@@ -1,0 +1,12 @@
+# Node modules
+node_modules/
+**/node_modules/
+
+# Production build
+dist/
+**/dist/
+
+# Logs & OS metadata
+*.log
+.DS_Store
+.vscode/
