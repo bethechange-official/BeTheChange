@@ -85,11 +85,11 @@ export function Header() {
           <div className="flex items-center gap-3 sm:gap-6 md:gap-8 h-16 md:h-18">
 
             {/* LEFT — Logo */}
-            <Link to="/" className="flex items-center flex-shrink-0 py-0.5">
+            <Link to="/" className="flex items-center flex-shrink-0">
               <img
                 src="/logo.png"
                 alt="Be The Change"
-                className="h-12 sm:h-13 md:h-14 w-auto max-h-[92%] object-contain transition-transform duration-300 hover:scale-[1.02]"
+                className="brand-logo-img"
               />
             </Link>
 

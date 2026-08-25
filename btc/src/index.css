@@ -44,3 +44,32 @@ input, textarea, select {
 ::-webkit-scrollbar { width: 4px; }
 ::-webkit-scrollbar-track { background: #FAF9F6; }
 ::-webkit-scrollbar-thumb { background: #C8C0B4; border-radius: 2px; }
+
+/* Dedicated Navbar Logo CSS */
+.brand-logo-img {
+  height: 48px;
+  width: auto;
+  max-height: 52px;
+  object-fit: contain;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.brand-logo-img:hover {
+  transform: scale(1.03);
+}
+
+@media (min-width: 640px) {
+  .brand-logo-img {
+    height: 56px;
+    max-height: 60px;
+  }
+}
+
+@media (min-width: 768px) {
+  .brand-logo-img {
+    height: 64px;
+    max-height: 68px;
+  }
+}
+
