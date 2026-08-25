@@ -7,7 +7,7 @@ import { ProductCard } from '../components/product/ProductCard';
 import { Toast } from '../components/ui/Toast';
 import { useState } from 'react';
 import { products } from '../data/products';
-import { categories, skinConcerns } from '../data/categories';
+import { categories } from '../data/categories';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 25 },
@@ -199,33 +199,6 @@ export default function Home() {
                     Shop <ArrowRight size={10} />
                   </span>
                 </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 6. SHOP BY CONCERN SECTION */}
-      <section className="py-12 sm:py-20 bg-white border-t border-[#E8E3DC]">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 md:px-10">
-          <SectionHeading label="TARGETED SOLUTIONS" title="Shop by Concern" subtitle="Find specialized products formulated for your specific skin needs." />
-
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6 mt-8">
-            {skinConcerns.map((concern) => (
-              <Link
-                key={concern.id}
-                to={`/shop?concern=${concern.id}`}
-                className="group block relative overflow-hidden bg-[#FAF9F6] border border-[#E2DDD6] p-3 transition-all duration-300 hover:border-[#111111]"
-              >
-                <div className="aspect-[4/3] overflow-hidden bg-[#EFECE6] mb-3">
-                  <img
-                    src={concern.image}
-                    alt={concern.name}
-                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                  />
-                </div>
-                <h3 className="font-serif text-sm sm:text-base text-[#111111] font-semibold mb-0.5 leading-snug">{concern.name}</h3>
-                <p className="text-[10px] text-[#8A8580] font-light">{concern.subtitle}</p>
               </Link>
             ))}
           </div>
