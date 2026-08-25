@@ -12,18 +12,6 @@ import {
   ArrowRight,
   TrendingUp
 } from 'lucide-react';
-import {
-  AreaChart,
-  Area,
-  XAxis,
-  YAxis,
-  CartesianGrid,
-  Tooltip,
-  ResponsiveContainer,
-  PieChart,
-  Pie,
-  Cell
-} from 'recharts';
 
 import { AdminLayout } from '../components/AdminLayout';
 import { StatCard } from '../components/StatCard';
@@ -39,7 +27,13 @@ const monthlySalesData = [
   { month: 'Aug', sales: 112000, orders: 130 }
 ];
 
-const COLORS = ['#F59E0B', '#3B82F6', '#8B5CF6', '#10B981', '#EF4444'];
+const STATUS_COLORS = {
+  Pending: '#F59E0B',
+  Processing: '#3B82F6',
+  Shipped: '#8B5CF6',
+  Delivered: '#10B981',
+  Cancelled: '#EF4444'
+};
 
 export default function AdminDashboard() {
   const [products, setProducts] = useState([]);
@@ -47,6 +41,7 @@ export default function AdminDashboard() {
   const [customers, setCustomers] = useState([]);
   const [coupons, setCoupons] = useState([]);
   const [settings, setSettings] = useState({});
+  const [hoveredMonth, setHoveredMonth] = useState(null);
 
   useEffect(() => {
     setProducts(adminStorage.getProducts());
@@ -67,14 +62,36 @@ export default function AdminDashboard() {
   const totalCustomers = customers.length;
   const activeCoupons = coupons.filter(c => c.status === 'Active').length;
 
-  // Pie chart data
+  // Order status breakdown data
   const orderStatusPie = [
-    { name: 'Pending', value: orders.filter(o => o.orderStatus === 'Pending').length },
-    { name: 'Processing', value: orders.filter(o => o.orderStatus === 'Processing').length },
-    { name: 'Shipped', value: orders.filter(o => o.orderStatus === 'Shipped').length },
-    { name: 'Delivered', value: orders.filter(o => o.orderStatus === 'Delivered').length },
-    { name: 'Cancelled', value: orders.filter(o => o.orderStatus === 'Cancelled').length }
+    { name: 'Pending', value: orders.filter(o => o.orderStatus === 'Pending').length, color: STATUS_COLORS.Pending },
+    { name: 'Processing', value: orders.filter(o => o.orderStatus === 'Processing').length, color: STATUS_COLORS.Processing },
+    { name: 'Shipped', value: orders.filter(o => o.orderStatus === 'Shipped').length, color: STATUS_COLORS.Shipped },
+    { name: 'Delivered', value: orders.filter(o => o.orderStatus === 'Delivered').length, color: STATUS_COLORS.Delivered },
+    { name: 'Cancelled', value: orders.filter(o => o.orderStatus === 'Cancelled').length, color: STATUS_COLORS.Cancelled }
   ].filter(item => item.value > 0);
+
+  const totalStatusOrders = orderStatusPie.reduce((acc, curr) => acc + curr.value, 0) || 1;
+
+  // SVG calculations for Revenue Area Chart
+  const maxSales = Math.max(...monthlySalesData.map(d => d.sales));
+  const minSales = 0;
+  const svgWidth = 600;
+  const svgHeight = 220;
+  const paddingX = 40;
+  const paddingY = 20;
+
+  const points = monthlySalesData.map((d, i) => {
+    const x = paddingX + (i * (svgWidth - 2 * paddingX)) / (monthlySalesData.length - 1);
+    const y = svgHeight - paddingY - ((d.sales - minSales) * (svgHeight - 2 * paddingY)) / maxSales;
+    return { x, y, ...d };
+  });
+
+  const linePath = points.reduce((acc, p, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`, '');
+  const areaPath = `${linePath} L ${points[points.length - 1].x} ${svgHeight - paddingY} L ${points[0].x} ${svgHeight - paddingY} Z`;
+
+  // Donut chart stroke dashoffset calculations
+  let accumulatedPercent = 0;
 
   return (
     <AdminLayout title="Dashboard Overview">
@@ -139,7 +156,7 @@ export default function AdminDashboard() {
         />
       </div>
 
-      {/* 2. Charts Section */}
+      {/* 2. Native SVG Charts Section */}
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
         
         {/* Monthly Revenue Chart */}
@@ -155,60 +172,122 @@ export default function AdminDashboard() {
             </div>
           </div>
 
-          <div className="h-72 w-full">
-            <ResponsiveContainer width="100%" height="100%">
-              <AreaChart data={monthlySalesData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                <defs>
-                  <linearGradient id="colorSales" x1="0" y1="0" x2="0" y2="1">
-                    <stop offset="5%" stopColor="#111111" stopOpacity={0.15}/>
-                    <stop offset="95%" stopColor="#111111" stopOpacity={0}/>
-                  </linearGradient>
-                </defs>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#E5E7EB" />
-                <XAxis dataKey="month" tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#6B7280' }} axisLine={false} tickLine={false} />
-                <Tooltip
-                  formatter={(val) => [`₹${val.toLocaleString()}`, 'Sales']}
-                  contentStyle={{ backgroundColor: '#111111', color: '#fff', borderRadius: '8px', fontSize: '12px' }}
-                  itemStyle={{ color: '#fff' }}
-                />
-                <Area type="monotone" dataKey="sales" stroke="#111111" strokeWidth={2} fillOpacity={1} fill="url(#colorSales)" />
-              </AreaChart>
-            </ResponsiveContainer>
+          {/* SVG Area Chart */}
+          <div className="relative w-full overflow-hidden">
+            <svg viewBox={`0 0 ${svgWidth} ${svgHeight}`} className="w-full h-auto overflow-visible">
+              <defs>
+                <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#111111" stopOpacity="0.2" />
+                  <stop offset="100%" stopColor="#111111" stopOpacity="0" />
+                </linearGradient>
+              </defs>
+
+              {/* Grid Lines */}
+              {[0, 0.25, 0.5, 0.75, 1].map((ratio, idx) => {
+                const y = paddingY + ratio * (svgHeight - 2 * paddingY);
+                return (
+                  <line
+                    key={idx}
+                    x1={paddingX}
+                    y1={y}
+                    x2={svgWidth - paddingX}
+                    y2={y}
+                    stroke="#E5E7EB"
+                    strokeDasharray="4 4"
+                  />
+                );
+              })}
+
+              {/* Filled Area */}
+              <path d={areaPath} fill="url(#areaGradient)" />
+
+              {/* Smooth Line */}
+              <path d={linePath} fill="none" stroke="#111111" strokeWidth="2.5" strokeLinecap="round" />
+
+              {/* Data Points */}
+              {points.map((p, idx) => (
+                <g key={idx} className="cursor-pointer" onMouseEnter={() => setHoveredMonth(p)} onMouseLeave={() => setHoveredMonth(null)}>
+                  <circle
+                    cx={p.x}
+                    cy={p.y}
+                    r={hoveredMonth?.month === p.month ? 6 : 4}
+                    fill={hoveredMonth?.month === p.month ? '#111111' : '#ffffff'}
+                    stroke="#111111"
+                    strokeWidth="2"
+                    className="transition-all duration-200"
+                  />
+                  <text
+                    x={p.x}
+                    y={svgHeight - 4}
+                    textAnchor="middle"
+                    className="text-[10px] font-sans fill-gray-500 font-medium"
+                  >
+                    {p.month}
+                  </text>
+                </g>
+              ))}
+            </svg>
+
+            {/* Interactive Tooltip Overlay */}
+            {hoveredMonth && (
+              <div
+                className="absolute bg-gray-900 text-white px-3 py-1.5 rounded-lg text-xs shadow-lg pointer-events-none -translate-x-1/2 -translate-y-full font-sans z-10"
+                style={{
+                  left: `${((hoveredMonth.x - paddingX) / (svgWidth - 2 * paddingX)) * 88 + 6}%`,
+                  top: `${(hoveredMonth.y / svgHeight) * 100 - 10}%`
+                }}
+              >
+                <p className="font-bold">{hoveredMonth.month}</p>
+                <p className="text-[11px] text-gray-300">Revenue: <strong className="text-white">₹{hoveredMonth.sales.toLocaleString()}</strong></p>
+                <p className="text-[11px] text-gray-300">Orders: <strong className="text-white">{hoveredMonth.orders}</strong></p>
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Order Status Distribution Pie Chart */}
+        {/* Order Status Distribution Donut Chart */}
         <div className="lg:col-span-4 bg-white border border-gray-200/80 rounded-xl p-6 shadow-2xs flex flex-col justify-between">
           <div>
             <h3 className="text-base font-bold text-gray-900 font-serif mb-1">Order Breakdown</h3>
             <p className="text-xs text-gray-500 font-light">Distribution across fulfillment stages</p>
           </div>
 
-          <div className="h-52 w-full my-3">
-            <ResponsiveContainer width="100%" height="100%">
-              <PieChart>
-                <Pie
-                  data={orderStatusPie}
-                  innerRadius={55}
-                  outerRadius={80}
-                  paddingAngle={4}
-                  dataKey="value"
-                >
-                  {orderStatusPie.map((entry, index) => (
-                    <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(value, name) => [`${value} Orders`, name]} />
-              </PieChart>
-            </ResponsiveContainer>
+          {/* SVG Donut Chart */}
+          <div className="relative w-44 h-44 mx-auto my-4 flex items-center justify-center">
+            <svg viewBox="0 0 100 100" className="w-full h-full transform -rotate-90">
+              {orderStatusPie.map((item, idx) => {
+                const percent = item.value / totalStatusOrders;
+                const dashArray = `${percent * 283} 283`;
+                const dashOffset = -accumulatedPercent * 283;
+                accumulatedPercent += percent;
+
+                return (
+                  <circle
+                    key={idx}
+                    cx="50"
+                    cy="50"
+                    r="45"
+                    fill="transparent"
+                    stroke={item.color}
+                    strokeWidth="10"
+                    strokeDasharray={dashArray}
+                    strokeDashoffset={dashOffset}
+                    className="transition-all duration-500 hover:opacity-80"
+                  />
+                );
+              })}
+            </svg>
+            <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+              <span className="text-2xl font-bold font-serif text-gray-900">{totalOrders}</span>
+              <span className="text-[10px] text-gray-400 uppercase tracking-widest">Total Orders</span>
+            </div>
           </div>
 
           <div className="space-y-1.5 pt-2 border-t border-gray-100 text-xs">
-            {orderStatusPie.map((entry, idx) => (
+            {orderStatusPie.map((entry) => (
               <div key={entry.name} className="flex items-center justify-between text-gray-600">
                 <div className="flex items-center gap-2">
-                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }} />
+                  <span className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: entry.color }} />
                   <span>{entry.name}</span>
                 </div>
                 <span className="font-semibold text-gray-900">{entry.value}</span>
