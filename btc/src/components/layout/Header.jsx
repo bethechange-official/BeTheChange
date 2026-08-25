@@ -10,8 +10,8 @@ export function Header() {
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [cartOpen, setCartOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
-  const [searchFocused, setSearchFocused] = useState(false);
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   
   const { itemCount } = useCart();
@@ -32,7 +32,7 @@ export function Header() {
   useEffect(() => {
     const handler = (e) => {
       if (searchRef.current && !searchRef.current.contains(e.target)) {
-        setSearchFocused(false);
+        setSearchOpen(false);
       }
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
         setUserMenuOpen(false);
@@ -53,22 +53,25 @@ export function Header() {
 
   const handleResultClick = (id) => {
     setQuery('');
-    setSearchFocused(false);
+    setSearchOpen(false);
     navigate(`/product/${id}`);
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     if (query.trim()) {
-      setSearchFocused(false);
+      setSearchOpen(false);
       navigate(`/shop?q=${encodeURIComponent(query.trim())}`);
       setQuery('');
     }
   };
 
   const navLinks = [
-    { to: '/shop', label: 'SHOP' },
-    { to: '/about', label: 'ABOUT' },
+    { to: '/shop', label: 'SHOP ALL' },
+    { to: '/category/skin-care-products', label: 'SKINCARE' },
+    { to: '/category/cold-process-soaps', label: 'BODY CARE' },
+    { to: '/category/hair-care-products', label: 'HAIR CARE' },
+    { to: '/category/household-products', label: 'HOUSEHOLD' },
     { to: '/contact', label: 'CONTACT' },
   ];
 
@@ -76,13 +79,11 @@ export function Header() {
     return location.pathname === to;
   };
 
-  const showDropdown = searchFocused && (results.length > 0 || query.trim().length > 1);
-
   return (
     <>
       <header className={`fixed top-0 left-0 right-0 z-[80] transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-[#FAF9F6]'}`}>
         <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10">
-          <div className="flex items-center gap-3 sm:gap-6 md:gap-8 h-16 md:h-18">
+          <div className="flex items-center justify-between h-16 md:h-18">
 
             {/* LEFT — Logo */}
             <Link to="/" className="flex items-center flex-shrink-0">
@@ -94,73 +95,22 @@ export function Header() {
             </Link>
 
             {/* CENTER — Nav links (desktop) */}
-            <nav className="hidden md:flex items-center gap-8 flex-shrink-0">
+            <nav className="hidden lg:flex items-center gap-6 xl:gap-8 flex-shrink-0">
               {navLinks.map(l => (
                 <Link
                   key={l.label}
                   to={l.to}
-                  className={`text-[11px] tracking-[0.22em] uppercase font-medium transition-all duration-200 whitespace-nowrap text-[#111111] hover:text-[#5C554E] ${isLinkActive(l.to) ? 'border-b border-[#111111] pb-0.5' : ''}`}
+                  className={`text-[11px] tracking-[0.2em] uppercase font-semibold transition-all duration-200 whitespace-nowrap text-[#111111] hover:text-[#5C554E] ${isLinkActive(l.to) ? 'border-b border-[#111111] pb-0.5' : ''}`}
                 >
                   {l.label}
                 </Link>
               ))}
             </nav>
 
-            {/* SEARCH BAR — desktop */}
-            <div ref={searchRef} className="hidden md:flex flex-1 relative">
-              <form onSubmit={handleSubmit} className="w-full">
-                <div className={`flex items-center border transition-colors duration-200 ${searchFocused ? 'border-[#111111]' : 'border-[#E2DDD6]'} bg-white px-4 py-1.5 rounded-full`}>
-                  <Search size={14} className="text-[#8A8580] flex-shrink-0 mr-3" />
-                  <input
-                    value={query}
-                    onChange={e => setQuery(e.target.value)}
-                    onFocus={() => setSearchFocused(true)}
-                    placeholder="Search products, ingredients..."
-                    className="flex-1 bg-transparent text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none font-sans"
-                  />
-                  {query && (
-                    <button
-                      type="button"
-                      onClick={() => { setQuery(''); setSearchFocused(false); }}
-                      className="text-[#8A8580] hover:text-[#111111] transition-colors ml-2"
-                    >
-                      <X size={13} />
-                    </button>
-                  )}
-                </div>
-              </form>
-
-              {/* Dropdown results */}
-              {showDropdown && (
-                <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-[#E2DDD6] shadow-lg z-[90] max-h-80 overflow-y-auto">
-                  {results.length === 0 && query.trim().length > 1 ? (
-                    <p className="px-4 py-4 text-sm text-[#8A8580]">No results for "{query}"</p>
-                  ) : (
-                    results.map(p => (
-                      <button
-                        key={p.id}
-                        onClick={() => handleResultClick(p.id)}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#FAF9F6] transition-colors border-b border-[#F3EFE8] last:border-0 text-left"
-                      >
-                        <div className="w-10 h-10 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
-                          <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] tracking-widest uppercase text-[#8A8580]">{p.category}</p>
-                          <p className="font-serif text-sm text-[#111111] truncate">{p.name}</p>
-                        </div>
-                        <span className="text-sm text-[#111111] flex-shrink-0">₹{p.price.toLocaleString()}</span>
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
-
             {/* RIGHT — Icons & User Dropdown */}
-            <div className="flex items-center gap-2.5 sm:gap-4 md:gap-5 flex-shrink-0 ml-auto md:ml-0">
+            <div className="flex items-center gap-3 sm:gap-4 md:gap-5 flex-shrink-0 ml-auto lg:ml-0">
               
-              {/* Account Trigger (LOGIN / REGISTER button when logged out, Profile Icon when logged in — visible on mobile & desktop) */}
+              {/* Account Trigger */}
               <div ref={userMenuRef} className="relative block">
                 {user ? (
                   <Link
@@ -227,21 +177,32 @@ export function Header() {
                 )}
               </div>
 
+              {/* SEARCH ICON BUTTON (Beside Wishlist Icon) */}
               <button
-                className="hidden md:block text-[#111111] hover:opacity-40 transition-opacity"
+                onClick={() => setSearchOpen(o => !o)}
+                className="text-[#111111] hover:opacity-40 transition-opacity p-1"
+                aria-label="Search"
+              >
+                <Search size={19} />
+              </button>
+
+              {/* WISHLIST ICON BUTTON */}
+              <button
+                className="hidden sm:block text-[#111111] hover:opacity-40 transition-opacity p-1"
                 aria-label="Wishlist"
               >
                 <Heart size={19} />
               </button>
               
+              {/* CART ICON BUTTON */}
               <button
                 onClick={() => setCartOpen(true)}
-                className="relative text-[#111111] hover:opacity-40 transition-opacity"
+                className="relative text-[#111111] hover:opacity-40 transition-opacity p-1"
                 aria-label="Cart"
               >
                 <ShoppingBag size={19} />
                 {itemCount > 0 && (
-                  <span className="absolute -top-1.5 -right-1.5 w-4 h-4 bg-[#111111] text-white text-[9px] rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#111111] text-white text-[9px] rounded-full flex items-center justify-center font-medium">
                     {itemCount}
                   </span>
                 )}
@@ -249,7 +210,7 @@ export function Header() {
 
               {/* Mobile hamburger */}
               <button
-                className="md:hidden text-[#111111] hover:opacity-40 transition-opacity"
+                className="lg:hidden text-[#111111] hover:opacity-40 transition-opacity p-1"
                 onClick={() => setMobileOpen(true)}
                 aria-label="Menu"
               >
@@ -260,15 +221,66 @@ export function Header() {
           </div>
         </div>
 
+        {/* SEARCH OVERLAY DROPDOWN (Toggled by Search Icon) */}
+        {searchOpen && (
+          <div ref={searchRef} className="absolute top-full left-0 right-0 bg-white/98 backdrop-blur-md border-b border-[#E2DDD6] shadow-lg py-4 px-6 md:px-10 z-[85]">
+            <div className="max-w-[700px] mx-auto relative">
+              <form onSubmit={handleSubmit} className="w-full flex items-center bg-[#FAF9F6] border border-[#111111] rounded-full px-4 py-2">
+                <Search size={16} className="text-[#8A8580] mr-3 flex-shrink-0" />
+                <input
+                  autoFocus
+                  value={query}
+                  onChange={e => setQuery(e.target.value)}
+                  placeholder="Search skincare, body care, hair care, household..."
+                  className="flex-1 bg-transparent text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none font-sans"
+                />
+                <button
+                  type="button"
+                  onClick={() => { setQuery(''); setSearchOpen(false); }}
+                  className="text-[#8A8580] hover:text-[#111111] ml-2 p-1"
+                >
+                  <X size={16} />
+                </button>
+              </form>
+
+              {/* Instant Search Results */}
+              {query.trim().length > 1 && (
+                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E2DDD6] shadow-xl rounded-sm max-h-80 overflow-y-auto z-[90]">
+                  {results.length === 0 ? (
+                    <p className="px-4 py-4 text-sm text-[#8A8580]">No results for "{query}"</p>
+                  ) : (
+                    results.map(p => (
+                      <button
+                        key={p.id}
+                        onClick={() => handleResultClick(p.id)}
+                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#FAF9F6] transition-colors border-b border-[#F3EFE8] last:border-0 text-left"
+                      >
+                        <div className="w-10 h-10 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
+                          <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                        </div>
+                        <div className="flex-1 min-w-0">
+                          <p className="text-[10px] tracking-widest uppercase text-[#8A8580]">{p.category}</p>
+                          <p className="font-serif text-sm text-[#111111] truncate">{p.name}</p>
+                        </div>
+                        <span className="text-sm font-semibold text-[#111111] flex-shrink-0">₹{p.price.toLocaleString()}</span>
+                      </button>
+                    ))
+                  )}
+                </div>
+              )}
+            </div>
+          </div>
+        )}
+
         {/* Bottom border */}
         <div className="h-px bg-[#E2DDD6]" />
       </header>
 
-      {/* Mobile Menu */}
+      {/* Mobile Navigation Drawer */}
       <div className={`fixed inset-0 z-[110] bg-white flex flex-col transition-transform duration-500 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2DDD6]">
           <Link to="/" onClick={() => setMobileOpen(false)}>
-            <img src="/logo.png" alt="Be The Change" className="h-18 w-auto object-contain" />
+            <img src="/logo.png" alt="Be The Change" className="h-12 w-auto object-contain" />
           </Link>
           <button onClick={() => setMobileOpen(false)} className="text-[#111111]">
             <X size={22} />
@@ -277,15 +289,17 @@ export function Header() {
 
         {/* Mobile search */}
         <div className="px-6 pt-6 pb-2">
-          <div className="flex items-center border border-[#E2DDD6] bg-[#FAF9F6] px-4 py-3 rounded-full">
-            <Search size={14} className="text-[#8A8580] mr-3 flex-shrink-0" />
-            <input
-              value={query}
-              onChange={e => setQuery(e.target.value)}
-              placeholder="Search products..."
-              className="flex-1 bg-transparent text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none"
-            />
-          </div>
+          <form onSubmit={(e) => { handleSubmit(e); setMobileOpen(false); }}>
+            <div className="flex items-center border border-[#E2DDD6] bg-[#FAF9F6] px-4 py-3 rounded-full">
+              <Search size={14} className="text-[#8A8580] mr-3 flex-shrink-0" />
+              <input
+                value={query}
+                onChange={e => setQuery(e.target.value)}
+                placeholder="Search products..."
+                className="flex-1 bg-transparent text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none"
+              />
+            </div>
+          </form>
         </div>
 
         {/* Mobile user greeting if logged in */}
@@ -310,13 +324,13 @@ export function Header() {
           </div>
         )}
 
-        <nav className="flex flex-col px-6 py-6 gap-0">
+        <nav className="flex flex-col px-6 py-6 gap-0 overflow-y-auto">
           {[...navLinks, { to: user ? '/account' : '/login', label: user ? 'MY ACCOUNT' : 'ACCOUNT' }].map(l => (
             <NavLink
               key={l.label}
               to={l.to}
               onClick={() => setMobileOpen(false)}
-              className="font-serif text-3xl text-[#111111] border-b border-[#F3EFE8] py-5 hover:opacity-50 transition-opacity"
+              className="font-serif text-2xl text-[#111111] border-b border-[#F3EFE8] py-4 hover:opacity-50 transition-opacity"
             >
               {l.label}
             </NavLink>
@@ -340,4 +354,3 @@ export function Header() {
     </>
   );
 }
-
