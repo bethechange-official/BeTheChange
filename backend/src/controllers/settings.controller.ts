@@ -1,5 +1,5 @@
 import { Response } from "express";
-import { prisma } from "../config/db";
+import { prisma, invalidateSettingsCache } from "../config/db";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { successResponse, errorResponse } from "../utils/apiResponse";
 import { AppError } from "../middleware/error.middleware";
@@ -37,6 +37,7 @@ export const getSettings = async (req: AuthenticatedRequest, res: Response): Pro
 };
 
 export const getPublicSettings = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
+  res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=60");
   const settings = await prisma.setting.findMany({
     where: { key: { in: ["shippingFee", "freeShippingThreshold", "currency"] } },
   });
@@ -63,6 +64,7 @@ export const updateSettings = async (req: AuthenticatedRequest, res: Response): 
     );
 
     const settings = await prisma.setting.findMany();
+    invalidateSettingsCache();
     successResponse(res, "Settings updated successfully", buildSettings(settings));
   } catch (error) {
     console.error("Update settings error:", error);

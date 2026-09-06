@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express";
 import jwt from "jsonwebtoken";
-import { prisma } from "../config/db";
+import { getCachedIdentity } from "../config/db";
 import { env } from "../config/env";
 import { errorResponse } from "../utils/apiResponse";
 import { AppError } from "./error.middleware";
@@ -21,22 +21,14 @@ const attachIdentity = async (req: AuthenticatedRequest, token: string): Promise
   const decoded = jwt.verify(token, env.JWT_SECRET) as TokenPayload;
   if (!decoded.id || !["admin", "user"].includes(decoded.type)) throw new AppError("Invalid token", 401);
 
-  if (decoded.type === "admin") {
-    const admin = await prisma.admin.findUnique({
-      where: { id: decoded.id },
-      select: { id: true, email: true, name: true, role: true, isActive: true },
-    });
-    if (!admin?.isActive) throw new AppError("Admin not found or inactive", 401);
-    req.admin = { id: admin.id, email: admin.email, name: admin.name, role: admin.role };
-    return;
-  }
+  const identity = await getCachedIdentity(decoded.id, decoded.type);
+  if (!identity?.isActive) throw new AppError("Account not found or inactive", 401);
 
-  const user = await prisma.user.findUnique({
-    where: { id: decoded.id },
-    select: { id: true, email: true, name: true, role: true, isActive: true },
-  });
-  if (!user?.isActive) throw new AppError("User not found or inactive", 401);
-  req.user = { id: user.id, email: user.email, name: user.name, role: user.role };
+  if (decoded.type === "admin") {
+    req.admin = { id: identity.id, email: identity.email, name: identity.name, role: identity.role };
+  } else {
+    req.user = { id: identity.id, email: identity.email, name: identity.name, role: identity.role };
+  }
 };
 
 const sendAuthError = (res: Response, error: unknown): void => {

@@ -8,6 +8,7 @@ import { getQueryInt, getQueryString } from "../utils/query";
 import { formatProduct, productInclude } from "../utils/storefront";
 
 export const listStorefrontProducts = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=30");
   const page = Math.max(1, getQueryInt(req.query.page, 1));
   const limit = Math.min(48, Math.max(1, getQueryInt(req.query.limit, 12)));
   const search = getQueryString(req.query.search)?.trim();
@@ -58,6 +59,7 @@ export const listStorefrontProducts = async (req: AuthenticatedRequest, res: Res
 };
 
 export const listFeaturedProducts = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
+  res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=30");
   const products = await prisma.product.findMany({
     where: { isActive: true, isFeatured: true },
     take: 12,
@@ -68,6 +70,7 @@ export const listFeaturedProducts = async (_req: AuthenticatedRequest, res: Resp
 };
 
 export const getStorefrontProduct = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  res.set("Cache-Control", "public, max-age=120, stale-while-revalidate=60");
   try {
     const identifier = String(req.params.slug);
     const isUuid = /^[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/i.test(identifier);

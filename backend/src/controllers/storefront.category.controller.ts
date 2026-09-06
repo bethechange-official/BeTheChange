@@ -5,6 +5,7 @@ import { AppError } from "../middleware/error.middleware";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 
 export const listStorefrontCategories = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
+  res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=60");
   const categories = await prisma.category.findMany({
     where: { isActive: true },
     orderBy: { name: "asc" },
@@ -17,6 +18,7 @@ export const listStorefrontCategories = async (_req: AuthenticatedRequest, res: 
 };
 
 export const getStorefrontCategory = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=60");
   try {
     const category = await prisma.category.findFirst({ where: { slug: String(req.params.slug), isActive: true } });
     if (!category) throw new AppError("Category not found", 404);
