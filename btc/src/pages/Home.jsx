@@ -123,7 +123,7 @@ export default function Home() {
             className="max-w-2xl"
           >
             <motion.p variants={fadeUp} className="text-[10px] sm:text-[11px] tracking-[0.3em] uppercase text-[#5C554E] font-medium mb-4 sm:mb-6">
-              BE THE CHANGE — PURE SKIN RITUALS
+              BE THE CHANGE — PURE SKIN RITUALS ✨
             </motion.p>
             <motion.h1 variants={fadeUp} className="font-serif text-4xl sm:text-6xl lg:text-8xl text-[#111111] leading-[1.06] mb-6 sm:mb-8 font-normal tracking-tight">
               Thoughtful Care,<br />
