@@ -1,19 +1,55 @@
-import { useState, useEffect } from 'react';
-import { Mail, Phone, ShoppingBag, DollarSign, Calendar, Eye } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { Mail, Phone, ShoppingBag, DollarSign, Calendar, Eye, Loader2, X } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
-import { adminStorage } from '../utils/localStorageHelpers';
+import { adminCustomerService } from '../../services/admin/customerService';
 
 export default function AdminCustomers() {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
+
+  const fetchCustomers = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await adminCustomerService.getAll({
+        page: pagination.page,
+        limit: pagination.limit,
+        search: search || undefined,
+        status: statusFilter !== 'ALL' ? statusFilter : undefined,
+      });
+      if (response.success) {
+        setCustomers(response.data);
+        setPagination(prev => ({
+          ...prev,
+          total: response.pagination?.total || 0,
+          totalPages: response.pagination?.totalPages || 1,
+        }));
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load customers');
+    } finally {
+      setLoading(false);
+    }
+  }, [pagination.page, pagination.limit, search, statusFilter]);
 
   useEffect(() => {
-    setCustomers(adminStorage.getCustomers());
-  }, []);
+    fetchCustomers();
+  }, [fetchCustomers]);
+
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination(prev => ({ ...prev, page: newPage }));
+    }
+  };
 
   const filteredCustomers = customers.filter(c => {
     const query = search.toLowerCase();
@@ -88,10 +124,11 @@ export default function AdminCustomers() {
       cell: (row) => (
         <button
           onClick={() => setSelectedCustomer(row)}
-          className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white transition-colors"
+          disabled={loading}
+          className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-gray-900 hover:text-white transition-colors disabled:opacity-50"
           title="View Details"
         >
-          <Eye size={14} />
+          {loading && selectedCustomer?.id === row.id ? <Loader2 size={14} className="animate-spin" /> : <Eye size={14} />}
         </button>
       )
     }
@@ -99,23 +136,37 @@ export default function AdminCustomers() {
 
   return (
     <AdminLayout title="Customer Directory">
+      {error && (
+        <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2">
+          <X size={16} className="flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
       <DataTable
         columns={columns}
         data={filteredCustomers}
         searchPlaceholder="Search by name, email, phone..."
         searchValue={search}
         onSearchChange={setSearch}
+        loading={loading}
         filterComponent={
           <select
             value={statusFilter}
             onChange={(e) => setStatusFilter(e.target.value)}
-            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900"
+            disabled={loading}
+            className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900 disabled:opacity-50"
           >
             <option value="ALL">All Customers</option>
             <option value="Active">Active Customers</option>
             <option value="Inactive">Inactive Customers</option>
           </select>
         }
+        pagination={{
+          currentPage: pagination.page,
+          totalPages: pagination.totalPages,
+          onPageChange: (page) => setPagination(prev => ({ ...prev, page: page })),
+        }}
       />
 
       {/* Customer Quick View Drawer / Modal */}

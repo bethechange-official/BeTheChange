@@ -17,29 +17,26 @@ export default function Register() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setAuthError('');
     const errs = {};
     if (!form.name.trim()) errs.name = 'Full name is required';
     if (!form.email.includes('@')) errs.email = 'Valid email address required';
     if (form.phone.length < 10) errs.phone = 'Valid 10-digit phone number required';
-    if (form.password.length < 6) errs.password = 'Password must be at least 6 characters';
+    if (form.password.length < 8) errs.password = 'Password must be at least 8 characters';
     if (form.password !== form.confirm) errs.confirm = 'Passwords do not match';
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setLoading(true);
-    setTimeout(() => {
-      const res = register(form);
-      setLoading(false);
-      if (res.success) {
-        const searchParams = new URLSearchParams(window.location.search);
-        const targetRedirect = searchParams.get('redirect') || '/account';
-        navigate(targetRedirect);
-      } else {
-        setAuthError(res.message || 'Registration failed. Please try again.');
-      }
-    }, 600);
+    const res = await register(form);
+    setLoading(false);
+    if (res.success) {
+      const searchParams = new URLSearchParams(window.location.search);
+      navigate(searchParams.get('redirect') || '/account');
+    } else {
+      setAuthError(res.message || 'Registration failed. Please try again.');
+    }
   };
 
   return (
@@ -84,7 +81,7 @@ export default function Register() {
               <div>
                 <h4 className="font-serif text-base text-white">Fast & Secure</h4>
                 <p className="text-xs text-white/70 font-light mt-0.5 leading-relaxed">
-                  Save your address and manage order tracking effortlessly.
+                  Save your address and view order status from your account.
                 </p>
               </div>
             </div>

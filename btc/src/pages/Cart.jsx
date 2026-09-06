@@ -5,19 +5,19 @@ import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
 import { QuantitySelector } from '../components/ui/QuantitySelector';
 import { Button } from '../components/ui/Button';
-import { Input } from '../components/ui/Input';
 import { CheckoutAuthModal } from '../components/cart/CheckoutAuthModal';
 
 export default function Cart() {
-  const { items, subtotal, total, discount, coupon, couponError, dispatch } = useCart();
+  const { items, subtotal, total, discount, shippingFee, coupon, couponError, applyCoupon, removeCoupon, updateQuantity, removeFromCart } = useCart();
   const { user } = useAuth();
   const navigate = useNavigate();
   
   const [couponInput, setCouponInput] = useState('');
   const [authModalOpen, setAuthModalOpen] = useState(false);
 
-  const handleApplyCoupon = () => {
-    dispatch({ type: 'APPLY_COUPON', code: couponInput, subtotal });
+  const handleApplyCoupon = async () => {
+    if (!couponInput.trim()) return;
+    await applyCoupon(couponInput.trim());
   };
 
   const handleProceedCheckout = (e) => {
@@ -60,30 +60,31 @@ export default function Cart() {
             {items.map(item => (
               <div key={item.id} className="grid grid-cols-12 gap-4 items-center py-4 border-b border-[#E2DDD6]">
                 <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
-                  <Link to={`/product/${item.id}`} className="w-16 h-20 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
-                    <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
+                  <Link to={`/product/${item.slug || item.id}`} className="w-16 h-20 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
+                    <img src={item.images?.[0] || item.image} alt={item.name} className="w-full h-full object-cover" />
                   </Link>
                   <div>
                     <p className="text-[10px] tracking-widest uppercase text-[#8A8580]">{item.category}</p>
-                    <Link to={`/product/${item.id}`}>
+                    <Link to={`/product/${item.slug || item.id}`}>
                       <p className="font-serif text-base text-[#111111] hover:opacity-70 transition-opacity">{item.name}</p>
                     </Link>
                     <p className="text-xs text-[#8A8580]">{item.size}</p>
                   </div>
                 </div>
                 <div className="col-span-4 md:col-span-2 text-sm text-[#111111] md:text-center">
-                  ₹{item.price.toLocaleString()}
+                  ₹{Number(item.price).toLocaleString()}
                 </div>
                 <div className="col-span-5 md:col-span-2 flex md:justify-center">
                   <QuantitySelector
                     qty={item.qty}
-                    onIncrease={() => dispatch({ type: 'UPDATE_QTY', id: item.id, qty: item.qty + 1 })}
-                    onDecrease={() => dispatch({ type: 'UPDATE_QTY', id: item.id, qty: item.qty - 1 })}
+                    onIncrease={() => updateQuantity(item.id, item.qty + 1)}
+                    onDecrease={() => updateQuantity(item.id, item.qty - 1)}
+                    max={item.stock}
                   />
                 </div>
                 <div className="col-span-3 md:col-span-2 flex items-center justify-end gap-3">
-                  <span className="text-sm font-medium text-[#111111]">₹{(item.price * item.qty).toLocaleString()}</span>
-                  <button onClick={() => dispatch({ type: 'REMOVE', id: item.id })} className="text-[#8A8580] hover:text-red-500 transition-colors">
+                  <span className="text-sm font-medium text-[#111111]">₹{(Number(item.price) * item.qty).toLocaleString()}</span>
+                  <button onClick={() => removeFromCart(item.id)} className="text-[#8A8580] hover:text-red-500 transition-colors">
                     <Trash2 size={14} />
                   </button>
                 </div>
@@ -102,10 +103,10 @@ export default function Cart() {
                 <div className="flex items-center justify-between bg-green-50 border border-green-200 px-4 py-3">
                   <div>
                     <p className="text-xs font-medium text-green-700">{coupon.code}</p>
-                    <p className="text-[10px] text-green-600">{coupon.description}</p>
+                    <p className="text-[10px] text-green-600">Applied</p>
                   </div>
                   <button
-                    onClick={() => dispatch({ type: 'REMOVE_COUPON' })}
+                    onClick={removeCoupon}
                     className="text-xs text-red-500 hover:text-red-700 underline"
                   >
                     Remove
@@ -133,21 +134,21 @@ export default function Cart() {
             <div className="space-y-3 border-t border-[#E2DDD6] pt-4">
               <div className="flex justify-between text-sm">
                 <span className="text-[#8A8580]">Subtotal</span>
-                <span className="text-[#111111]">₹{subtotal.toLocaleString()}</span>
+                <span className="text-[#111111]">₹{Number(subtotal).toLocaleString()}</span>
               </div>
               {discount > 0 && (
                 <div className="flex justify-between text-sm text-green-700">
                   <span>Discount</span>
-                  <span>-₹{discount.toLocaleString()}</span>
+                  <span>-₹{Number(discount).toLocaleString()}</span>
                 </div>
               )}
               <div className="flex justify-between text-sm">
                 <span className="text-[#8A8580]">Shipping</span>
-                <span className="text-[#111111]">Free</span>
+                <span className="text-[#111111]">{shippingFee > 0 ? `₹${Number(shippingFee).toLocaleString()}` : 'Free'}</span>
               </div>
               <div className="flex justify-between font-medium text-base border-t border-[#E2DDD6] pt-3">
                 <span className="font-serif text-[#111111]">Total</span>
-                <span className="text-[#111111]">₹{total.toLocaleString()}</span>
+                <span className="text-[#111111]">₹{Number(total).toLocaleString()}</span>
               </div>
             </div>
 

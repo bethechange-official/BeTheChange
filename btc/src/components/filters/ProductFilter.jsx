@@ -38,10 +38,6 @@ export function ProductFilter({ filters, onChange }) {
 }
 
 function FilterSelect({ label, value, options, values, onChange }) {
-  const displayValue = values
-    ? options[values.indexOf(value)] || label
-    : value === 'All' ? label : value;
-
   return (
     <div className="relative">
       <select

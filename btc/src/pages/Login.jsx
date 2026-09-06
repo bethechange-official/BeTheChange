@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
-import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Eye, EyeOff, Lock, Mail, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
@@ -17,7 +16,7 @@ export default function Login() {
 
   const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setAuthError('');
     const errs = {};
@@ -26,23 +25,14 @@ export default function Login() {
     if (Object.keys(errs).length) { setErrors(errs); return; }
 
     setLoading(true);
-    setTimeout(() => {
-      const res = login(form.email, form.password);
-      setLoading(false);
-      if (res.success) {
-        const searchParams = new URLSearchParams(window.location.search);
-        const targetRedirect = searchParams.get('redirect') || '/account';
-        navigate(targetRedirect);
-      } else {
-        setAuthError(res.message || 'Invalid email or password.');
-      }
-    }, 600);
-  };
-
-  const handleDemoLogin = () => {
-    setForm({ email: 'sarah@example.com', password: 'password123' });
-    setAuthError('');
-    setErrors({});
+    const res = await login(form.email, form.password);
+    setLoading(false);
+    if (res.success) {
+      const searchParams = new URLSearchParams(window.location.search);
+      navigate(searchParams.get('redirect') || '/account');
+    } else {
+      setAuthError(res.message || 'Invalid email or password.');
+    }
   };
 
   return (
@@ -152,9 +142,6 @@ export default function Login() {
                 <label className="block text-[10px] tracking-[0.25em] uppercase font-semibold text-[#111111]">
                   Password
                 </label>
-                <button type="button" className="text-[11px] text-[#8A8580] hover:text-[#111111] transition-colors font-light">
-                  Forgot password?
-                </button>
               </div>
               <div className="relative flex items-center">
                 <Lock size={16} className="absolute left-4 text-[#8A8580]" />
@@ -187,15 +174,6 @@ export default function Login() {
                 SIGN IN TO ACCOUNT
               </Button>
 
-              {/* Demo Helper Button */}
-              <button
-                type="button"
-                onClick={handleDemoLogin}
-                className="w-full py-3.5 border border-[#E2DDD6] bg-white hover:bg-[#F3EFE8] text-[#111111] text-[10px] tracking-[0.2em] uppercase font-semibold flex items-center justify-center gap-2 transition-all"
-              >
-                <Sparkles size={13} className="text-[#8A8580]" />
-                ONE-CLICK DEMO LOGIN (SARAH JENKINS)
-              </button>
             </div>
           </form>
 

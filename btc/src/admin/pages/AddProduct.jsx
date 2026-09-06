@@ -2,7 +2,10 @@ import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, Plus, Trash2, CheckCircle2, Image as ImageIcon } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
-import { adminStorage } from '../utils/localStorageHelpers';
+import { adminProductService } from '../../services/admin/productService';
+import { adminCategoryService } from '../../services/admin/categoryService';
+import { adminCollectionService } from '../../services/admin/collectionService';
+import { adminApi } from '../../services/admin/api';
 
 export default function AddProduct() {
   const navigate = useNavigate();
@@ -28,13 +31,29 @@ export default function AddProduct() {
     isActive: true
   });
 
-  const [imageUrls, setImageUrls] = useState(['https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800&q=80']);
+  const [imageUrls, setImageUrls] = useState([]);
   const [newUrlInput, setNewUrlInput] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [error, setError] = useState('');
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
 
   useEffect(() => {
-    setCategories(adminStorage.getCategories());
-    setCollections(adminStorage.getCollections());
+    Promise.all([adminCategoryService.getAll(), adminCollectionService.getAll()])
+      .then(([categoryResponse, collectionResponse]) => {
+        const fetchedCats = categoryResponse.data || [];
+        const fetchedCols = collectionResponse.data || [];
+        setCategories(fetchedCats);
+        setCollections(fetchedCols);
+        if (fetchedCats.length > 0) {
+          setFormData((prev) => ({
+            ...prev,
+            category: fetchedCats.some((c) => c.name === prev.category) ? prev.category : fetchedCats[0].name,
+            collection: fetchedCols.some((c) => c.name === prev.collection) ? prev.collection : (fetchedCols[0]?.name || ''),
+          }));
+        }
+      })
+      .catch((err) => setError(err.message || 'Failed to load product options'));
   }, []);
 
   const handleNameChange = (e) => {
@@ -54,25 +73,42 @@ export default function AddProduct() {
     setImageUrls(prev => prev.filter((_, idx) => idx !== index));
   };
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleImageUpload = async (event) => {
+    const files = Array.from(event.target.files || []);
+    if (!files.length) return;
+    setUploading(true);
+    setError('');
+    try {
+      const response = await adminApi.uploadImages(files);
+      setImageUrls((current) => [...current, ...(response.data?.images || []).map((image) => image.url)]);
+    } catch (err) {
+      setError(err.message || 'Image upload failed');
+    } finally {
+      setUploading(false);
+      event.target.value = '';
+    }
+  };
 
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    setSaving(true);
+    setError('');
     const newProduct = {
       ...formData,
-      id: 'prod_' + Date.now(),
       price: Number(formData.price),
       originalPrice: formData.originalPrice ? Number(formData.originalPrice) : null,
       stock: Number(formData.stock),
-      images: imageUrls.length > 0 ? imageUrls : ['https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=800&q=80']
+      images: imageUrls,
     };
-
-    const existingProducts = adminStorage.getProducts();
-    adminStorage.saveProducts([newProduct, ...existingProducts]);
-
-    setToastMessage('Product created successfully!');
-    setTimeout(() => {
+    try {
+      await adminProductService.create(newProduct);
+      setToastMessage('Product created successfully!');
       navigate('/admin/products');
-    }, 1000);
+    } catch (err) {
+      setError(err.message || 'Failed to create product');
+    } finally {
+      setSaving(false);
+    }
   };
 
   return (
@@ -94,6 +130,8 @@ export default function AddProduct() {
             <span>{toastMessage}</span>
           </div>
         )}
+
+        {error && <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-xs">{error}</div>}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* General Information Card */}
@@ -287,6 +325,10 @@ export default function AddProduct() {
           {/* Media Images Card */}
           <div className="bg-white border border-gray-200/80 rounded-xl p-6 shadow-2xs space-y-4">
             <h3 className="text-base font-bold text-gray-900 font-serif border-b border-gray-100 pb-3">Product Images</h3>
+            <label className="block border-2 border-dashed border-gray-200 rounded-lg p-4 text-center text-xs font-semibold text-gray-700 cursor-pointer hover:border-gray-400">
+              {uploading ? 'Uploading images…' : 'Upload JPG, PNG, WebP, or GIF (max 5 MB each)'}
+              <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleImageUpload} disabled={uploading} className="hidden" />
+            </label>
             
             <div className="flex items-center gap-2">
               <input
@@ -356,9 +398,10 @@ export default function AddProduct() {
               </Link>
               <button
                 type="submit"
+                disabled={saving || uploading}
                 className="px-6 py-2.5 rounded-lg bg-gray-900 hover:bg-black text-white text-xs font-semibold uppercase tracking-wider shadow-xs"
               >
-                Save Product
+                {saving ? 'Saving…' : 'Save Product'}
               </button>
             </div>
           </div>

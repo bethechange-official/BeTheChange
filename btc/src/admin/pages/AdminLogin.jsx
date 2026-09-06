@@ -1,24 +1,24 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, Lock, Mail, ShieldAlert } from 'lucide-react';
-import { adminAuth } from '../utils/adminAuth';
+import { adminAuth } from '../../services/admin/adminAuth';
 
 export default function AdminLogin() {
-  const [email, setEmail] = useState('admin@btc.com');
-  const [password, setPassword] = useState('admin123');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
     setLoading(true);
 
-    setTimeout(() => {
-      const res = adminAuth.login(email, password);
+    try {
+      const res = await adminAuth.login(email, password);
       setLoading(false);
 
       if (res.success) {
@@ -26,7 +26,10 @@ export default function AdminLogin() {
       } else {
         setError(res.message);
       }
-    }, 400);
+    } catch (err) {
+      setLoading(false);
+      setError('An unexpected error occurred. Please try again.');
+    }
   };
 
   return (
@@ -40,13 +43,6 @@ export default function AdminLogin() {
           </div>
           <h1 className="font-serif text-3xl font-bold text-[#111111]">Be The Change</h1>
           <p className="text-xs tracking-[0.25em] uppercase text-[#8A8580] font-medium mt-1">Admin Portal Access</p>
-        </div>
-
-        {/* Demo Credentials Alert */}
-        <div className="mb-6 bg-blue-50 border border-blue-200 text-blue-800 p-3 rounded-lg text-xs leading-relaxed">
-          <p className="font-semibold mb-0.5">Demo Credentials:</p>
-          <p>Email: <code className="bg-blue-100 px-1 py-0.5 rounded font-mono">admin@btc.com</code></p>
-          <p>Password: <code className="bg-blue-100 px-1 py-0.5 rounded font-mono">admin123</code></p>
         </div>
 
         {/* Error Message */}

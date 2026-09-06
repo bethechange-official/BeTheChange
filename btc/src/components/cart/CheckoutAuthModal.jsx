@@ -1,7 +1,6 @@
 import { Link, useNavigate } from 'react-router-dom';
 import { Modal } from '../ui/Modal';
-import { Button } from '../ui/Button';
-import { User, UserPlus, ArrowRight, ShieldCheck, Lock } from 'lucide-react';
+import { User, UserPlus, Lock } from 'lucide-react';
 
 export function CheckoutAuthModal({ isOpen, onClose }) {
   const navigate = useNavigate();
@@ -27,7 +26,7 @@ export function CheckoutAuthModal({ isOpen, onClose }) {
           Sign In to Proceed
         </h3>
         <p className="text-xs text-[#666666] font-light leading-relaxed mb-8 max-w-sm mx-auto">
-          Please sign in to your account or create a new account to save your order details and track delivery.
+          Sign in or create an account to save your order history and contact details.
         </p>
 
         <div className="space-y-3">

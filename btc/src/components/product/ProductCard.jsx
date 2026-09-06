@@ -6,12 +6,12 @@ import { useCart } from '../../context/CartContext';
 export function ProductCard({ product, onAddToCart }) {
   const [wishlisted, setWishlisted] = useState(false);
   const [hovered, setHovered] = useState(false);
-  const { dispatch } = useCart();
+  const { addToCart } = useCart();
 
-  const handleAdd = (e) => {
+  const handleAdd = async (e) => {
     e.preventDefault();
-    dispatch({ type: 'ADD', product });
-    onAddToCart?.();
+    const result = await addToCart(product, 1);
+    onAddToCart?.(result);
   };
 
   const discount = product.originalPrice
@@ -29,7 +29,7 @@ export function ProductCard({ product, onAddToCart }) {
       onMouseLeave={() => setHovered(false)}
     >
       {/* IMAGE CONTAINER */}
-      <Link to={`/product/${product.id}`} className="block overflow-hidden relative bg-[#F4F2EE] aspect-[3/4] mb-2.5">
+      <Link to={`/product/${product.slug || product.id}`} className="block overflow-hidden relative bg-[#F4F2EE] aspect-[3/4] mb-2.5">
         <img
           src={hovered && product.images[1] ? product.images[1] : product.images[0]}
           alt={product.name}
@@ -60,7 +60,7 @@ export function ProductCard({ product, onAddToCart }) {
       {/* DETAILS */}
       <div className="flex flex-col flex-1">
         {/* Title */}
-        <Link to={`/product/${product.id}`} className="block mb-0.5">
+        <Link to={`/product/${product.slug || product.id}`} className="block mb-0.5">
           <h3 className="font-serif text-xs sm:text-base text-[#111111] font-semibold leading-snug line-clamp-2 hover:text-[#5C554E] transition-colors">
             {product.name}
           </h3>
@@ -89,12 +89,12 @@ export function ProductCard({ product, onAddToCart }) {
         {/* SOLID BLACK ADD TO CART BUTTON (Always visible at bottom of card) */}
         <button
           onClick={handleAdd}
-          className="w-full bg-[#111111] text-white text-[9px] sm:text-[11px] tracking-[0.16em] uppercase font-semibold py-2.5 sm:py-3 flex items-center justify-center gap-1 hover:bg-[#2A2A2A] active:scale-[0.99] transition-all shadow-2xs"
+          disabled={product.stock <= 0}
+          className="w-full bg-[#111111] disabled:bg-[#8A8580] text-white text-[9px] sm:text-[11px] tracking-[0.16em] uppercase font-semibold py-2.5 sm:py-3 flex items-center justify-center gap-1 hover:bg-[#2A2A2A] active:scale-[0.99] transition-all shadow-2xs"
         >
-          ADD TO CART
+          {product.stock <= 0 ? 'OUT OF STOCK' : 'ADD TO CART'}
         </button>
       </div>
     </div>
   );
 }
-

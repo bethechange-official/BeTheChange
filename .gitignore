@@ -10,3 +10,16 @@ dist/
 *.log
 .DS_Store
 .vscode/
+
+# Secrets and local databases
+.env
+**/.env
+**/.env.*
+!**/.env.example
+*.db
+*.db-journal
+
+# Runtime uploads and test artifacts
+uploads/
+playwright-report/
+test-results/

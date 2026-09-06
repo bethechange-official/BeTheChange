@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Search, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Search, ChevronLeft, ChevronRight, Loader2 } from 'lucide-react';
 
 export function DataTable({
   columns = [],
@@ -9,13 +9,28 @@ export function DataTable({
   onSearchChange,
   filterComponent,
   actionButton,
-  pageSize = 8
+  loading = false,
+  pagination,
+  onPageChange,
 }) {
   const [currentPage, setCurrentPage] = useState(1);
 
-  const totalPages = Math.ceil(data.length / pageSize) || 1;
-  const startIndex = (currentPage - 1) * pageSize;
-  const currentData = data.slice(startIndex, startIndex + pageSize);
+  // Use external pagination if provided, otherwise use internal
+  const useExternalPagination = pagination !== undefined;
+  const page = useExternalPagination ? pagination.currentPage : currentPage;
+  const totalPages = useExternalPagination ? pagination.totalPages : (Math.ceil(data.length / 8) || 1);
+  const totalItems = useExternalPagination ? pagination.total : data.length;
+  const pageSize = useExternalPagination ? pagination.limit : 8;
+  const startIndex = useExternalPagination ? (page - 1) * pageSize : (page - 1) * pageSize;
+  const currentData = useExternalPagination ? data : data.slice(startIndex, startIndex + pageSize);
+
+  const handlePageChange = (newPage) => {
+    if (useExternalPagination && onPageChange) {
+      onPageChange(newPage);
+    } else {
+      setCurrentPage(newPage);
+    }
+  };
 
   return (
     <div className="bg-white border border-gray-200/80 rounded-xl shadow-2xs overflow-hidden">
@@ -30,10 +45,12 @@ export function DataTable({
                 value={searchValue}
                 onChange={(e) => {
                   onSearchChange(e.target.value);
-                  setCurrentPage(1);
+                  if (useExternalPagination && onPageChange) onPageChange(1);
+                  else setCurrentPage(1);
                 }}
+                disabled={loading}
                 placeholder={searchPlaceholder}
-                className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
+                className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-colors disabled:opacity-50"
               />
             </div>
           )}
@@ -44,7 +61,12 @@ export function DataTable({
       </div>
 
       {/* Table Area */}
-      <div className="overflow-x-auto">
+      <div className="overflow-x-auto relative">
+        {loading && (
+          <div className="absolute inset-0 bg-white/80 flex items-center justify-center z-10">
+            <Loader2 size={24} className="animate-spin text-gray-900" />
+          </div>
+        )}
         <table className="w-full text-left text-xs text-gray-600">
           <thead className="bg-gray-50 text-gray-500 font-semibold uppercase tracking-wider text-[10px] border-b border-gray-100">
             <tr>
@@ -59,7 +81,7 @@ export function DataTable({
             {currentData.length === 0 ? (
               <tr>
                 <td colSpan={columns.length} className="px-5 py-12 text-center text-gray-400 font-light text-sm">
-                  No items found.
+                  {loading ? 'Loading...' : 'No items found.'}
                 </td>
               </tr>
             ) : (
@@ -78,28 +100,36 @@ export function DataTable({
       </div>
 
       {/* Pagination Bar */}
-      {data.length > 0 && (
+      {(data.length > 0 || useExternalPagination) && (
         <div className="p-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 bg-gray-50/30">
-          <span>
-            Showing <strong className="font-semibold text-gray-900">{startIndex + 1}</strong> to{' '}
-            <strong className="font-semibold text-gray-900">{Math.min(startIndex + pageSize, data.length)}</strong> of{' '}
-            <strong className="font-semibold text-gray-900">{data.length}</strong> results
-          </span>
+          {useExternalPagination ? (
+            <span>
+              Showing <strong className="font-semibold text-gray-900">{startIndex + 1}</strong> to{' '}
+              <strong className="font-semibold text-gray-900">{Math.min(startIndex + pageSize, totalItems)}</strong> of{' '}
+              <strong className="font-semibold text-gray-900">{totalItems}</strong> results
+            </span>
+          ) : (
+            <span>
+              Showing <strong className="font-semibold text-gray-900">{startIndex + 1}</strong> to{' '}
+              <strong className="font-semibold text-gray-900">{Math.min(startIndex + pageSize, data.length)}</strong> of{' '}
+              <strong className="font-semibold text-gray-900">{data.length}</strong> results
+            </span>
+          )}
 
           <div className="flex items-center gap-1">
             <button
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
-              disabled={currentPage === 1}
+              onClick={() => handlePageChange(page - 1)}
+              disabled={page === 1 || loading}
               className="p-1.5 rounded-md border border-gray-200 hover:bg-white disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
             >
               <ChevronLeft size={15} />
             </button>
             <span className="px-3 py-1 font-semibold text-gray-900">
-              Page {currentPage} of {totalPages}
+              Page {page} of {totalPages}
             </span>
             <button
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-              disabled={currentPage === totalPages}
+              onClick={() => handlePageChange(page + 1)}
+              disabled={page === totalPages || loading}
               className="p-1.5 rounded-md border border-gray-200 hover:bg-white disabled:opacity-40 disabled:hover:bg-transparent transition-colors"
             >
               <ChevronRight size={15} />

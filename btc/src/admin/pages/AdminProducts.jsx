@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Plus, Edit2, Trash2, Eye, AlertCircle } from 'lucide-react';
+import { Plus, Edit2, Trash2, Eye, AlertCircle, Loader2 } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { ConfirmModal } from '../components/ConfirmModal';
-import { adminStorage } from '../utils/localStorageHelpers';
+import { adminProductService } from '../../services/admin/productService';
+import { adminCategoryService } from '../../services/admin/categoryService';
 
 export default function AdminProducts() {
   const [products, setProducts] = useState([]);
@@ -14,34 +15,84 @@ export default function AdminProducts() {
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [stockFilter, setStockFilter] = useState('ALL');
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
 
-  useEffect(() => {
-    setProducts(adminStorage.getProducts());
-    setCategories(adminStorage.getCategories());
+  const fetchProducts = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await adminProductService.getAll({
+        page: pagination.page,
+        limit: pagination.limit,
+        search: search || undefined,
+        category: categoryFilter !== 'ALL' ? categoryFilter : undefined,
+        stockStatus: stockFilter !== 'ALL' ? stockFilter : undefined,
+      });
+      if (response.success) {
+        setProducts(response.data);
+        setPagination(prev => ({
+          ...prev,
+          total: response.pagination?.total || 0,
+          totalPages: response.pagination?.totalPages || 1,
+        }));
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load products');
+    } finally {
+      setLoading(false);
+    }
+  }, [pagination.page, pagination.limit, search, categoryFilter, stockFilter]);
+
+  const fetchCategories = useCallback(async () => {
+    try {
+      const response = await adminCategoryService.getAll();
+      if (response.success) {
+        setCategories(response.data);
+      }
+    } catch (err) {
+      console.error('Failed to load categories:', err);
+    }
   }, []);
 
-  const handleDelete = () => {
+  useEffect(() => {
+    fetchProducts();
+    fetchCategories();
+  }, [fetchProducts, fetchCategories]);
+
+  const handleDelete = async () => {
     if (!deleteTarget) return;
-    const updated = products.filter(p => p.id !== deleteTarget.id);
-    setProducts(updated);
-    adminStorage.saveProducts(updated);
-    setDeleteTarget(null);
+    setLoading(true);
+    try {
+      const response = await adminProductService.delete(deleteTarget.id);
+      if (response.success) {
+        setProducts(prev => prev.filter(p => p.id !== deleteTarget.id));
+        setDeleteTarget(null);
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to delete product');
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Filter products based on search, category, and stock status
+  const handlePageChange = (newPage) => {
+    if (newPage >= 1 && newPage <= pagination.totalPages) {
+      setPagination(prev => ({ ...prev, page: newPage }));
+    }
+  };
+
+  // Filter products based on search (local for immediate feedback)
   const filteredProducts = products.filter(p => {
     const matchesSearch = p.name.toLowerCase().includes(search.toLowerCase()) ||
                           p.category.toLowerCase().includes(search.toLowerCase()) ||
                           p.slug.toLowerCase().includes(search.toLowerCase());
-
-    const matchesCategory = categoryFilter === 'ALL' || p.category === categoryFilter;
-
-    let matchesStock = true;
-    if (stockFilter === 'LOW') matchesStock = p.stock <= 5 && p.stock > 0;
-    else if (stockFilter === 'OUT') matchesStock = p.stock === 0;
-    else if (stockFilter === 'IN') matchesStock = p.stock > 5;
-
-    return matchesSearch && matchesCategory && matchesStock;
+    return matchesSearch;
   });
 
   const columns = [
@@ -70,9 +121,9 @@ export default function AdminProducts() {
       accessor: 'price',
       cell: (row) => (
         <div>
-          <span className="font-bold text-gray-900">₹{row.price?.toLocaleString()}</span>
+          <span className="font-bold text-gray-900">\u20B9{row.price?.toLocaleString()}</span>
           {row.originalPrice && (
-            <span className="text-[10px] text-gray-400 line-through block">₹{row.originalPrice?.toLocaleString()}</span>
+            <span className="text-[10px] text-gray-400 line-through block">\u20B9{row.originalPrice?.toLocaleString()}</span>
           )}
         </div>
       )
@@ -124,10 +175,11 @@ export default function AdminProducts() {
           </Link>
           <button
             onClick={() => setDeleteTarget(row)}
-            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-colors"
+            disabled={loading}
+            className="p-1.5 rounded-lg border border-gray-200 text-gray-600 hover:bg-rose-600 hover:text-white hover:border-rose-600 transition-colors disabled:opacity-50"
             title="Delete Product"
           >
-            <Trash2 size={14} />
+            {loading && row.id === deleteTarget?.id ? <Loader2 size={14} className="animate-spin" /> : <Trash2 size={14} />}
           </button>
         </div>
       )
@@ -136,6 +188,12 @@ export default function AdminProducts() {
 
   return (
     <AdminLayout title="Product Management">
+      {error && (
+        <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 p-3 rounded-lg text-xs">
+          {error}
+        </div>
+      )}
+
       {/* Table Filters */}
       <DataTable
         columns={columns}
@@ -143,6 +201,7 @@ export default function AdminProducts() {
         searchPlaceholder="Search product name, category..."
         searchValue={search}
         onSearchChange={setSearch}
+        loading={loading}
         actionButton={
           <Link
             to="/admin/products/add"
@@ -171,12 +230,17 @@ export default function AdminProducts() {
               className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900"
             >
               <option value="ALL">All Stock Status</option>
-              <option value="IN">In Stock (&gt; 5)</option>
-              <option value="LOW">Low Stock (&lt;= 5)</option>
+              <option value="IN">In Stock (more than 5)</option>
+              <option value="LOW">Low Stock (5 or fewer)</option>
               <option value="OUT">Out of Stock (0)</option>
             </select>
           </div>
         }
+        pagination={{
+          currentPage: pagination.page,
+          totalPages: pagination.totalPages,
+          onPageChange: handlePageChange,
+        }}
       />
 
       {/* Delete Confirmation Modal */}
@@ -187,6 +251,7 @@ export default function AdminProducts() {
         confirmText="Yes, Delete"
         onConfirm={handleDelete}
         onClose={() => setDeleteTarget(null)}
+        loading={loading}
       />
     </AdminLayout>
   );

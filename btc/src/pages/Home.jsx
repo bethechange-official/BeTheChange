@@ -5,9 +5,9 @@ import { Button } from '../components/ui/Button';
 import { SectionHeading } from '../components/ui/SectionHeading';
 import { ProductCard } from '../components/product/ProductCard';
 import { Toast } from '../components/ui/Toast';
-import { useState } from 'react';
-import { products } from '../data/products';
-import { categories } from '../data/categories';
+import { useState, useEffect } from 'react';
+import { productService } from '../services/productService';
+import { categoryService } from '../services/categoryService';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 25 },
@@ -18,10 +18,34 @@ const stagger = { visible: { transition: { staggerChildren: 0.12 } } };
 
 export default function Home() {
   const [toast, setToast] = useState(null);
+  const [featuredProducts, setFeaturedProducts] = useState([]);
+  const [categories, setCategories] = useState([]);
+  const [loading, setLoading] = useState(true);
 
-  // Filter products for homepage sections
-  const bestsellers = products.filter(p => p.featured).slice(0, 4);
-  const newLaunches = products.slice(6, 10);
+  useEffect(() => {
+    const fetchFeatured = async () => {
+      try {
+        const [productsRes, categoriesRes] = await Promise.all([
+          productService.getFeaturedProducts(),
+          categoryService.getCategories()
+        ]);
+        if (productsRes.success) {
+          setFeaturedProducts(productsRes.data.products.slice(0, 8));
+        }
+        if (categoriesRes.success) {
+          setCategories(categoriesRes.data);
+        }
+      } catch (error) {
+        console.error('Failed to fetch data:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchFeatured();
+  }, []);
+
+  const bestsellers = featuredProducts.slice(0, 4);
+  const newLaunches = featuredProducts.slice(4, 8);
 
   const reviews = [
     {
@@ -132,9 +156,19 @@ export default function Home() {
           
           {/* 2-column mobile grid / 4-column desktop grid */}
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6">
-            {bestsellers.map(p => (
-              <ProductCard key={p.id} product={p} onAddToCart={() => setToast(`${p.name} added to bag`)} />
-            ))}
+            {loading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white border border-[#E2DDD6] p-4 animate-pulse">
+                  <div className="aspect-square bg-[#E8E3DC] mb-4" />
+                  <div className="h-4 bg-[#E8E3DC] w-3/4 mb-2" />
+                  <div className="h-3 bg-[#E8E3DC] w-1/2" />
+                </div>
+              ))
+            ) : (
+              bestsellers.map(p => (
+                <ProductCard key={p.id} product={p} onAddToCart={(result) => setToast(result.success ? `${p.name} added to bag` : result.message)} />
+              ))
+            )}
           </div>
 
           <div className="mt-8 text-center sm:hidden">
@@ -187,7 +221,7 @@ export default function Home() {
                 className="group block relative overflow-hidden aspect-[3/4] bg-[#EFECE6] border border-[#E2DDD6] shadow-2xs"
               >
                 <img
-                  src={cat.image}
+                  src={cat.imageUrl || 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&q=80'}
                   alt={cat.name}
                   className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
                 />
@@ -211,9 +245,19 @@ export default function Home() {
           <SectionHeading label="JUST ARRIVED" title="New Launches" subtitle="Discover our latest botanical & minimalist formulations." />
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-6 mt-8">
-            {newLaunches.map(p => (
-              <ProductCard key={p.id} product={p} onAddToCart={() => setToast(`${p.name} added to bag`)} />
-            ))}
+            {loading ? (
+              [...Array(4)].map((_, i) => (
+                <div key={i} className="bg-white border border-[#E2DDD6] p-4 animate-pulse">
+                  <div className="aspect-square bg-[#E8E3DC] mb-4" />
+                  <div className="h-4 bg-[#E8E3DC] w-3/4 mb-2" />
+                  <div className="h-3 bg-[#E8E3DC] w-1/2" />
+                </div>
+              ))
+            ) : (
+              newLaunches.map(p => (
+                <ProductCard key={p.id} product={p} onAddToCart={(result) => setToast(result.success ? `${p.name} added to bag` : result.message)} />
+              ))
+            )}
           </div>
         </div>
       </section>

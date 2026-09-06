@@ -1,10 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { Eye, CheckCircle2, ShoppingBag } from 'lucide-react';
+import { Eye, CheckCircle2, X } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
-import { adminStorage } from '../utils/localStorageHelpers';
+import { adminOrderService } from '../../services/admin/orderService';
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -12,17 +12,60 @@ export default function AdminOrders() {
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('ALL');
   const [toastMsg, setToastMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
+  const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
+
+  const fetchOrders = useCallback(async () => {
+    setLoading(true);
+    setError('');
+    try {
+      const response = await adminOrderService.getAll({
+        page: pagination.page,
+        limit: pagination.limit,
+        search: search || undefined,
+        orderStatus: orderStatusFilter !== 'ALL' ? orderStatusFilter : undefined,
+        paymentStatus: paymentStatusFilter !== 'ALL' ? paymentStatusFilter : undefined,
+      });
+      if (response.success) {
+        setOrders(response.data);
+        setPagination(prev => ({
+          ...prev,
+          total: response.pagination?.total || 0,
+          totalPages: response.pagination?.totalPages || 1,
+        }));
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to load orders');
+    } finally {
+      setLoading(false);
+    }
+  }, [pagination.page, pagination.limit, search, orderStatusFilter, paymentStatusFilter]);
 
   useEffect(() => {
-    setOrders(adminStorage.getOrders());
-  }, []);
+    fetchOrders();
+  }, [fetchOrders]);
 
-  const handleUpdateOrderStatus = (orderId, newStatus) => {
-    const updatedList = orders.map(o => o.id === orderId ? { ...o, orderStatus: newStatus } : o);
-    setOrders(updatedList);
-    adminStorage.saveOrders(updatedList);
-    setToastMsg(`Order ${orderId} updated to ${newStatus}`);
-    setTimeout(() => setToastMsg(''), 3000);
+  const handleUpdateOrderStatus = async (orderId, newStatus) => {
+    setLoading(true);
+    try {
+      const response = await adminOrderService.updateStatus(orderId, { orderStatus: newStatus });
+      if (response.success) {
+        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: newStatus } : o));
+        setToastMsg(`Order ${orderId} updated to ${newStatus}`);
+        setTimeout(() => setToastMsg(''), 3000);
+      } else {
+        setError(response.message);
+        fetchOrders(); // Refresh to reset UI
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to update order');
+      fetchOrders(); // Refresh to reset UI
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredOrders = orders.filter(o => {
@@ -43,7 +86,7 @@ export default function AdminOrders() {
       accessor: 'id',
       cell: (row) => (
         <Link to={`/admin/orders/${row.id}`} className="font-mono font-bold text-gray-900 hover:underline">
-          {row.id}
+          {row.orderNumber || row.id}
         </Link>
       )
     },
@@ -59,7 +102,7 @@ export default function AdminOrders() {
     {
       header: 'Date',
       accessor: 'orderDate',
-      cell: (row) => <span className="text-xs text-gray-500 font-mono">{row.orderDate}</span>
+      cell: (row) => <span className="text-xs text-gray-500 font-mono">{new Date(row.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</span>
     },
     {
       header: 'Items',
@@ -98,14 +141,16 @@ export default function AdminOrders() {
         <select
           value={row.orderStatus}
           onChange={(e) => handleUpdateOrderStatus(row.id, e.target.value)}
-          className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-900 focus:outline-none focus:border-gray-900 font-medium"
+          disabled={loading}
+          className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-900 focus:outline-none focus:border-gray-900 font-medium disabled:opacity-50"
         >
-          <option value="Pending">Pending</option>
-          <option value="Confirmed">Confirmed</option>
-          <option value="Processing">Processing</option>
-          <option value="Shipped">Shipped</option>
-          <option value="Delivered">Delivered</option>
-          <option value="Cancelled">Cancelled</option>
+          <option value="PENDING">Pending</option>
+          <option value="CONFIRMED">Confirmed</option>
+          <option value="PROCESSING">Processing</option>
+          <option value="SHIPPED">Shipped</option>
+          <option value="DELIVERED">Delivered</option>
+          <option value="CANCELLED">Cancelled</option>
+          <option value="REFUNDED">Refunded</option>
         </select>
       )
     },
@@ -125,6 +170,13 @@ export default function AdminOrders() {
 
   return (
     <AdminLayout title="Order Management">
+      {error && (
+        <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-700 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2">
+          <X size={16} className="flex-shrink-0" />
+          <span>{error}</span>
+        </div>
+      )}
+
       {toastMsg && (
         <div className="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2">
           <CheckCircle2 size={16} />
@@ -138,35 +190,44 @@ export default function AdminOrders() {
         searchPlaceholder="Search order ID or customer name..."
         searchValue={search}
         onSearchChange={setSearch}
+        loading={loading}
         filterComponent={
           <div className="flex items-center gap-2 flex-wrap">
             <select
               value={orderStatusFilter}
               onChange={(e) => setOrderStatusFilter(e.target.value)}
-              className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900"
+              disabled={loading}
+              className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900 disabled:opacity-50"
             >
               <option value="ALL">All Order Statuses</option>
-              <option value="Pending">Pending</option>
-              <option value="Confirmed">Confirmed</option>
-              <option value="Processing">Processing</option>
-              <option value="Shipped">Shipped</option>
-              <option value="Delivered">Delivered</option>
-              <option value="Cancelled">Cancelled</option>
+              <option value="PENDING">Pending</option>
+              <option value="CONFIRMED">Confirmed</option>
+              <option value="PROCESSING">Processing</option>
+              <option value="SHIPPED">Shipped</option>
+              <option value="DELIVERED">Delivered</option>
+              <option value="CANCELLED">Cancelled</option>
+              <option value="REFUNDED">Refunded</option>
             </select>
 
             <select
               value={paymentStatusFilter}
               onChange={(e) => setPaymentStatusFilter(e.target.value)}
-              className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900"
+              disabled={loading}
+              className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900 disabled:opacity-50"
             >
               <option value="ALL">All Payment Statuses</option>
-              <option value="Paid">Paid</option>
-              <option value="Pending">Pending</option>
-              <option value="Failed">Failed</option>
-              <option value="Refunded">Refunded</option>
+              <option value="PAID">Paid</option>
+              <option value="PENDING">Pending</option>
+              <option value="FAILED">Failed</option>
+              <option value="REFUNDED">Refunded</option>
             </select>
           </div>
         }
+        pagination={{
+          currentPage: pagination.page,
+          totalPages: pagination.totalPages,
+          onPageChange: (page) => setPagination(prev => ({ ...prev, page: page })),
+        }}
       />
     </AdminLayout>
   );

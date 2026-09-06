@@ -4,7 +4,7 @@ import { Search, User, Heart, ShoppingBag, Menu, X, LogOut, Package } from 'luci
 import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { CartDrawer } from '../cart/CartDrawer';
-import { products } from '../../data/products';
+import { productService } from '../../services/productService';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -13,6 +13,7 @@ export function Header() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [query, setQuery] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
+  const [results, setResults] = useState([]);
   
   const { itemCount } = useCart();
   const { user, logout } = useAuth();
@@ -42,14 +43,23 @@ export function Header() {
     return () => document.removeEventListener('mousedown', handler);
   }, []);
 
-  const results = query.trim().length > 1
-    ? products.filter(p =>
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase()) ||
-        p.skinConcerns.some(s => s.toLowerCase().includes(query.toLowerCase())) ||
-        p.ingredients.some(i => i.toLowerCase().includes(query.toLowerCase()))
-      ).slice(0, 5)
-    : [];
+  useEffect(() => {
+    if (query.trim().length > 1) {
+      const timer = setTimeout(async () => {
+        try {
+          const res = await productService.getProducts({ search: query.trim(), limit: 5 });
+          if (res.success) {
+            setResults(res.data.products);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setResults([]);
+    }
+  }, [query]);
 
   const handleResultClick = (id) => {
     setQuery('');
@@ -256,7 +266,7 @@ export function Header() {
                         className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#FAF9F6] transition-colors border-b border-[#F3EFE8] last:border-0 text-left"
                       >
                         <div className="w-10 h-10 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
-                          <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                          <img src={p.images?.[0] || 'https://via.placeholder.com/40'} alt={p.name} className="w-full h-full object-cover" />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="text-[10px] tracking-widest uppercase text-[#8A8580]">{p.category}</p>

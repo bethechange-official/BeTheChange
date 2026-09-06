@@ -1,36 +1,69 @@
 import { useState, useEffect } from 'react';
-import { Save, CheckCircle2, Store, Truck, ShieldAlert } from 'lucide-react';
+import { Save, CheckCircle2, Store, Truck, ShieldAlert, Loader2, X } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
-import { adminStorage } from '../utils/localStorageHelpers';
+import { adminSettingsService } from '../../services/admin/settingsService';
+
+const defaultSettings = {
+  storeName: 'Be The Change (BTC)',
+  storeEmail: 'contact@bethechange.com',
+  storePhone: '+91 98765 43210',
+  storeAddress: '12 Botanical Avenue, Jubilee Hills, Hyderabad, Telangana 500033',
+  shippingFee: 50,
+  freeShippingThreshold: 999,
+  lowStockAlertThreshold: 5,
+  currency: 'INR'
+};
 
 export default function AdminSettings() {
-  const [settings, setSettings] = useState({
-    storeName: 'Be The Change (BTC)',
-    storeEmail: 'contact@bethechange.com',
-    storePhone: '+91 98765 43210',
-    storeAddress: '12 Botanical Avenue, Jubilee Hills, Hyderabad, Telangana 500033',
-    shippingFee: 50,
-    freeShippingThreshold: 999,
-    lowStockAlertThreshold: 5,
-    currency: 'INR'
-  });
-
+  const [settings, setSettings] = useState(defaultSettings);
   const [toastMsg, setToastMsg] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState('');
 
   useEffect(() => {
-    setSettings(adminStorage.getSettings());
+    const fetchSettings = async () => {
+      try {
+        const response = await adminSettingsService.getAll();
+        if (response.success) {
+          setSettings({ ...defaultSettings, ...response.data });
+        }
+      } catch (err) {
+        console.error('Failed to load settings:', err);
+      }
+    };
+    fetchSettings();
   }, []);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    adminStorage.saveSettings(settings);
-    setToastMsg('Store settings saved successfully!');
-    setTimeout(() => setToastMsg(''), 3000);
+    setLoading(true);
+    setError('');
+
+    try {
+      const response = await adminSettingsService.update(settings);
+      if (response.success) {
+        setToastMsg('Store settings saved successfully!');
+        setTimeout(() => setToastMsg(''), 3000);
+      } else {
+        setError(response.message);
+      }
+    } catch (err) {
+      setError(err.message || 'Failed to save settings');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
     <AdminLayout title="Store Settings">
       <div className="max-w-4xl mx-auto">
+        {error && (
+          <div className="mb-6 bg-rose-50 border border-rose-200 text-rose-800 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2">
+            <X size={16} className="flex-shrink-0" />
+            <span>{error}</span>
+          </div>
+        )}
+
         {toastMsg && (
           <div className="mb-6 bg-emerald-50 border border-emerald-200 text-emerald-800 px-4 py-3 rounded-xl text-xs font-semibold flex items-center gap-2">
             <CheckCircle2 size={16} />
@@ -54,7 +87,8 @@ export default function AdminSettings() {
                   required
                   value={settings.storeName}
                   onChange={(e) => setSettings(prev => ({ ...prev, storeName: e.target.value }))}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
+                  disabled={loading}
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none disabled:opacity-50"
                 />
               </div>
 
@@ -65,7 +99,8 @@ export default function AdminSettings() {
                   required
                   value={settings.storeEmail}
                   onChange={(e) => setSettings(prev => ({ ...prev, storeEmail: e.target.value }))}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
+                  disabled={loading}
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none disabled:opacity-50"
                 />
               </div>
             </div>
@@ -78,7 +113,8 @@ export default function AdminSettings() {
                   required
                   value={settings.storePhone}
                   onChange={(e) => setSettings(prev => ({ ...prev, storePhone: e.target.value }))}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
+                  disabled={loading}
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none disabled:opacity-50"
                 />
               </div>
 
@@ -89,7 +125,8 @@ export default function AdminSettings() {
                   required
                   value={settings.currency}
                   onChange={(e) => setSettings(prev => ({ ...prev, currency: e.target.value }))}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none font-mono text-xs"
+                  disabled={loading}
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none font-mono text-xs disabled:opacity-50"
                 />
               </div>
             </div>
@@ -100,7 +137,8 @@ export default function AdminSettings() {
                 rows={2}
                 value={settings.storeAddress}
                 onChange={(e) => setSettings(prev => ({ ...prev, storeAddress: e.target.value }))}
-                className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg p-3 text-xs text-gray-900 focus:outline-none"
+                disabled={loading}
+                className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg p-3 text-xs text-gray-900 focus:outline-none disabled:opacity-50"
               />
             </div>
           </div>
@@ -121,7 +159,8 @@ export default function AdminSettings() {
                   min="0"
                   value={settings.shippingFee}
                   onChange={(e) => setSettings(prev => ({ ...prev, shippingFee: Number(e.target.value) }))}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
+                  disabled={loading}
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none disabled:opacity-50"
                 />
               </div>
 
@@ -133,7 +172,8 @@ export default function AdminSettings() {
                   min="0"
                   value={settings.freeShippingThreshold}
                   onChange={(e) => setSettings(prev => ({ ...prev, freeShippingThreshold: Number(e.target.value) }))}
-                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
+                  disabled={loading}
+                  className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none disabled:opacity-50"
                 />
               </div>
             </div>
@@ -154,7 +194,8 @@ export default function AdminSettings() {
                 min="1"
                 value={settings.lowStockAlertThreshold}
                 onChange={(e) => setSettings(prev => ({ ...prev, lowStockAlertThreshold: Number(e.target.value) }))}
-                className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
+                disabled={loading}
+                className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none disabled:opacity-50"
               />
               <p className="text-[10px] text-gray-400 mt-1">Products with stock at or below this count will trigger dashboard warnings.</p>
             </div>
@@ -164,9 +205,10 @@ export default function AdminSettings() {
           <div className="flex items-center justify-end">
             <button
               type="submit"
-              className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all shadow-md active:scale-[0.99]"
+              disabled={loading}
+              className="inline-flex items-center gap-2 bg-gray-900 hover:bg-black text-white px-6 py-3 rounded-xl text-xs font-semibold uppercase tracking-wider transition-all shadow-md active:scale-[0.99] disabled:opacity-50"
             >
-              <Save size={16} />
+              {loading ? <Loader2 size={16} className="animate-spin" /> : <Save size={16} />}
               <span>Save Settings</span>
             </button>
           </div>

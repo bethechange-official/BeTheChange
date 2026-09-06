@@ -1,19 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Search, X } from 'lucide-react';
 import { Link } from 'react-router-dom';
-import { products } from '../../data/products';
+import { productService } from '../../services/productService';
 
 export function SearchOverlay({ isOpen, onClose }) {
   const [query, setQuery] = useState('');
 
-  const results = query.trim().length > 1
-    ? products.filter(p =>
-        p.name.toLowerCase().includes(query.toLowerCase()) ||
-        p.category.toLowerCase().includes(query.toLowerCase()) ||
-        p.skinConcerns.some(s => s.toLowerCase().includes(query.toLowerCase())) ||
-        p.ingredients.some(i => i.toLowerCase().includes(query.toLowerCase()))
-      ).slice(0, 6)
-    : [];
+  const [results, setResults] = useState([]);
+
+  useEffect(() => {
+    if (query.trim().length > 1) {
+      const timer = setTimeout(async () => {
+        try {
+          const res = await productService.getProducts({ search: query.trim(), limit: 6 });
+          if (res.success) {
+            setResults(res.data.products || []);
+          }
+        } catch (err) {
+          console.error(err);
+        }
+      }, 300);
+      return () => clearTimeout(timer);
+    } else {
+      setResults([]);
+    }
+  }, [query]);
 
   if (!isOpen) return null;
 
@@ -55,7 +66,7 @@ export function SearchOverlay({ isOpen, onClose }) {
                 className="flex items-center gap-4 py-3 border-b border-[#F3EFE8] hover:bg-[#FAF9F6] -mx-2 px-2 transition-colors"
               >
                 <div className="w-12 h-12 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
-                  <img src={p.images[0]} alt={p.name} className="w-full h-full object-cover" />
+                  <img src={p.images?.[0] || 'https://via.placeholder.com/48'} alt={p.name} className="w-full h-full object-cover" />
                 </div>
                 <div>
                   <p className="text-[10px] tracking-widest uppercase text-[#8A8580]">{p.category}</p>

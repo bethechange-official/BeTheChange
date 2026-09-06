@@ -16,7 +16,21 @@ export default function OrderSuccess() {
     );
   }
 
-  const { orderId, items, subtotal, discount, total, customer } = state;
+  const orderId = state.orderNumber;
+  const items = state.items || [];
+  const subtotal = Number(state.subtotal || 0);
+  const discount = Number(state.discountAmount || 0);
+  const shippingFee = Number(state.shippingFee || 0);
+  const total = Number(state.totalAmount || 0);
+  const customer = {
+    name: state.customerName,
+    email: state.customerEmail,
+    phone: state.customerPhone,
+    address: [state.addressLine1, state.addressLine2].filter(Boolean).join(', '),
+    city: state.city,
+    state: state.state,
+    pincode: state.pincode,
+  };
 
   return (
     <main className="pt-18 md:pt-22 min-h-screen bg-[#FAF9F6]">
@@ -41,13 +55,13 @@ export default function OrderSuccess() {
             {items.map(item => (
               <div key={item.id} className="flex gap-4 items-center">
                 <div className="w-14 h-16 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
-                  <img src={item.images[0]} alt={item.name} className="w-full h-full object-cover" />
+                  <img src={item.image} alt={item.productName} className="w-full h-full object-cover" />
                 </div>
                 <div className="flex-1">
-                  <p className="font-serif text-sm text-[#111111]">{item.name}</p>
-                  <p className="text-xs text-[#8A8580]">{item.size} · Qty: {item.qty}</p>
+                  <p className="font-serif text-sm text-[#111111]">{item.productName}</p>
+                  <p className="text-xs text-[#8A8580]">Qty: {item.quantity}</p>
                 </div>
-                <span className="text-sm text-[#111111]">₹{(item.price * item.qty).toLocaleString()}</span>
+                <span className="text-sm text-[#111111]">₹{(Number(item.price) * item.quantity).toLocaleString()}</span>
               </div>
             ))}
           </div>
@@ -62,8 +76,12 @@ export default function OrderSuccess() {
                 <span>-₹{discount.toLocaleString()}</span>
               </div>
             )}
+            <div className="flex justify-between text-sm">
+              <span className="text-[#8A8580]">Shipping</span>
+              <span>{shippingFee > 0 ? `₹${shippingFee.toLocaleString()}` : 'Free'}</span>
+            </div>
             <div className="flex justify-between font-medium text-base border-t border-[#E2DDD6] pt-3">
-              <span className="font-serif">Total Paid</span>
+              <span className="font-serif">Amount due on delivery</span>
               <span>₹{total.toLocaleString()}</span>
             </div>
           </div>

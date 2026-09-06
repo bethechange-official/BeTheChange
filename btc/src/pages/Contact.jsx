@@ -3,6 +3,7 @@ import { Mail, Phone, MapPin, Clock, Send, MessageSquare, CheckCircle2 } from 'l
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Toast } from '../components/ui/Toast';
+import { contactService } from '../services/contactService';
 
 export default function Contact() {
   const [form, setForm] = useState({
@@ -17,7 +18,7 @@ export default function Contact() {
   const [submitted, setSubmitted] = useState(false);
   const [toast, setToast] = useState(null);
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     if (!form.name || !form.email || !form.message) {
       setToast('Please complete all required fields.');
@@ -25,12 +26,16 @@ export default function Contact() {
     }
 
     setLoading(true);
-    setTimeout(() => {
+    try {
+      await contactService.submitContact({ ...form, subject: form.topic });
       setLoading(false);
       setSubmitted(true);
       setToast('Thank you! Your message has been sent successfully.');
       setForm({ name: '', email: '', phone: '', topic: 'Order Inquiry', message: '' });
-    }, 800);
+    } catch (error) {
+      setLoading(false);
+      setToast(error.message || 'Unable to send your message. Please try again.');
+    }
   };
 
   const contactDetails = [

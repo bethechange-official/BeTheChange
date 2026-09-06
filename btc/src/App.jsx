@@ -1,35 +1,35 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { lazy, Suspense } from 'react';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
 import { Header } from './components/layout/Header';
 import { Footer } from './components/layout/Footer';
 
-import Home from './pages/Home';
-import Shop from './pages/Shop';
-import CategoryPage from './pages/CategoryPage';
-import ProductDetails from './pages/ProductDetails';
-import Cart from './pages/Cart';
-import Checkout from './pages/Checkout';
-import OrderSuccess from './pages/OrderSuccess';
-import Login from './pages/Login';
-import Register from './pages/Register';
-import Account from './pages/Account';
-import About from './pages/About';
-import Contact from './pages/Contact';
-
-// Admin imports
-import { ProtectedRoute } from './admin/components/ProtectedRoute';
-import AdminLogin from './admin/pages/AdminLogin';
-import AdminDashboard from './admin/pages/AdminDashboard';
-import AdminProducts from './admin/pages/AdminProducts';
-import AddProduct from './admin/pages/AddProduct';
-import EditProduct from './admin/pages/EditProduct';
-import AdminCategories from './admin/pages/AdminCategories';
-import AdminCoupons from './admin/pages/AdminCoupons';
-import AdminCustomers from './admin/pages/AdminCustomers';
-import AdminOrders from './admin/pages/AdminOrders';
-import AdminOrderDetails from './admin/pages/AdminOrderDetails';
-import AdminSettings from './admin/pages/AdminSettings';
+const Home = lazy(() => import('./pages/Home'));
+const Shop = lazy(() => import('./pages/Shop'));
+const CategoryPage = lazy(() => import('./pages/CategoryPage'));
+const ProductDetails = lazy(() => import('./pages/ProductDetails'));
+const Cart = lazy(() => import('./pages/Cart'));
+const Checkout = lazy(() => import('./pages/Checkout'));
+const OrderSuccess = lazy(() => import('./pages/OrderSuccess'));
+const Login = lazy(() => import('./pages/Login'));
+const Register = lazy(() => import('./pages/Register'));
+const Account = lazy(() => import('./pages/Account'));
+const About = lazy(() => import('./pages/About'));
+const Contact = lazy(() => import('./pages/Contact'));
+const NotFound = lazy(() => import('./pages/NotFound'));
+const ProtectedRoute = lazy(() => import('./admin/components/ProtectedRoute').then((module) => ({ default: module.ProtectedRoute })));
+const AdminLogin = lazy(() => import('./admin/pages/AdminLogin'));
+const AdminDashboard = lazy(() => import('./admin/pages/AdminDashboard'));
+const AdminProducts = lazy(() => import('./admin/pages/AdminProducts'));
+const AddProduct = lazy(() => import('./admin/pages/AddProduct'));
+const EditProduct = lazy(() => import('./admin/pages/EditProduct'));
+const AdminCategories = lazy(() => import('./admin/pages/AdminCategories'));
+const AdminCoupons = lazy(() => import('./admin/pages/AdminCoupons'));
+const AdminCustomers = lazy(() => import('./admin/pages/AdminCustomers'));
+const AdminOrders = lazy(() => import('./admin/pages/AdminOrders'));
+const AdminOrderDetails = lazy(() => import('./admin/pages/AdminOrderDetails'));
+const AdminSettings = lazy(() => import('./admin/pages/AdminSettings'));
 
 function AppContent() {
   const location = useLocation();
@@ -39,6 +39,7 @@ function AppContent() {
     <>
       {!isAdminRoute && <Header />}
       
+      <Suspense fallback={<main className="min-h-screen flex items-center justify-center">Loading…</main>}>
       <Routes>
         {/* Customer Routes */}
         <Route path="/" element={<Home />} />
@@ -67,7 +68,11 @@ function AppContent() {
         <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
         <Route path="/admin/orders/:id" element={<ProtectedRoute><AdminOrderDetails /></ProtectedRoute>} />
         <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
+
+        {/* 404 Catch All */}
+        <Route path="*" element={<NotFound />} />
       </Routes>
+      </Suspense>
 
       {!isAdminRoute && <Footer />}
     </>

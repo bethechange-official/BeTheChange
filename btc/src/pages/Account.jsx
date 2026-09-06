@@ -1,70 +1,60 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Toast } from '../components/ui/Toast';
-import { 
-  User, Package, LogOut, Shield, Check, ShoppingBag, MapPin, 
-  Sparkles, Clock, Truck, ChevronRight, Edit3, Lock, Heart, Award
-} from 'lucide-react';
+import { User, Package, LogOut, Shield, Check, ShoppingBag, MapPin, Sparkles, Truck, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Account() {
-  const { user, logout, updateProfile, getUserOrders } = useAuth();
+  const { user, loading: authLoading, logout, updateProfile, getUserOrders } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('orders');
   const [toast, setToast] = useState(null);
+  const [profileForm, setProfileForm] = useState({
+    name: user?.name || '',
+    phone: user?.phone || '',
+    email: user?.email || '',
+    address: user?.address || '',
+  });
+  const [saved, setSaved] = useState(false);
+
+  if (authLoading) {
+    return <main className="pt-24 min-h-screen flex items-center justify-center bg-[#FAF9F6]">Loading…</main>;
+  }
 
   // Redirect if not logged in
   if (!user) {
-    navigate('/login');
-    return null;
+    return <Navigate to="/login" replace />;
   }
 
   const realOrders = getUserOrders();
 
-  // Mock demo order for empty state richness
-  const demoOrder = {
-    orderId: 'BTC89201452',
-    createdAt: '22 Aug 2026, 04:30 PM',
-    total: 1098,
-    status: 'Delivered',
-    items: [
-      {
-        id: 13,
-        name: 'Pigmentation Serum',
-        quantity: 1,
-        price: 599,
-        images: ['https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=400&q=80']
-      },
-      {
-        id: 2,
-        name: 'Dish Liquid',
-        quantity: 1,
-        price: 499,
-        images: ['https://images.unsplash.com/photo-1563453392212-326f5e854473?w=400&q=80']
-      }
-    ]
-  };
+  const displayOrders = realOrders.map((order) => ({
+    ...order,
+    orderId: order.orderNumber,
+    total: Number(order.totalAmount),
+    status: order.orderStatus,
+    createdAt: new Date(order.createdAt).toLocaleString(),
+    items: (order.items || []).map((item) => ({
+      ...item,
+      name: item.productName,
+      price: Number(item.price),
+      images: item.image ? [item.image] : [],
+    })),
+  }));
 
-  const displayOrders = realOrders.length > 0 ? realOrders : [demoOrder];
-
-  const [profileForm, setProfileForm] = useState({
-    name: user.name || '',
-    phone: user.phone || '+91 98765 43210',
-    email: user.email || '',
-    address: user.address || '12-A Botanical Enclave, Green Park, New Delhi - 110016'
-  });
-
-  const [saved, setSaved] = useState(false);
-
-  const handleProfileSave = (e) => {
+  const handleProfileSave = async (e) => {
     e.preventDefault();
-    updateProfile(profileForm);
-    setSaved(true);
-    setToast('Profile updated successfully');
-    setTimeout(() => setSaved(false), 3000);
+    const result = await updateProfile({ name: profileForm.name, phone: profileForm.phone });
+    if (result.success) {
+      setSaved(true);
+      setToast('Profile updated successfully');
+      setTimeout(() => setSaved(false), 3000);
+    } else {
+      setToast(result.message || 'Profile update failed');
+    }
   };
 
   const handleLogout = () => {
@@ -253,17 +243,9 @@ export default function Account() {
                         ))}
                       </div>
 
-                      {/* Action Bar */}
+                      {/* Fulfilment note */}
                       <div className="pt-3 flex items-center justify-between border-t border-[#F3EFE8]">
-                        <p className="text-xs text-[#8A8580] font-light flex items-center gap-1">
-                          <Clock size={13} /> Estimated Delivery: 2-4 Business Days
-                        </p>
-                        <button
-                          onClick={() => setToast(`Tracking info sent for order ${order.orderId}`)}
-                          className="text-[10px] tracking-[0.2em] uppercase font-semibold text-[#111111] hover:underline"
-                        >
-                          Track Package &rarr;
-                        </button>
+                        <p className="text-xs text-[#8A8580] font-light">Order status is updated manually by our fulfilment team.</p>
                       </div>
                     </motion.div>
                   ))}
@@ -291,7 +273,7 @@ export default function Account() {
                     label="Email Address"
                     type="email"
                     value={profileForm.email}
-                    onChange={e => setProfileForm(f => ({ ...f, email: e.target.value }))}
+                    readOnly
                   />
                   
                   <Input

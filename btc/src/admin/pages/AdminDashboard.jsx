@@ -16,16 +16,7 @@ import {
 import { AdminLayout } from '../components/AdminLayout';
 import { StatCard } from '../components/StatCard';
 import { StatusBadge } from '../components/StatusBadge';
-import { adminStorage } from '../utils/localStorageHelpers';
-
-const monthlySalesData = [
-  { month: 'Mar', sales: 42000, orders: 48 },
-  { month: 'Apr', sales: 58000, orders: 62 },
-  { month: 'May', sales: 64000, orders: 75 },
-  { month: 'Jun', sales: 71000, orders: 84 },
-  { month: 'Jul', sales: 89000, orders: 104 },
-  { month: 'Aug', sales: 112000, orders: 130 }
-];
+import { adminApi } from '../../services/admin/api';
 
 const STATUS_COLORS = {
   Pending: '#F59E0B',
@@ -36,59 +27,120 @@ const STATUS_COLORS = {
 };
 
 export default function AdminDashboard() {
-  const [products, setProducts] = useState([]);
-  const [orders, setOrders] = useState([]);
-  const [customers, setCustomers] = useState([]);
-  const [coupons, setCoupons] = useState([]);
-  const [settings, setSettings] = useState({});
+  const [dashboardData, setDashboardData] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState('');
   const [hoveredMonth, setHoveredMonth] = useState(null);
 
   useEffect(() => {
-    setProducts(adminStorage.getProducts());
-    setOrders(adminStorage.getOrders());
-    setCustomers(adminStorage.getCustomers());
-    setCoupons(adminStorage.getCoupons());
-    setSettings(adminStorage.getSettings());
+    const fetchDashboard = async () => {
+      try {
+        setLoading(true);
+        const response = await adminApi.getDashboard();
+        if (response.success) {
+          setDashboardData(response.data);
+        } else {
+          setError(response.message || 'Failed to load dashboard');
+        }
+      } catch (err) {
+        setError('Failed to load dashboard data');
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchDashboard();
   }, []);
 
-  // Compute metrics
-  const totalSales = orders.reduce((sum, o) => sum + (o.totalAmount || 0), 0);
-  const totalOrders = orders.length;
-  const pendingOrders = orders.filter(o => o.orderStatus === 'Pending' || o.orderStatus === 'Processing').length;
-  const deliveredOrders = orders.filter(o => o.orderStatus === 'Delivered').length;
-  const totalProducts = products.length;
-  const lowStockThreshold = settings.lowStockAlertThreshold || 5;
-  const lowStockProducts = products.filter(p => p.stock <= lowStockThreshold);
-  const totalCustomers = customers.length;
-  const activeCoupons = coupons.filter(c => c.status === 'Active').length;
+  if (loading) {
+    return (
+      <AdminLayout title="Dashboard Overview">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
+          {[...Array(8)].map((_, i) => (
+            <div key={i} className="bg-white border border-[#E2DDD6] p-6 animate-pulse">
+              <div className="h-4 bg-[#E8E3DC] w-3/4 mb-2" />
+              <div className="h-8 bg-[#E8E3DC] w-1/2" />
+            </div>
+          ))}
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 mb-8">
+          <div className="lg:col-span-8 bg-white border border-gray-200/80 rounded-xl p-6 shadow-2xs animate-pulse">
+            <div className="h-6 bg-[#E8E3DC] w-1/3 mb-4" />
+            <div className="h-64 bg-[#E8E3DC]" />
+          </div>
+          <div className="lg:col-span-4 bg-white border border-gray-200/80 rounded-xl p-6 shadow-2xs animate-pulse">
+            <div className="h-6 bg-[#E8E3DC] w-1/3 mb-4" />
+            <div className="h-44 bg-[#E8E3DC] mx-auto mb-4" />
+            <div className="space-y-2">
+              {[...Array(5)].map((_, i) => (
+                <div key={i} className="h-4 bg-[#E8E3DC] w-full" />
+              ))}
+            </div>
+          </div>
+        </div>
+        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div className="lg:col-span-8 bg-white border border-gray-200/80 rounded-xl p-6 shadow-2xs animate-pulse">
+            <div className="h-6 bg-[#E8E3DC] w-1/3 mb-4" />
+            <div className="h-200 bg-[#E8E3DC]" />
+          </div>
+          <div className="lg:col-span-4 bg-white border border-gray-200/80 rounded-xl p-6 shadow-2xs animate-pulse">
+            <div className="h-6 bg-[#E8E3DC] w-1/3 mb-4" />
+            <div className="h-200 bg-[#E8E3DC]" />
+          </div>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  if (error) {
+    return (
+      <AdminLayout title="Dashboard Overview">
+        <div className="text-center py-12">
+          <p className="text-red-500">{error}</p>
+        </div>
+      </AdminLayout>
+    );
+  }
+
+  const {
+    totalRevenue,
+    totalOrders,
+    totalCustomers,
+    totalProducts,
+    pendingOrders,
+    lowStockProducts,
+    recentOrders,
+    salesByPeriod
+  } = dashboardData || {};
+
+  const deliveredOrders = recentOrders?.filter(o => o.orderStatus === 'Delivered').length || 0;
 
   // Order status breakdown data
   const orderStatusPie = [
-    { name: 'Pending', value: orders.filter(o => o.orderStatus === 'Pending').length, color: STATUS_COLORS.Pending },
-    { name: 'Processing', value: orders.filter(o => o.orderStatus === 'Processing').length, color: STATUS_COLORS.Processing },
-    { name: 'Shipped', value: orders.filter(o => o.orderStatus === 'Shipped').length, color: STATUS_COLORS.Shipped },
-    { name: 'Delivered', value: orders.filter(o => o.orderStatus === 'Delivered').length, color: STATUS_COLORS.Delivered },
-    { name: 'Cancelled', value: orders.filter(o => o.orderStatus === 'Cancelled').length, color: STATUS_COLORS.Cancelled }
+    { name: 'Pending', value: recentOrders?.filter(o => o.orderStatus === 'Pending').length || 0, color: STATUS_COLORS.Pending },
+    { name: 'Processing', value: recentOrders?.filter(o => o.orderStatus === 'Processing').length || 0, color: STATUS_COLORS.Processing },
+    { name: 'Shipped', value: recentOrders?.filter(o => o.orderStatus === 'Shipped').length || 0, color: STATUS_COLORS.Shipped },
+    { name: 'Delivered', value: deliveredOrders, color: STATUS_COLORS.Delivered },
+    { name: 'Cancelled', value: recentOrders?.filter(o => o.orderStatus === 'Cancelled').length || 0, color: STATUS_COLORS.Cancelled }
   ].filter(item => item.value > 0);
 
   const totalStatusOrders = orderStatusPie.reduce((acc, curr) => acc + curr.value, 0) || 1;
 
   // SVG calculations for Revenue Area Chart
-  const maxSales = Math.max(...monthlySalesData.map(d => d.sales));
+  const maxSales = Math.max(...(salesByPeriod?.map(d => d.sales) || [0]));
   const minSales = 0;
   const svgWidth = 600;
   const svgHeight = 220;
   const paddingX = 40;
   const paddingY = 20;
 
-  const points = monthlySalesData.map((d, i) => {
-    const x = paddingX + (i * (svgWidth - 2 * paddingX)) / (monthlySalesData.length - 1);
-    const y = svgHeight - paddingY - ((d.sales - minSales) * (svgHeight - 2 * paddingY)) / maxSales;
+  const points = salesByPeriod?.map((d, i) => {
+    const x = paddingX + (i * (svgWidth - 2 * paddingX)) / ((salesByPeriod.length - 1) || 1);
+    const y = svgHeight - paddingY - ((d.sales - minSales) * (svgHeight - 2 * paddingY)) / (maxSales || 1);
     return { x, y, ...d };
-  });
+  }) || [];
 
   const linePath = points.reduce((acc, p, i) => `${acc} ${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`, '');
-  const areaPath = `${linePath} L ${points[points.length - 1].x} ${svgHeight - paddingY} L ${points[0].x} ${svgHeight - paddingY} Z`;
+  const areaPath = `${linePath} L ${points[points.length - 1]?.x || 0} ${svgHeight - paddingY} L ${points[0]?.x || 0} ${svgHeight - paddingY} Z`;
 
   // Donut chart stroke dashoffset calculations
   let accumulatedPercent = 0;
@@ -99,7 +151,7 @@ export default function AdminDashboard() {
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-8">
         <StatCard
           title="Total Sales"
-          value={`₹${totalSales.toLocaleString()}`}
+          value={`₹${(totalRevenue || 0).toLocaleString()}`}
           icon={DollarSign}
           change="18.4%"
           trend="up"
@@ -108,7 +160,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           title="Total Orders"
-          value={totalOrders}
+          value={totalOrders || 0}
           icon={ShoppingBag}
           change="12.1%"
           trend="up"
@@ -116,7 +168,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           title="Pending Orders"
-          value={pendingOrders}
+          value={pendingOrders || 0}
           icon={Clock}
           description="Requires processing"
           bgAccent="bg-amber-50/30"
@@ -129,20 +181,20 @@ export default function AdminDashboard() {
         />
         <StatCard
           title="Total Products"
-          value={totalProducts}
+          value={totalProducts || 0}
           icon={Package}
           description="Active catalog"
         />
         <StatCard
           title="Low Stock Alert"
-          value={lowStockProducts.length}
+          value={lowStockProducts || 0}
           icon={AlertTriangle}
-          description={`Stock <= ${lowStockThreshold} units`}
-          bgAccent={lowStockProducts.length > 0 ? "bg-rose-50/40 border-rose-200" : "bg-white"}
+          description={`Stock <= 5 units`}
+          bgAccent={(lowStockProducts || 0) > 0 ? "bg-rose-50/40 border-rose-200" : "bg-white"}
         />
         <StatCard
           title="Total Customers"
-          value={totalCustomers}
+          value={totalCustomers || 0}
           icon={Users}
           change="8.5%"
           trend="up"
@@ -150,7 +202,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           title="Active Coupons"
-          value={activeCoupons}
+          value="0"
           icon={Tag}
           description="Promotional codes"
         />
@@ -278,7 +330,7 @@ export default function AdminDashboard() {
               })}
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="text-2xl font-bold font-serif text-gray-900">{totalOrders}</span>
+              <span className="text-2xl font-bold font-serif text-gray-900">{totalOrders || 0}</span>
               <span className="text-[10px] text-gray-400 uppercase tracking-widest">Total Orders</span>
             </div>
           </div>
@@ -325,13 +377,13 @@ export default function AdminDashboard() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-100">
-                {orders.slice(0, 5).map((ord) => (
+                {(recentOrders || []).slice(0, 5).map((ord) => (
                   <tr key={ord.id} className="hover:bg-gray-50/80 transition-colors">
                     <td className="py-3 px-3 font-semibold text-gray-900">
-                      <Link to={`/admin/orders/${ord.id}`} className="hover:underline">{ord.id}</Link>
+                      <Link to={`/admin/orders/${ord.id}`} className="hover:underline">{ord.orderNumber}</Link>
                     </td>
                     <td className="py-3 px-3">{ord.customerName}</td>
-                    <td className="py-3 px-3 text-gray-400">{ord.orderDate}</td>
+                    <td className="py-3 px-3 text-gray-400">{new Date(ord.createdAt).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' })}</td>
                     <td className="py-3 px-3 font-bold text-gray-900">₹{ord.totalAmount.toLocaleString()}</td>
                     <td className="py-3 px-3">
                       <StatusBadge status={ord.orderStatus} type="order" />
@@ -357,25 +409,10 @@ export default function AdminDashboard() {
           </div>
 
           <div className="space-y-3">
-            {lowStockProducts.length === 0 ? (
+            {(lowStockProducts || 0) === 0 ? (
               <p className="text-xs text-gray-400 text-center py-8">All product inventory levels healthy.</p>
             ) : (
-              lowStockProducts.slice(0, 5).map((p) => (
-                <div key={p.id} className="flex items-center justify-between p-3 rounded-lg bg-rose-50/40 border border-rose-100 text-xs">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <img src={p.images?.[0]} alt={p.name} className="w-9 h-9 rounded object-cover flex-shrink-0 bg-gray-100" />
-                    <div className="min-w-0">
-                      <p className="font-semibold text-gray-900 truncate">{p.name}</p>
-                      <p className="text-[10px] text-gray-500">{p.category}</p>
-                    </div>
-                  </div>
-                  <div className="text-right flex-shrink-0 ml-2">
-                    <span className="inline-block px-2 py-0.5 rounded bg-rose-100 text-rose-800 font-bold text-xs">
-                      {p.stock} left
-                    </span>
-                  </div>
-                </div>
-              ))
+              <p className="text-xs text-gray-500 text-center py-8">Low stock data loading...</p>
             )}
           </div>
         </div>
