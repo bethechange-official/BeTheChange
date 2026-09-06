@@ -13,6 +13,7 @@ const startServer = async (): Promise<void> => {
     server = app.listen(env.PORT, () => {
       console.log(`Server running on port ${env.PORT} in ${env.NODE_ENV} mode`);
       console.log(`Health check: http://localhost:${env.PORT}/api/health`);
+      console.log(`Ready: http://localhost:${env.PORT}/api/ready`);
     });
   } catch (error) {
     console.error("Failed to start server:", error);
