@@ -18,12 +18,14 @@ const SETTINGS_TTL = 60_000;
 export const getCachedSettings = async (keys: string[]): Promise<Record<string, string>> => {
   const now = Date.now();
   if (settingsCache && now - settingsCacheTime < SETTINGS_TTL) {
-    return Object.fromEntries(keys.map((k) => [k, settingsCache![k] ?? "0"]));
+    const cache = settingsCache;
+    return Object.fromEntries(keys.map((k) => [k, cache[k] ?? "0"]));
   }
   const rows = await prisma.setting.findMany();
   settingsCache = Object.fromEntries(rows.map((r) => [r.key, r.value]));
   settingsCacheTime = now;
-  return Object.fromEntries(keys.map((k) => [k, settingsCache[k] ?? "0"]));
+  const cache = settingsCache;
+  return Object.fromEntries(keys.map((k) => [k, cache[k] ?? "0"]));
 };
 
 export const invalidateSettingsCache = () => {
