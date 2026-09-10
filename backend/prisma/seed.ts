@@ -29,11 +29,11 @@ async function main() {
 
   const categories = [
     { name: "Uncategorized", slug: "uncategorized", description: "Products awaiting categorization.", imageUrl: null },
-    { name: "Skin Care Products", slug: "skin-care-products", description: "Botanical serums, cleansers, and moisturizers.", imageUrl: "https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80" },
+    { name: "Skin Care Products", slug: "skin-care-products", description: "Botanical serums, cleansers, and moisturizers.", imageUrl: null },
     { name: "Glycerin Soaps", slug: "glycerin-soaps", description: "Gentle cleansing bars for everyday use.", imageUrl: null },
-    { name: "Cold Process Soaps", slug: "cold-process-soaps", description: "Artisan handcrafted soap bars rich in natural oils.", imageUrl: "https://images.unsplash.com/photo-1607006344380-b6775a0824a7?w=600&q=80" },
-    { name: "Hair Care Products", slug: "hair-care-products", description: "Ayurvedic scalp oils, herbal cleansers, and follicle stimulants.", imageUrl: "https://images.unsplash.com/photo-1522337360788-8b13dee7a37e?w=600&q=80" },
-    { name: "Household Products", slug: "household-products", description: "Non-toxic, bio-degradable eco-friendly cleaning liquid refills.", imageUrl: "https://images.unsplash.com/photo-1585421514284-efb74c2b69ba?w=600&q=80" },
+    { name: "Cold Process Soaps", slug: "cold-process-soaps", description: "Artisan handcrafted soap bars rich in natural oils.", imageUrl: null },
+    { name: "Hair Care Products", slug: "hair-care-products", description: "Ayurvedic scalp oils, herbal cleansers, and follicle stimulants.", imageUrl: null },
+    { name: "Household Products", slug: "household-products", description: "Non-toxic, bio-degradable eco-friendly cleaning liquid refills.", imageUrl: null },
   ];
 
   for (const cat of categories) {
@@ -82,6 +82,66 @@ async function main() {
     });
   }
   console.log("Settings seeded");
+
+  // Category name mapping from catalog JSON to DB category names
+  const categoryMap: Record<string, string> = {
+    "Household": "Household Products",
+    "Skincare": "Skin Care Products",
+    "Haircare": "Hair Care Products",
+    "Glycerin Soaps": "Glycerin Soaps",
+    "Cold Process Soaps": "Cold Process Soaps",
+  };
+
+  const catalogProducts = JSON.parse(
+    require("fs").readFileSync(
+      require("path").join(__dirname, "../../btc_website_catalog/data/products.json"),
+      "utf-8"
+    )
+  );
+
+  const BASE_IMAGE_URL = "https://api.bethechangeorga.com/uploads/products/";
+
+  for (const p of catalogProducts) {
+    const categoryName = categoryMap[p.category] ?? "Uncategorized";
+    const imageUrl = `${BASE_IMAGE_URL}${p.slug}.webp`;
+
+    await prisma.product.upsert({
+      where: { slug: p.slug },
+      update: {
+        name: p.name,
+        price: p.price,
+        shortDescription: p.shortDescription,
+        description: p.description,
+        benefits: p.benefits?.join("\n") ?? null,
+        usageInstructions: p.howToUse || null,
+        size: p.quantity,
+        category: categoryName,
+        stock: 100,
+        isActive: true,
+        images: {
+          deleteMany: {},
+          create: [{ url: imageUrl, altText: p.name, sortOrder: 0 }],
+        },
+      },
+      create: {
+        name: p.name,
+        slug: p.slug,
+        price: p.price,
+        shortDescription: p.shortDescription,
+        description: p.description,
+        benefits: p.benefits?.join("\n") ?? null,
+        usageInstructions: p.howToUse || null,
+        size: p.quantity,
+        category: categoryName,
+        stock: 100,
+        isActive: true,
+        images: {
+          create: [{ url: imageUrl, altText: p.name, sortOrder: 0 }],
+        },
+      },
+    });
+  }
+  console.log(`Products seeded: ${catalogProducts.length}`);
 
   console.log("Seeding completed!");
 }
