@@ -24,7 +24,6 @@ export const adminLogin = async (req: AuthenticatedRequest, res: Response): Prom
       throw new AppError("Account is deactivated", 403);
     }
 
-    clearFailedLogin(ip);
     const { accessToken, refreshToken } = generateTokens(admin.id, "admin");
 
     await prisma.admin.update({
