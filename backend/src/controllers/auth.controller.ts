@@ -1,7 +1,7 @@
 import { Response } from "express";
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
-import { prisma, checkLoginAttempts, recordFailedLogin, clearFailedLogin, invalidateIdentityCache } from "../config/db";
+import { prisma, invalidateIdentityCache } from "../config/db";
 import { env } from "../config/env";
 import { AuthenticatedRequest, generateTokens } from "../middleware/auth.middleware";
 import { successResponse, errorResponse } from "../utils/apiResponse";
@@ -10,9 +10,6 @@ import { refreshCookieOptions } from "../utils/cookies";
 
 export const adminLogin = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const ip = req.ip ?? "unknown";
-    checkLoginAttempts(ip);
-
     const { email, password } = req.body;
 
     const admin = await prisma.admin.findUnique({
@@ -20,7 +17,6 @@ export const adminLogin = async (req: AuthenticatedRequest, res: Response): Prom
     });
 
     if (!admin || !(await bcrypt.compare(password, admin.passwordHash))) {
-      recordFailedLogin(ip);
       throw new AppError("Invalid email or password", 401);
     }
 
@@ -50,10 +46,6 @@ export const adminLogin = async (req: AuthenticatedRequest, res: Response): Prom
   } catch (error) {
     if (error instanceof AppError) {
       errorResponse(res, error.message, error.statusCode);
-      return;
-    }
-    if (error instanceof Error && error.message.includes("Too many failed")) {
-      errorResponse(res, error.message, 429);
       return;
     }
     console.error("Admin login error:", error);

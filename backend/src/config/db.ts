@@ -59,26 +59,3 @@ export const invalidateIdentityCache = (id: string, type: "admin" | "user") => {
   identityCache.delete(`${type}:${id}`);
 };
 
-// Failed login attempt tracking (in-memory, per IP)
-const failedAttempts = new Map<string, { count: number; lockedUntil: number }>();
-const MAX_FAILED = 5;
-const LOCKOUT_MS = 15 * 60 * 1000; // 15 minutes
-
-export const checkLoginAttempts = (ip: string): void => {
-  const entry = failedAttempts.get(ip);
-  if (entry && Date.now() < entry.lockedUntil) {
-    const mins = Math.ceil((entry.lockedUntil - Date.now()) / 60000);
-    throw new Error(`Too many failed attempts. Try again in ${mins} minute(s).`);
-  }
-};
-
-export const recordFailedLogin = (ip: string): void => {
-  const entry = failedAttempts.get(ip) ?? { count: 0, lockedUntil: 0 };
-  entry.count += 1;
-  if (entry.count >= MAX_FAILED) entry.lockedUntil = Date.now() + LOCKOUT_MS;
-  failedAttempts.set(ip, entry);
-};
-
-export const clearFailedLogin = (ip: string): void => {
-  failedAttempts.delete(ip);
-};

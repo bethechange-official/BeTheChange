@@ -1,7 +1,7 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
 import { Response } from "express";
-import { prisma, checkLoginAttempts, recordFailedLogin, clearFailedLogin } from "../config/db";
+import { prisma } from "../config/db";
 import { env } from "../config/env";
 import { AuthenticatedRequest, generateTokens } from "../middleware/auth.middleware";
 import { AppError } from "../middleware/error.middleware";
@@ -50,21 +50,14 @@ export const registerCustomer = async (req: AuthenticatedRequest, res: Response)
 
 export const loginCustomer = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
-    const ip = req.ip ?? "unknown";
-    checkLoginAttempts(ip);
     const user = await prisma.user.findUnique({ where: { email: String(req.body.email).trim().toLowerCase() } });
     if (!user || !(await bcrypt.compare(String(req.body.password), user.passwordHash))) {
-      recordFailedLogin(ip);
       throw new AppError("Invalid email or password", 401);
     }
     if (!user.isActive) throw new AppError("Account is deactivated", 403);
-    clearFailedLogin(ip);
     await authenticate(req, res, user);
   } catch (error) {
     if (error instanceof AppError) return void errorResponse(res, error.message, error.statusCode);
-    if (error instanceof Error && error.message.includes("Too many failed")) {
-      return void errorResponse(res, error.message, 429);
-    }
     throw error;
   }
 };
