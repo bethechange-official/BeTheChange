@@ -14,9 +14,6 @@ jobs:
   build-backend:
     name: Build & Validate Backend
     runs-on: ubuntu-latest
-    if: |
-      contains(join(github.event.commits.*.modified, ','), 'backend/') ||
-      contains(join(github.event.commits.*.added, ','), 'backend/')
     permissions:
       contents: read
     steps:
@@ -62,9 +59,6 @@ jobs:
   build-frontend:
     name: Build & Validate Frontend
     runs-on: ubuntu-latest
-    if: |
-      contains(join(github.event.commits.*.modified, ','), 'btc/') ||
-      contains(join(github.event.commits.*.added, ','), 'btc/')
     permissions:
       contents: read
     steps:
