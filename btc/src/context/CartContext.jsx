@@ -16,7 +16,8 @@ function cartReducer(state, action) {
         itemTotal: item.price * item.quantity,
       })) || [];
       const subtotal = items.reduce((sum, i) => sum + i.price * i.qty, 0);
-      return { ...state, items, subtotal, coupon: null, discount: 0, couponError: null };
+      // Preserve existing coupon/discount when reloading cart
+      return { ...state, items, subtotal };
     }
     case 'ADD_ITEM': {
       const items = [...state.items];

@@ -60,7 +60,14 @@ export default function Checkout() {
     }
   }, [user]);
 
-  const set = (k, v) => setForm(f => ({ ...f, [k]: v }));
+  const set = (k, v) => {
+    setForm(f => ({ ...f, [k]: v }));
+    // If user manually edits address fields, deselect the saved address
+    const addressFields = ['addressLine1', 'addressLine2', 'city', 'state', 'pincode'];
+    if (addressFields.includes(k)) {
+      setSelectedAddressId('');
+    }
+  };
 
   const handleAddressSelect = (address) => {
     setSelectedAddressId(address.id);
@@ -155,6 +162,11 @@ export default function Checkout() {
         )}
 
         <form onSubmit={handleSubmit}>
+          {errors.submit && (
+            <div className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-sm font-light">
+              {errors.submit}
+            </div>
+          )}
           <div className="grid lg:grid-cols-3 gap-10 lg:gap-16">
             {/* Form */}
             <div className="lg:col-span-2 space-y-10">

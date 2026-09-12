@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Navigate, useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Input } from '../components/ui/Input';
@@ -6,12 +6,14 @@ import { Button } from '../components/ui/Button';
 import { Toast } from '../components/ui/Toast';
 import { User, Package, LogOut, Shield, Check, ShoppingBag, MapPin, Sparkles, Truck, Award } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { addressService } from '../services/addressService';
 
 export default function Account() {
   const { user, loading: authLoading, logout, updateProfile, getUserOrders } = useAuth();
   const navigate = useNavigate();
   const [activeTab, setActiveTab] = useState('orders');
   const [toast, setToast] = useState(null);
+  const [savedAddresses, setSavedAddresses] = useState([]);
   const [profileForm, setProfileForm] = useState({
     name: user?.name || '',
     phone: user?.phone || '',
@@ -19,6 +21,13 @@ export default function Account() {
     address: user?.address || '',
   });
   const [saved, setSaved] = useState(false);
+
+  useEffect(() => {
+    if (!user || activeTab !== 'addresses') return;
+    addressService.getAddresses()
+      .then(r => { if (r.success) setSavedAddresses(r.data.addresses); })
+      .catch(() => undefined);
+  }, [activeTab, user]);
 
   if (authLoading) {
     return <main className="pt-24 min-h-screen flex items-center justify-center bg-[#FAF9F6]">Loading…</main>;
@@ -307,31 +316,31 @@ export default function Account() {
                     <h2 className="font-serif text-2xl text-[#111111]">Saved Delivery Addresses</h2>
                     <p className="text-xs text-[#8A8580] mt-1 font-light">Manage your default shipping destinations for fast checkout.</p>
                   </div>
-                  <button
-                    onClick={() => setToast('Address manager opened')}
-                    className="inline-flex items-center gap-1.5 px-4 py-2 border border-[#111111] text-[#111111] hover:bg-[#111111] hover:text-white text-[10px] tracking-[0.2em] uppercase font-semibold transition-all"
-                  >
-                    + Add New Address
-                  </button>
                 </div>
 
-                <div className="grid sm:grid-cols-2 gap-6">
-                  <div className="bg-white border border-[#111111] p-6 space-y-3 relative">
-                    <span className="absolute top-4 right-4 text-[9px] tracking-widest uppercase font-semibold px-2 py-0.5 bg-[#111111] text-white">
-                      DEFAULT
-                    </span>
-                    <p className="font-serif text-lg text-[#111111]">{user.name}</p>
-                    <p className="text-xs text-[#555555] font-light leading-relaxed">
-                      {profileForm.address}
-                    </p>
-                    <p className="text-xs text-[#8A8580] font-light">Phone: {profileForm.phone}</p>
-                    <div className="pt-3 border-t border-[#F3EFE8] flex items-center gap-4">
-                      <button onClick={() => setActiveTab('profile')} className="text-[10px] tracking-widest uppercase font-semibold text-[#111111] underline">
-                        Edit
-                      </button>
-                    </div>
+                {savedAddresses.length === 0 ? (
+                  <div className="bg-white border border-[#E2DDD6] p-8 text-center">
+                    <p className="text-sm text-[#8A8580] font-light">No saved addresses yet. Add one during checkout.</p>
                   </div>
-                </div>
+                ) : (
+                  <div className="grid sm:grid-cols-2 gap-6">
+                    {savedAddresses.map(addr => (
+                      <div key={addr.id} className={`bg-white border p-6 space-y-2 relative ${addr.isDefault ? 'border-[#111111]' : 'border-[#E2DDD6]'}`}>
+                        {addr.isDefault && (
+                          <span className="absolute top-4 right-4 text-[9px] tracking-widest uppercase font-semibold px-2 py-0.5 bg-[#111111] text-white">
+                            DEFAULT
+                          </span>
+                        )}
+                        <p className="font-serif text-lg text-[#111111]">{addr.name}</p>
+                        <p className="text-xs text-[#555555] font-light leading-relaxed">
+                          {addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ''}
+                        </p>
+                        <p className="text-xs text-[#555555] font-light">{addr.city}, {addr.state} — {addr.pincode}</p>
+                        <p className="text-xs text-[#8A8580] font-light">Phone: {addr.phone}</p>
+                      </div>
+                    ))}
+                  </div>
+                )}
               </div>
             )}
 
@@ -377,17 +386,11 @@ export default function Account() {
               <div className="bg-white border border-[#E2DDD6] p-8 md:p-10 space-y-6 shadow-2xs">
                 <div>
                   <h2 className="font-serif text-2xl md:text-3xl text-[#111111]">Security & Account Controls</h2>
-                  <p className="text-xs text-[#8A8580] mt-1 font-light">Update password and manage session permissions.</p>
+                  <p className="text-xs text-[#8A8580] mt-1 font-light">Manage your session and account access.</p>
                 </div>
 
-                <div className="border-t border-[#F3EFE8] pt-6 space-y-5 max-w-lg">
-                  <Input label="Current Password" type="password" placeholder="••••••••" />
-                  <Input label="New Password" type="password" placeholder="••••••••" />
-                  <Input label="Confirm New Password" type="password" placeholder="••••••••" />
-
-                  <Button type="button" onClick={() => setToast('Password updated successfully')} size="md">
-                    Update Password
-                  </Button>
+                <div className="border-t border-[#F3EFE8] pt-6">
+                  <p className="text-xs text-[#8A8580] font-light">Password changes are not available from the account portal. Please contact support if you need to reset your password.</p>
                 </div>
 
                 <div className="border-t border-[#F3EFE8] pt-8 mt-8">

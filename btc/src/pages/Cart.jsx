@@ -2,18 +2,14 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
-import { useAuth } from '../context/AuthContext';
 import { QuantitySelector } from '../components/ui/QuantitySelector';
 import { Button } from '../components/ui/Button';
-import { CheckoutAuthModal } from '../components/cart/CheckoutAuthModal';
 
 export default function Cart() {
   const { items, subtotal, total, discount, shippingFee, coupon, couponError, applyCoupon, removeCoupon, updateQuantity, removeFromCart } = useCart();
-  const { user } = useAuth();
   const navigate = useNavigate();
   
   const [couponInput, setCouponInput] = useState('');
-  const [authModalOpen, setAuthModalOpen] = useState(false);
 
   const handleApplyCoupon = async () => {
     if (!couponInput.trim()) return;
@@ -22,11 +18,7 @@ export default function Cart() {
 
   const handleProceedCheckout = (e) => {
     e.preventDefault();
-    if (user) {
-      navigate('/checkout');
-    } else {
-      setAuthModalOpen(true);
-    }
+    navigate('/checkout');
   };
 
   if (items.length === 0) {
@@ -162,11 +154,6 @@ export default function Cart() {
           </div>
         </div>
       </div>
-
-      <CheckoutAuthModal
-        isOpen={authModalOpen}
-        onClose={() => setAuthModalOpen(false)}
-      />
     </main>
   );
 }
