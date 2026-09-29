@@ -4,7 +4,7 @@ export const customerRegisterSchema = z.object({
   body: z.object({
     name: z.string().min(2, "Name must be at least 2 characters long"),
     email: z.string().email("Invalid email address"),
-    phone: z.string().min(10, "Phone number must be at least 10 digits").optional(),
+    phone: z.string().min(10, "Phone number must be at least 10 digits").optional().nullable(),
     password: z.string().min(8, "Password must be at least 8 characters long").max(128),
   }),
 });
@@ -18,7 +18,7 @@ export const customerLoginSchema = z.object({
 
 export const customerUpdateProfileSchema = z.object({
   body: z.object({
-    name: z.string().min(2, "Name must be at least 2 characters long").optional(),
-    phone: z.string().min(10, "Phone number must be at least 10 digits").optional(),
+    name: z.string().min(2, "Name must be at least 2 characters long").optional().nullable(),
+    phone: z.string().min(10, "Phone number must be at least 10 digits").optional().nullable(),
   }),
 });
