@@ -72,7 +72,7 @@ export default function OrderSuccess() {
             </div>
             {discount > 0 && (
               <div className="flex justify-between text-sm text-green-700">
-                <span>Discount</span>
+                <span>Coupon Discount{state.couponCode ? ` (${state.couponCode})` : ''}</span>
                 <span>-₹{discount.toLocaleString()}</span>
               </div>
             )}

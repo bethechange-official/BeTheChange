@@ -5,6 +5,7 @@ import { AdminLayout } from '../components/AdminLayout';
 import { DataTable } from '../components/DataTable';
 import { StatusBadge } from '../components/StatusBadge';
 import { adminOrderService } from '../../services/admin/orderService';
+import { StatusSelect, ORDER_STATUS_LABELS } from '../components/OrderStatusSelect';
 
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
@@ -48,37 +49,25 @@ export default function AdminOrders() {
     fetchOrders();
   }, [fetchOrders]);
 
-  const handleUpdateOrderStatus = async (orderId, newStatus) => {
-    setLoading(true);
+  // Only the row being changed is locked; the rest of the table stays usable.
+  const [updatingId, setUpdatingId] = useState(null);
+
+  const handleUpdateOrderStatus = async (order, newStatus) => {
+    setUpdatingId(order.id);
+    setError('');
     try {
-      const response = await adminOrderService.updateStatus(orderId, { orderStatus: newStatus });
-      if (response.success) {
-        setOrders(prev => prev.map(o => o.id === orderId ? { ...o, orderStatus: newStatus } : o));
-        setToastMsg(`Order ${orderId} updated to ${newStatus}`);
-        setTimeout(() => setToastMsg(''), 3000);
-      } else {
-        setError(response.message);
-        fetchOrders(); // Refresh to reset UI
-      }
+      const response = await adminOrderService.updateStatus(order.id, { orderStatus: newStatus });
+      // Use the server's copy: it carries the new allowed transitions (and any payment change, e.g. refunds).
+      setOrders(prev => prev.map(o => o.id === order.id ? { ...o, ...response.data } : o));
+      setToastMsg(`Order ${order.orderNumber} updated to ${ORDER_STATUS_LABELS[newStatus] || newStatus}`);
+      setTimeout(() => setToastMsg(''), 3000);
     } catch (err) {
-      setError(err.message || 'Failed to update order');
-      fetchOrders(); // Refresh to reset UI
+      setError(`Order ${order.orderNumber}: ${err.message || 'Failed to update order'}`);
+      fetchOrders();
     } finally {
-      setLoading(false);
+      setUpdatingId(null);
     }
   };
-
-  const filteredOrders = orders.filter(o => {
-    const query = search.toLowerCase();
-    const matchesSearch = o.id.toLowerCase().includes(query) ||
-                          o.customerName.toLowerCase().includes(query) ||
-                          o.customerEmail.toLowerCase().includes(query);
-
-    const matchesOrderStatus = orderStatusFilter === 'ALL' || o.orderStatus === orderStatusFilter;
-    const matchesPaymentStatus = paymentStatusFilter === 'ALL' || o.paymentStatus === paymentStatusFilter;
-
-    return matchesSearch && matchesOrderStatus && matchesPaymentStatus;
-  });
 
   const columns = [
     {
@@ -138,20 +127,15 @@ export default function AdminOrders() {
     {
       header: 'Order Status',
       cell: (row) => (
-        <select
+        <StatusSelect
           value={row.orderStatus}
-          onChange={(e) => handleUpdateOrderStatus(row.id, e.target.value)}
-          disabled={loading}
-          className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-900 focus:outline-none focus:border-gray-900 font-medium disabled:opacity-50"
-        >
-          <option value="PENDING">Pending</option>
-          <option value="CONFIRMED">Confirmed</option>
-          <option value="PROCESSING">Processing</option>
-          <option value="SHIPPED">Shipped</option>
-          <option value="DELIVERED">Delivered</option>
-          <option value="CANCELLED">Cancelled</option>
-          <option value="REFUNDED">Refunded</option>
-        </select>
+          allowed={row.allowedOrderStatuses}
+          labels={ORDER_STATUS_LABELS}
+          onChange={(next) => handleUpdateOrderStatus(row, next)}
+          disabled={updatingId === row.id}
+          ariaLabel={`Order status for ${row.orderNumber}`}
+          className="bg-white border border-gray-200 rounded-lg px-2 py-1 text-xs text-gray-900 focus:outline-none focus:border-gray-900 font-medium"
+        />
       )
     },
     {
@@ -186,16 +170,16 @@ export default function AdminOrders() {
 
       <DataTable
         columns={columns}
-        data={filteredOrders}
+        data={orders}
         searchPlaceholder="Search order ID or customer name..."
         searchValue={search}
-        onSearchChange={setSearch}
+        onSearchChange={(value) => { setSearch(value); setPagination(prev => ({ ...prev, page: 1 })); }}
         loading={loading}
         filterComponent={
           <div className="flex items-center gap-2 flex-wrap">
             <select
               value={orderStatusFilter}
-              onChange={(e) => setOrderStatusFilter(e.target.value)}
+              onChange={(e) => { setOrderStatusFilter(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
               disabled={loading}
               className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900 disabled:opacity-50"
             >
@@ -211,7 +195,7 @@ export default function AdminOrders() {
 
             <select
               value={paymentStatusFilter}
-              onChange={(e) => setPaymentStatusFilter(e.target.value)}
+              onChange={(e) => { setPaymentStatusFilter(e.target.value); setPagination(prev => ({ ...prev, page: 1 })); }}
               disabled={loading}
               className="bg-white border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-700 focus:outline-none focus:border-gray-900 disabled:opacity-50"
             >
@@ -225,6 +209,8 @@ export default function AdminOrders() {
         }
         pagination={{
           currentPage: pagination.page,
+          total: pagination.total,
+          limit: pagination.limit,
           totalPages: pagination.totalPages,
           onPageChange: (page) => setPagination(prev => ({ ...prev, page: page })),
         }}

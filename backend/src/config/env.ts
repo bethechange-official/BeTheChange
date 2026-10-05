@@ -20,6 +20,16 @@ const schema = z.object({
   PUBLIC_STORAGE_URL: z.string().url().optional(),
   COOKIE_DOMAIN: z.string().optional(),
   TRUST_PROXY: z.coerce.number().int().min(0).default(1),
+  // WhatsApp Business Cloud API (Meta) — admin notification for every new order. Off until token + phone ID are set.
+  // Empty values (e.g. copied blank from .env.example) mean "not configured", not an invalid config.
+  WHATSAPP_ACCESS_TOKEN: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
+  WHATSAPP_PHONE_NUMBER_ID: z.preprocess((v) => (v === "" ? undefined : v), z.string().min(1).optional()),
+  ADMIN_WHATSAPP_NUMBER: z.string().regex(/^\d{10,15}$/, "ADMIN_WHATSAPP_NUMBER must be digits with country code, e.g. 916300836017").default("916300836017"),
+  // "template" works any time (needs an approved template); "text" only within 24h of the admin messaging the business number.
+  WHATSAPP_MESSAGE_MODE: z.enum(["template", "text"]).default("template"),
+  WHATSAPP_ORDER_TEMPLATE: z.string().default("new_order_alert"),
+  WHATSAPP_TEMPLATE_LANGUAGE: z.string().default("en"),
+  WHATSAPP_API_URL: z.string().url().default("https://graph.facebook.com/v21.0"),
   SEED_ADMIN_EMAIL: z.string().email().optional(),
   SEED_ADMIN_PASSWORD: z.string().min(12).optional(),
 });

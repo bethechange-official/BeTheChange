@@ -79,7 +79,7 @@ export function Header() {
   const navLinks = [
     { to: '/shop', label: 'SHOP ALL' },
     { to: '/category/skin-care-products', label: 'SKINCARE' },
-    { to: '/category/cold-process-soaps', label: 'BODY CARE' },
+    { to: '/category/lip-care', label: 'LIP CARE' },
     { to: '/category/hair-care-products', label: 'HAIR CARE' },
     { to: '/category/household-products', label: 'HOUSEHOLD' },
     { to: '/contact', label: 'CONTACT' },
@@ -241,7 +241,7 @@ export function Header() {
                   autoFocus
                   value={query}
                   onChange={e => setQuery(e.target.value)}
-                  placeholder="Search skincare, body care, hair care, household..."
+                  placeholder="Search skincare, lip care, hair care, household..."
                   className="flex-1 bg-transparent text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none font-sans"
                 />
                 <button

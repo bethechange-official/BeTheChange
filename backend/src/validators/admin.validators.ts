@@ -98,6 +98,26 @@ export const collectionCreateSchema = z.object({
   }),
 });
 
+export const categoryProductsSchema = z.object({
+  body: z.object({
+    // The complete membership: listed products end up in the category; others leave it (to "Uncategorized").
+    productIds: z.array(z.string().uuid("Invalid product ID")).max(1000),
+  }),
+  params: z.object({
+    id: z.string().uuid("Invalid category ID"),
+  }),
+});
+
+export const collectionProductsSchema = z.object({
+  body: z.object({
+    // The complete membership: listed products end up in the collection, all others are removed from it.
+    productIds: z.array(z.string().uuid("Invalid product ID")).max(1000),
+  }),
+  params: z.object({
+    id: z.string().uuid("Invalid collection ID"),
+  }),
+});
+
 export const collectionUpdateSchema = z.object({
   body: z.object({
     name: z.string().min(2).optional(),

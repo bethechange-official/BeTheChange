@@ -3,11 +3,10 @@ import { Link } from 'react-router-dom';
 const footerLinks = {
   Shop: [
     { label: 'All Products', to: '/shop' },
-    { label: 'Household Products', to: '/category/household-products' },
-    { label: 'Glycerin Soaps', to: '/category/glycerin-soaps' },
-    { label: 'Cold Process Soaps', to: '/category/cold-process-soaps' },
-    { label: 'Skin Care Products', to: '/category/skin-care-products' },
-    { label: 'Hair Care Products', to: '/category/hair-care-products' },
+    { label: 'Skincare', to: '/category/skin-care-products' },
+    { label: 'Lip Care', to: '/category/lip-care' },
+    { label: 'Hair Care', to: '/category/hair-care-products' },
+    { label: 'Household', to: '/category/household-products' },
   ],
   Discover: [
     { label: 'About Us', to: '/about' },

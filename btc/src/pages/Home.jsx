@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import { ArrowRight, Sparkles, Droplets, Feather, ShieldCheck, Star, CheckCircle, Gift } from 'lucide-react';
+import { ArrowRight, Sparkles, Droplets, Feather, ShieldCheck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { Button } from '../components/ui/Button';
 import { SectionHeading } from '../components/ui/SectionHeading';
@@ -8,6 +8,7 @@ import { Toast } from '../components/ui/Toast';
 import { useState, useEffect } from 'react';
 import { productService } from '../services/productService';
 import { categoryService } from '../services/categoryService';
+import { sortCategories } from '../utils/categories';
 
 const fadeUp = {
   hidden: { opacity: 0, y: 25 },
@@ -33,7 +34,7 @@ export default function Home() {
           setFeaturedProducts(productsRes.data.products.slice(0, 8));
         }
         if (categoriesRes.success) {
-          setCategories(categoriesRes.data);
+          setCategories(sortCategories(categoriesRes.data));
         }
       } catch (error) {
         console.error('Failed to fetch data:', error);
@@ -47,35 +48,6 @@ export default function Home() {
   const bestsellers = featuredProducts.slice(0, 4);
   const newLaunches = featuredProducts.slice(4, 8);
 
-  const reviews = [
-    {
-      id: 1,
-      rating: 5,
-      title: "Visible difference in 2 weeks!",
-      text: "The Pigmentation Serum completely transformed my skin tone. Spots have visibly faded and my skin feels deeply hydrated.",
-      name: "Ananya Sharma",
-      verified: true,
-      product: "Pigmentation Serum"
-    },
-    {
-      id: 2,
-      rating: 5,
-      title: "Best natural cold process soap!",
-      text: "The Carrot Puree soap is so nourishing! No dryness after washing and it smells wonderful.",
-      name: "Rohan Mehta",
-      verified: true,
-      product: "Carrot Puree Soap"
-    },
-    {
-      id: 3,
-      rating: 5,
-      title: "Mild & effective sunscreen",
-      text: "SPF 50 doesn't leave any white cast at all! Fits perfectly under makeup.",
-      name: "Priya V.",
-      verified: true,
-      product: "Sunscreen SPF 50"
-    }
-  ];
 
   const trustPillars = [
     {
@@ -213,18 +185,20 @@ export default function Home() {
           <SectionHeading label="COLLECTIONS" title="Shop by Category" subtitle="Explore our curated ranges for skin, hair, body, and home." />
 
           {/* 2-column mobile swipe cards */}
-          <div className="grid grid-cols-2 lg:grid-cols-5 gap-3.5 sm:gap-6 mt-8">
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3.5 sm:gap-6 mt-8">
             {categories.map((cat) => (
               <Link
                 key={cat.id}
-                to={`/category/${cat.id}`}
+                to={`/category/${cat.slug || cat.id}`}
                 className="group block relative overflow-hidden aspect-[3/4] bg-[#EFECE6] border border-[#E2DDD6] shadow-2xs"
               >
-                <img
-                  src={cat.imageUrl || 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&q=80'}
-                  alt={cat.name}
-                  className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-                />
+                {cat.imageUrl && (
+                  <img
+                    src={cat.imageUrl}
+                    alt={cat.name}
+                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+                  />
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/75 via-black/20 to-transparent" />
                 <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-5 flex flex-col justify-end">
                   <p className="text-[8px] tracking-[0.2em] uppercase text-white/70 font-light mb-0.5">Category</p>
@@ -284,55 +258,6 @@ export default function Home() {
         </div>
       </section>
 
-      {/* 9. REVIEWS SECTION */}
-      <section className="py-14 sm:py-24 bg-[#FAF9F6] border-t border-[#E8E3DC]">
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-8 md:px-10">
-          <SectionHeading label="TESTIMONIALS" title="What Our Customers Say" subtitle="Real feedback from people who transformed their daily rituals." center />
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
-            {reviews.map((rev) => (
-              <div key={rev.id} className="bg-white border border-[#E2DDD6] p-6 flex flex-col justify-between shadow-2xs">
-                <div>
-                  <div className="flex items-center gap-1 text-[#111111] mb-3">
-                    {[...Array(rev.rating)].map((_, i) => (
-                      <Star key={i} size={14} fill="#111111" />
-                    ))}
-                  </div>
-                  <h4 className="font-serif text-base text-[#111111] font-semibold mb-2">"{rev.title}"</h4>
-                  <p className="text-xs text-[#555555] font-light leading-relaxed mb-4">"{rev.text}"</p>
-                </div>
-                <div className="pt-4 border-t border-[#F3EFE8] flex items-center justify-between text-[11px]">
-                  <div>
-                    <span className="font-semibold text-[#111111] block">{rev.name}</span>
-                    <span className="text-[#8A8580] text-[10px]">{rev.product}</span>
-                  </div>
-                  <span className="inline-flex items-center gap-1 text-[9px] text-emerald-700 bg-emerald-50 px-2 py-0.5 rounded font-medium">
-                    <CheckCircle size={10} /> Verified
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* 10. REWARD CLUB PROMO BANNER */}
-      <section className="py-14 sm:py-24 bg-white border-t border-[#E8E3DC]">
-        <div className="max-w-[1200px] mx-auto px-4 sm:px-8">
-          <div className="bg-[#FAF9F6] border border-[#E2DDD6] p-8 sm:p-14 text-center relative overflow-hidden">
-            <div className="w-14 h-14 rounded-full bg-[#111111] text-white flex items-center justify-center mx-auto mb-4">
-              <Gift size={24} />
-            </div>
-            <h2 className="font-serif text-3xl sm:text-5xl text-[#111111] mb-3">Join The BTC Club</h2>
-            <p className="text-xs sm:text-base text-[#666666] font-light max-w-lg mx-auto mb-6">
-              Earn rewards on every purchase, enjoy birthday treats, and unlock early access to new releases.
-            </p>
-            <Button as={Link} to="/register" className="bg-[#111111] text-white px-8 py-3.5 text-[10px] sm:text-[11px] tracking-[0.2em] font-semibold uppercase">
-              JOIN NOW & SAVE 10%
-            </Button>
-          </div>
-        </div>
-      </section>
 
       {toast && <Toast message={toast} onClose={() => setToast(null)} />}
     </main>

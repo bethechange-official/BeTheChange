@@ -28,12 +28,10 @@ async function main() {
   console.log("Admin user created:", admin.email);
 
   const categories = [
-    { name: "Uncategorized", slug: "uncategorized", description: "Products awaiting categorization.", imageUrl: null },
-    { name: "Skin Care Products", slug: "skin-care-products", description: "Botanical serums, cleansers, and moisturizers.", imageUrl: null },
-    { name: "Glycerin Soaps", slug: "glycerin-soaps", description: "Gentle cleansing bars for everyday use.", imageUrl: null },
-    { name: "Cold Process Soaps", slug: "cold-process-soaps", description: "Artisan handcrafted soap bars rich in natural oils.", imageUrl: null },
-    { name: "Hair Care Products", slug: "hair-care-products", description: "Ayurvedic scalp oils, herbal cleansers, and follicle stimulants.", imageUrl: null },
-    { name: "Household Products", slug: "household-products", description: "Non-toxic, bio-degradable eco-friendly cleaning liquid refills.", imageUrl: null },
+    { name: "Skincare", slug: "skin-care-products", description: "Botanical serums, cleansers, soaps and moisturizers.", imageUrl: null },
+    { name: "Lip Care", slug: "lip-care", description: "Nourishing lip balms that moisturise, protect and soften lips.", imageUrl: null },
+    { name: "Hair Care", slug: "hair-care-products", description: "Ayurvedic scalp oils, herbal cleansers, and follicle stimulants.", imageUrl: null },
+    { name: "Household", slug: "household-products", description: "Non-toxic, bio-degradable eco-friendly cleaning liquid refills.", imageUrl: null },
   ];
 
   for (const cat of categories) {
@@ -66,7 +64,7 @@ async function main() {
   const settings = [
     { key: "storeName", value: "Be The Change (BTC)" },
     { key: "storeEmail", value: "contact@bethechange.com" },
-    { key: "storePhone", value: "+91 98765 43210" },
+    { key: "storePhone", value: "+91 63008 36017" },
     { key: "storeAddress", value: "12 Botanical Avenue, Jubilee Hills, Hyderabad, Telangana 500033" },
     { key: "shippingFee", value: "50" },
     { key: "freeShippingThreshold", value: "999" },
@@ -85,24 +83,24 @@ async function main() {
 
   // Category name mapping from catalog JSON to DB category names
   const categoryMap: Record<string, string> = {
-    "Household": "Household Products",
-    "Skincare": "Skin Care Products",
-    "Haircare": "Hair Care Products",
-    "Glycerin Soaps": "Glycerin Soaps",
-    "Cold Process Soaps": "Cold Process Soaps",
+    "Household": "Household",
+    "Skincare": "Skincare",
+    "Haircare": "Hair Care",
+    "Glycerin Soaps": "Skincare",
+    "Cold Process Soaps": "Skincare",
   };
 
-  const catalogProducts = JSON.parse(
-    require("fs").readFileSync(
-      require("path").join(__dirname, "../../btc_website_catalog/data/products.json"),
-      "utf-8"
-    )
-  );
+  // Optional real-catalog import: the file lives outside this repo. Without it, products are added in admin.
+  const catalogPath = require("path").join(__dirname, "../../btc_website_catalog/data/products.json");
+  const catalogProducts: any[] = require("fs").existsSync(catalogPath)
+    ? JSON.parse(require("fs").readFileSync(catalogPath, "utf-8"))
+    : [];
+  if (!catalogProducts.length) console.log(`No catalog file at ${catalogPath}; skipping product import.`);
 
   const BASE_IMAGE_URL = "https://api.bethechangeorga.com/uploads/products/";
 
   for (const p of catalogProducts) {
-    const categoryName = categoryMap[p.category] ?? "Uncategorized";
+    const categoryName = /\blip(s|stick)?\b/i.test(p.name) ? "Lip Care" : categoryMap[p.category] ?? "Skincare";
     const imageUrl = `${BASE_IMAGE_URL}${p.slug}.webp`;
 
     await prisma.product.upsert({

@@ -2,23 +2,32 @@ import { Response } from "express";
 import { prisma } from "../config/db";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { AppError } from "../middleware/error.middleware";
-import { calculateCouponDiscount } from "../utils/storefront";
+import { assertCouponApplicable, calculateCartSubtotal, calculateCouponDiscount, getExistingCart } from "../utils/storefront";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 
+// Previews a coupon against the caller's server-side cart. The client never supplies the subtotal,
+// and order creation re-runs the same checks, so this response is informational only.
 export const validateCoupon = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const code = String(req.body.code).trim().toUpperCase();
-    const subtotal = Number(req.body.subtotal);
-    const now = new Date();
-    const coupon = await prisma.coupon.findFirst({ where: { code, isActive: true, startDate: { lte: now }, expiryDate: { gte: now } } });
-    if (!coupon) throw new AppError("Coupon is invalid or expired", 400);
-    if (coupon.usedCount >= coupon.usageLimit) throw new AppError("Coupon usage limit has been reached", 400);
-    if (subtotal < Number(coupon.minimumOrderAmount)) {
-      throw new AppError(`Minimum order amount is ₹${Number(coupon.minimumOrderAmount)}`, 400);
-    }
+    const cart = await getExistingCart(req);
+    const items = cart?.items.filter((item) => item.product.isActive) || [];
+    if (!items.length) throw new AppError("Your cart is empty", 400);
+    const subtotal = calculateCartSubtotal(items);
+
+    const coupon = assertCouponApplicable(await prisma.coupon.findUnique({ where: { code } }), subtotal);
+    const discountAmount = calculateCouponDiscount(coupon, subtotal);
+
     successResponse(res, "Coupon applied", {
       couponCode: coupon.code,
-      discountAmount: calculateCouponDiscount(coupon, subtotal),
+      description: coupon.description,
+      discountType: coupon.discountType,
+      discountValue: Number(coupon.discountValue),
+      maximumDiscountAmount: coupon.maximumDiscountAmount === null ? null : Number(coupon.maximumDiscountAmount),
+      minimumOrderAmount: Number(coupon.minimumOrderAmount),
+      subtotal,
+      discountAmount,
+      discountedSubtotal: Math.round((subtotal - discountAmount) * 100) / 100,
     });
   } catch (error) {
     if (error instanceof AppError) return void errorResponse(res, error.message, error.statusCode);

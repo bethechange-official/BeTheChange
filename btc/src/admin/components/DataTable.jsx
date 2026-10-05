@@ -24,9 +24,13 @@ export function DataTable({
   const startIndex = useExternalPagination ? (page - 1) * pageSize : (page - 1) * pageSize;
   const currentData = useExternalPagination ? data : data.slice(startIndex, startIndex + pageSize);
 
+  // Pages pass the handler inside `pagination`; also accept it as a top-level prop.
+  const externalPageChange = pagination?.onPageChange ?? onPageChange;
+
   const handlePageChange = (newPage) => {
-    if (useExternalPagination && onPageChange) {
-      onPageChange(newPage);
+    if (newPage < 1 || newPage > totalPages) return;
+    if (useExternalPagination && externalPageChange) {
+      externalPageChange(newPage);
     } else {
       setCurrentPage(newPage);
     }
@@ -104,7 +108,7 @@ export function DataTable({
         <div className="p-4 border-t border-gray-100 flex items-center justify-between text-xs text-gray-500 bg-gray-50/30">
           {useExternalPagination ? (
             <span>
-              Showing <strong className="font-semibold text-gray-900">{startIndex + 1}</strong> to{' '}
+              Showing <strong className="font-semibold text-gray-900">{totalItems > 0 ? startIndex + 1 : 0}</strong> to{' '}
               <strong className="font-semibold text-gray-900">{Math.min(startIndex + pageSize, totalItems)}</strong> of{' '}
               <strong className="font-semibold text-gray-900">{totalItems}</strong> results
             </span>

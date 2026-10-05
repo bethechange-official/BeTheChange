@@ -472,6 +472,15 @@ export const adminApi = {
     return handleResponse(response);
   },
 
+  async setCategoryProducts(id: string, productIds: string[]): Promise<ApiResponse<{ added: number; removed: number; productsCount: number }>> {
+    const response = await fetch(`${API_BASE_URL}/admin/categories/${id}/products`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify({ productIds }),
+    });
+    return handleResponse(response);
+  },
+
   async deleteCategory(id: string): Promise<ApiResponse> {
     const response = await fetch(`${API_BASE_URL}/admin/categories/${id}`, {
       method: 'DELETE',
@@ -521,6 +530,15 @@ export const adminApi = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
       body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  async setCollectionProducts(id: string, productIds: string[]): Promise<ApiResponse<{ added: number; removed: number; productsCount: number }>> {
+    const response = await fetch(`${API_BASE_URL}/admin/collections/${id}/products`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify({ productIds }),
     });
     return handleResponse(response);
   },
@@ -757,6 +775,14 @@ export const adminApi = {
     updatedAt: string;
   }>> {
     const response = await fetch(`${API_BASE_URL}/admin/orders/${id}`, {
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    });
+    return handleResponse(response);
+  },
+
+  async resendOrderWhatsapp(id: string): Promise<ApiResponse<{ whatsappStatus: string; whatsappError: string | null; whatsappSentAt: string | null }>> {
+    const response = await fetch(`${API_BASE_URL}/admin/orders/${id}/whatsapp`, {
+      method: 'POST',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     });
     return handleResponse(response);

@@ -10,7 +10,8 @@ import {
   Users,
   Tag,
   ArrowRight,
-  TrendingUp
+  TrendingUp,
+  TrendingDown
 } from 'lucide-react';
 
 import { AdminLayout } from '../components/AdminLayout';
@@ -18,13 +19,63 @@ import { StatCard } from '../components/StatCard';
 import { StatusBadge } from '../components/StatusBadge';
 import { adminApi } from '../../services/admin/api';
 
-const STATUS_COLORS = {
-  Pending: '#F59E0B',
-  Processing: '#3B82F6',
-  Shipped: '#8B5CF6',
-  Delivered: '#10B981',
-  Cancelled: '#EF4444'
+const STATUS_SLICES = [
+  { key: 'PENDING', name: 'Pending', color: '#F59E0B' },
+  { key: 'CONFIRMED', name: 'Confirmed', color: '#06B6D4' },
+  { key: 'PROCESSING', name: 'Processing', color: '#3B82F6' },
+  { key: 'SHIPPED', name: 'Shipped', color: '#8B5CF6' },
+  { key: 'DELIVERED', name: 'Delivered', color: '#10B981' },
+  { key: 'CANCELLED', name: 'Cancelled', color: '#EF4444' },
+  { key: 'REFUNDED', name: 'Refunded', color: '#6B7280' },
+];
+
+// Dates are shown in store time (IST) to match how the server buckets them.
+// Fixed month names: some locales print "Sept", which looks like a typo next to "Oct".
+const MONTHS = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+const istParts = (date) => {
+  const parts = Object.fromEntries(new Intl.DateTimeFormat('en-GB', {
+    timeZone: 'Asia/Kolkata', day: 'numeric', month: 'numeric', year: 'numeric', hour: 'numeric', minute: '2-digit', hour12: true,
+  }).formatToParts(new Date(date)).map((p) => [p.type, p.value]));
+  return { day: Number(parts.day), month: MONTHS[Number(parts.month) - 1], year: parts.year, time: `${parts.hour}:${parts.minute} ${parts.dayPeriod?.toLowerCase()}` };
 };
+
+/**
+ * A period [start, end) as text. `end` is exclusive, so the last covered day is end − 1ms.
+ * label: "1–3 Oct", "3 Oct", "28 Feb–1 Mar". exact: "1 Oct, 12:00 am – 3 Oct, 11:42 am IST".
+ */
+const describePeriod = (start, end) => {
+  const a = istParts(start);
+  const b = istParts(new Date(new Date(end).getTime() - 1));
+  const label = a.month === b.month && a.year === b.year
+    ? (a.day === b.day ? `${a.day} ${a.month}` : `${a.day}–${b.day} ${a.month}`)
+    : `${a.day} ${a.month}–${b.day} ${b.month}`;
+  const e = istParts(end);
+  return { label, exact: `${a.day} ${a.month}, ${a.time} – ${e.day} ${e.month}, ${e.time} IST` };
+};
+
+/**
+ * Turns a server comparison ({ current, previous, changePercent }) into StatCard props:
+ * "↑ 18.4% more than 1–3 Sep". changePercent = (current − previous) / previous × 100, computed by the API.
+ * It is null when the earlier period is zero: growth from nothing has no percentage, so we say "New"
+ * rather than invent one.
+ */
+const toChangeProps = (comparison, periods, formatValue = (v) => v.toLocaleString('en-IN')) => {
+  if (!comparison || !periods) return {};
+  const { current, previous, changePercent } = comparison;
+  // Name both periods: the card's big number is the all-time total, not this period's figure.
+  const cur = periods.current.label;
+  const prev = periods.previous.label;
+  const changeTitle = `${periods.current.exact}: ${formatValue(current)}\nvs ${periods.previous.exact}: ${formatValue(previous)}`;
+  if (changePercent === null) {
+    return { change: 'New', trend: 'up', description: `in ${cur} · nothing in ${prev} to compare`, changeTitle };
+  }
+  const pct = `${Math.abs(changePercent).toLocaleString('en-IN', { minimumFractionDigits: 1, maximumFractionDigits: 1 })}%`;
+  if (changePercent > 0) return { change: pct, trend: 'up', description: `more in ${cur} than ${prev}`, changeTitle };
+  if (changePercent < 0) return { change: pct, trend: 'down', description: `less in ${cur} than ${prev}`, changeTitle };
+  return { change: pct, trend: 'flat', description: `same in ${cur} as ${prev}`, changeTitle };
+};
+
+const formatRupees = (v) => `₹${Number(v).toLocaleString('en-IN', { maximumFractionDigits: 2 })}`;
 
 export default function AdminDashboard() {
   const [dashboardData, setDashboardData] = useState(null);
@@ -107,21 +158,26 @@ export default function AdminDashboard() {
     totalCustomers,
     totalProducts,
     pendingOrders,
+    deliveredOrders,
     lowStockProducts,
+    activeCoupons,
+    ordersByStatus,
+    comparisons,
     recentOrders,
-    salesByPeriod
+    salesByPeriod,
+    salesComparison,
   } = dashboardData || {};
 
-  const deliveredOrders = recentOrders?.filter(o => o.orderStatus === 'Delivered').length || 0;
+  // This month so far vs the same elapsed span of last month, e.g. "1–3 Oct" vs "1–3 Sep".
+  const periods = comparisons?.period && {
+    current: describePeriod(comparisons.period.currentStart, comparisons.period.currentEnd),
+    previous: describePeriod(comparisons.period.previousStart, comparisons.period.previousEnd),
+  };
 
-  // Order status breakdown data
-  const orderStatusPie = [
-    { name: 'Pending', value: recentOrders?.filter(o => o.orderStatus === 'Pending').length || 0, color: STATUS_COLORS.Pending },
-    { name: 'Processing', value: recentOrders?.filter(o => o.orderStatus === 'Processing').length || 0, color: STATUS_COLORS.Processing },
-    { name: 'Shipped', value: recentOrders?.filter(o => o.orderStatus === 'Shipped').length || 0, color: STATUS_COLORS.Shipped },
-    { name: 'Delivered', value: deliveredOrders, color: STATUS_COLORS.Delivered },
-    { name: 'Cancelled', value: recentOrders?.filter(o => o.orderStatus === 'Cancelled').length || 0, color: STATUS_COLORS.Cancelled }
-  ].filter(item => item.value > 0);
+  // Order status breakdown across all orders (counts come from the server, not just recent orders)
+  const orderStatusPie = STATUS_SLICES
+    .map(s => ({ name: s.name, color: s.color, value: ordersByStatus?.[s.key] || 0 }))
+    .filter(item => item.value > 0);
 
   const totalStatusOrders = orderStatusPie.reduce((acc, curr) => acc + curr.value, 0) || 1;
 
@@ -153,18 +209,14 @@ export default function AdminDashboard() {
           title="Total Sales"
           value={`₹${(totalRevenue || 0).toLocaleString()}`}
           icon={DollarSign}
-          change="18.4%"
-          trend="up"
-          description="vs last month"
+          {...toChangeProps(comparisons?.revenue, periods, formatRupees)}
           bgAccent="bg-gradient-to-br from-emerald-50/50 to-white"
         />
         <StatCard
           title="Total Orders"
           value={totalOrders || 0}
           icon={ShoppingBag}
-          change="12.1%"
-          trend="up"
-          description="vs last month"
+          {...toChangeProps(comparisons?.orders, periods)}
         />
         <StatCard
           title="Pending Orders"
@@ -175,7 +227,7 @@ export default function AdminDashboard() {
         />
         <StatCard
           title="Delivered Orders"
-          value={deliveredOrders}
+          value={deliveredOrders || 0}
           icon={CheckCircle2}
           description="Completed orders"
         />
@@ -196,15 +248,13 @@ export default function AdminDashboard() {
           title="Total Customers"
           value={totalCustomers || 0}
           icon={Users}
-          change="8.5%"
-          trend="up"
-          description="Registered buyers"
+          {...toChangeProps(comparisons?.customers, periods)}
         />
         <StatCard
           title="Active Coupons"
-          value="0"
+          value={activeCoupons || 0}
           icon={Tag}
-          description="Promotional codes"
+          description="Usable right now"
         />
       </div>
 
@@ -218,10 +268,17 @@ export default function AdminDashboard() {
               <h3 className="text-base font-bold text-gray-900 font-serif">Revenue & Growth</h3>
               <p className="text-xs text-gray-500 font-light">Monthly sales performance summary</p>
             </div>
-            <div className="flex items-center gap-1.5 text-xs text-emerald-600 font-semibold bg-emerald-50 px-2.5 py-1 rounded-md">
-              <TrendingUp size={14} />
-              <span>+24.8% YoY</span>
-            </div>
+            {salesComparison && salesComparison.changePercent !== null && (
+              <div
+                className={`flex items-center gap-1.5 text-xs font-semibold px-2.5 py-1 rounded-md ${
+                  salesComparison.changePercent >= 0 ? 'text-emerald-600 bg-emerald-50' : 'text-rose-600 bg-rose-50'
+                }`}
+                title={`Last 6 months: ${formatRupees(salesComparison.current)} · previous 6 months: ${formatRupees(salesComparison.previous)}`}
+              >
+                {salesComparison.changePercent >= 0 ? <TrendingUp size={14} /> : <TrendingDown size={14} />}
+                <span>{salesComparison.changePercent > 0 ? '+' : ''}{salesComparison.changePercent.toFixed(1)}% vs prior 6 months</span>
+              </div>
+            )}
           </div>
 
           {/* SVG Area Chart */}
@@ -330,7 +387,7 @@ export default function AdminDashboard() {
               })}
             </svg>
             <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-              <span className="text-2xl font-bold font-serif text-gray-900">{totalOrders || 0}</span>
+              <span className="text-2xl font-bold font-sans text-gray-900">{totalOrders || 0}</span>
               <span className="text-[10px] text-gray-400 uppercase tracking-widest">Total Orders</span>
             </div>
           </div>

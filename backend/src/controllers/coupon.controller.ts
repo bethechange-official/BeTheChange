@@ -174,6 +174,18 @@ export const updateCoupon = async (req: AuthenticatedRequest, res: Response): Pr
       throw new AppError("Coupon not found", 404);
     }
 
+    // Validate the coupon as it will look after this partial update.
+    const nextType = discountType ?? existing.discountType;
+    const nextValue = discountValue ?? Number(existing.discountValue);
+    if (nextType === "PERCENTAGE" && nextValue > 100) {
+      throw new AppError("Percentage discount cannot exceed 100%", 400);
+    }
+    const nextStart = startDate ? new Date(startDate) : existing.startDate;
+    const nextExpiry = expiryDate ? new Date(expiryDate) : existing.expiryDate;
+    if (nextExpiry <= nextStart) {
+      throw new AppError("Expiry date must be after start date", 400);
+    }
+
     if (code && code.toUpperCase() !== existing.code) {
       const codeExists = await prisma.coupon.findUnique({ where: { code: code.toUpperCase() } });
       if (codeExists) {

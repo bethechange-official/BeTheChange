@@ -42,20 +42,20 @@ export default function Contact() {
     {
       icon: Mail,
       title: 'Customer Care Email',
-      value: 'care@bethechange.com',
+      value: 'contact@bethechange.com',
       sub: 'We reply within 24 business hours'
     },
     {
       icon: Phone,
       title: 'Phone & WhatsApp',
-      value: '+91 98765 43210',
+      phones: ['6300836017', '6309568418', '6305514327'],
       sub: 'Monday to Saturday, 9am – 6pm IST'
     },
     {
       icon: MapPin,
       title: 'Studio Address',
-      value: '12-A Botanical Enclave, Green Park',
-      sub: 'New Delhi, India - 110016'
+      value: '12 Botanical Avenue, Jubilee Hills',
+      sub: 'Hyderabad, Telangana 500033'
     },
     {
       icon: Clock,
@@ -98,7 +98,17 @@ export default function Contact() {
                       </div>
                       <div>
                         <p className="text-[10px] tracking-[0.2em] uppercase text-[#8A8580] font-medium">{detail.title}</p>
-                        <p className="font-serif text-base text-[#111111] mt-0.5">{detail.value}</p>
+                        {detail.phones ? (
+                          <div className="mt-0.5 space-y-0.5">
+                            {detail.phones.map((num) => (
+                              <a key={num} href={`tel:+91${num}`} className="block font-serif text-base text-[#111111] hover:underline">
+                                +91 {num.slice(0, 5)} {num.slice(5)}
+                              </a>
+                            ))}
+                          </div>
+                        ) : (
+                          <p className="font-serif text-base text-[#111111] mt-0.5">{detail.value}</p>
+                        )}
                         <p className="text-xs text-[#777777] font-light mt-0.5">{detail.sub}</p>
                       </div>
                     </div>

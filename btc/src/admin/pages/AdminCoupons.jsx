@@ -14,12 +14,19 @@ const codeCell = (row) => (
 );
 
 const discountCell = (row) => (
-  <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded text-xs">
-    {row.discountType === 'Percentage' ? `${row.discountValue}% OFF` : `\u20B9${row.discountValue} OFF`}
-  </span>
+  <div>
+    <span className="font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded text-xs">
+      {row.discountType === 'Percentage' ? `${row.discountValue}% OFF` : `₹${row.discountValue} OFF`}
+    </span>
+    {row.discountType === 'Percentage' && row.maxDiscountAmount && (
+      <p className="text-[10px] text-gray-500 mt-1">Max ₹{row.maxDiscountAmount}</p>
+    )}
+  </div>
 );
 
-const minOrderCell = (row) => <span className="font-semibold text-gray-800">\u20B9{row.minOrderAmount}</span>;
+const minOrderCell = (row) => (
+  <span className="font-semibold text-gray-800">{Number(row.minOrderAmount) > 0 ? `₹${row.minOrderAmount}` : '—'}</span>
+);
 
 const usageCell = (row) => (
   <span className="text-gray-600">
@@ -28,10 +35,35 @@ const usageCell = (row) => (
 );
 
 const datesCell = (row) => (
-  <span className="text-[11px] text-gray-500 font-mono">
-    {row.startDate} to {row.endDate}
-  </span>
+  <div className="text-[11px] text-gray-500 font-mono">
+    <span>{row.startDate} to {row.endDate}</span>
+    {row.isExpired && <p className="text-rose-600 font-sans font-semibold mt-0.5">Expired</p>}
+  </div>
 );
+
+// Dates are edited as local calendar days: a coupon runs from 00:00 on its start day to 23:59:59 on its expiry day.
+const toDateInput = (iso) => {
+  if (!iso) return '';
+  const d = new Date(iso);
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+};
+const dateInputOffset = (years = 0) => {
+  const d = new Date();
+  d.setFullYear(d.getFullYear() + years);
+  return toDateInput(d.toISOString());
+};
+const emptyForm = () => ({
+  code: '',
+  discountType: 'Percentage',
+  discountValue: 10,
+  minOrderAmount: '',
+  maxDiscountAmount: '',
+  startDate: dateInputOffset(0),
+  endDate: dateInputOffset(1),
+  usageLimit: 100,
+  usedCount: 0,
+  status: 'Active',
+});
 
 const statusCell = (row, loading, handleToggleStatus) => (
   <button
@@ -47,8 +79,10 @@ const toCouponView = (coupon) => ({
   ...coupon,
   discountType: coupon.discountType === 'PERCENTAGE' ? 'Percentage' : 'Flat',
   minOrderAmount: coupon.minimumOrderAmount,
-  startDate: coupon.startDate?.slice(0, 10),
-  endDate: coupon.expiryDate?.slice(0, 10),
+  maxDiscountAmount: coupon.maximumDiscountAmount ?? '',
+  startDate: toDateInput(coupon.startDate),
+  endDate: toDateInput(coupon.expiryDate),
+  isExpired: new Date(coupon.expiryDate) < new Date(),
   status: coupon.isActive ? 'Active' : 'Inactive',
 });
 
@@ -84,19 +118,10 @@ export default function AdminCoupons() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
+  const [errorMsg, setErrorMsg] = useState('');
   const [toastMsg, setToastMsg] = useState('');
 
-  const [formData, setFormData] = useState({
-    code: '',
-    discountType: 'Percentage',
-    discountValue: 10,
-    minOrderAmount: 499,
-    startDate: new Date().toISOString().split('T')[0],
-    endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-    usageLimit: 500,
-    usedCount: 0,
-    status: 'Active'
-  });
+  const [formData, setFormData] = useState(emptyForm);
 
   const fetchCoupons = useCallback(async () => {
     setLoading(true);
@@ -132,17 +157,7 @@ export default function AdminCoupons() {
   const openAddModal = () => {
     setEditingCoupon(null);
     setErrorMsg('');
-    setFormData({
-      code: '',
-      discountType: 'Percentage',
-      discountValue: 10,
-      minOrderAmount: 499,
-      startDate: new Date().toISOString().split('T')[0],
-      endDate: new Date(new Date().setFullYear(new Date().getFullYear() + 1)).toISOString().split('T')[0],
-      usageLimit: 100,
-      usedCount: 0,
-      status: 'Active'
-    });
+    setFormData(emptyForm());
     setModalOpen(true);
   };
 
@@ -178,37 +193,47 @@ export default function AdminCoupons() {
         setLoading(false);
         return;
       }
-      if (new Date(formData.endDate) <= new Date(formData.startDate)) {
-        setErrorMsg('End date must be after start date.');
+      if (formData.endDate < formData.startDate) {
+        setErrorMsg('Expiry date cannot be before the start date.');
         setLoading(false);
         return;
       }
-      if (Number(formData.usageLimit) <= 0) {
-        setErrorMsg('Usage limit must be greater than 0.');
+      if (!Number.isInteger(Number(formData.usageLimit)) || Number(formData.usageLimit) <= 0) {
+        setErrorMsg('Usage limit must be a whole number greater than 0.');
+        setLoading(false);
+        return;
+      }
+      if (formData.minOrderAmount !== '' && Number(formData.minOrderAmount) < 0) {
+        setErrorMsg('Minimum order value cannot be negative.');
+        setLoading(false);
+        return;
+      }
+      const isPercentage = formData.discountType === 'Percentage';
+      if (isPercentage && formData.maxDiscountAmount !== '' && Number(formData.maxDiscountAmount) <= 0) {
+        setErrorMsg('Maximum discount must be greater than 0, or left empty for no cap.');
         setLoading(false);
         return;
       }
 
       const payload = {
         code: formattedCode,
-        discountType: formData.discountType === 'Percentage' ? 'PERCENTAGE' : 'FLAT',
+        discountType: isPercentage ? 'PERCENTAGE' : 'FLAT',
         discountValue: Number(formData.discountValue),
-        minimumOrderAmount: Number(formData.minOrderAmount),
-        startDate: new Date(`${formData.startDate}T00:00:00.000Z`).toISOString(),
-        expiryDate: new Date(`${formData.endDate}T23:59:59.999Z`).toISOString(),
+        minimumOrderAmount: formData.minOrderAmount === '' ? 0 : Number(formData.minOrderAmount),
+        // A flat coupon is its own cap, so the max only applies to percentage coupons.
+        maximumDiscountAmount: isPercentage && formData.maxDiscountAmount !== '' ? Number(formData.maxDiscountAmount) : null,
+        startDate: new Date(`${formData.startDate}T00:00:00`).toISOString(),
+        expiryDate: new Date(`${formData.endDate}T23:59:59.999`).toISOString(),
         usageLimit: Number(formData.usageLimit),
         isActive: formData.status === 'Active',
       };
 
-      if (editingCoupon) {
-        response = await adminCouponService.update(editingCoupon.id, payload);
-        setToastMsg('Coupon updated successfully!');
-      } else {
-        response = await adminCouponService.create(payload);
-        setToastMsg('Coupon created successfully!');
-      }
+      response = editingCoupon
+        ? await adminCouponService.update(editingCoupon.id, payload)
+        : await adminCouponService.create(payload);
 
       if (response.success) {
+        setToastMsg(editingCoupon ? 'Coupon updated successfully!' : 'Coupon created successfully!');
         fetchCoupons();
         setModalOpen(false);
         setTimeout(() => setToastMsg(''), 3000);
@@ -330,6 +355,8 @@ export default function AdminCoupons() {
         }
         pagination={{
           currentPage: pagination.page,
+          total: pagination.total,
+          limit: pagination.limit,
           totalPages: pagination.totalPages,
           onPageChange: handlePageChange,
         }}
@@ -379,7 +406,7 @@ export default function AdminCoupons() {
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
                   >
                     <option value="Percentage">Percentage (%)</option>
-                    <option value="Flat">Flat Amount (\u20B9)</option>
+                    <option value="Flat">Fixed Amount (₹)</option>
                   </select>
                 </div>
               </div>
@@ -387,12 +414,14 @@ export default function AdminCoupons() {
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">
-                    Discount Value ({formData.discountType === 'Percentage' ? '%' : '\u20B9'}) *
+                    Discount Value ({formData.discountType === 'Percentage' ? '%' : '₹'}) *
                   </label>
                   <input
                     type="number"
                     required
-                    min="1"
+                    min="0.01"
+                    max={formData.discountType === 'Percentage' ? 100 : undefined}
+                    step="0.01"
                     value={formData.discountValue}
                     onChange={(e) => setFormData(prev => ({ ...prev, discountValue: e.target.value }))}
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
@@ -400,17 +429,34 @@ export default function AdminCoupons() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">Min Order Amount (\u20B9) *</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">Min Order Value (₹)</label>
                   <input
                     type="number"
-                    required
                     min="0"
+                    step="0.01"
                     value={formData.minOrderAmount}
                     onChange={(e) => setFormData(prev => ({ ...prev, minOrderAmount: e.target.value }))}
+                    placeholder="Optional — no minimum"
                     className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
                   />
                 </div>
               </div>
+
+              {formData.discountType === 'Percentage' && (
+                <div>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">Maximum Discount (₹)</label>
+                  <input
+                    type="number"
+                    min="0.01"
+                    step="0.01"
+                    value={formData.maxDiscountAmount}
+                    onChange={(e) => setFormData(prev => ({ ...prev, maxDiscountAmount: e.target.value }))}
+                    placeholder="Optional — no cap"
+                    className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none"
+                  />
+                  <p className="text-[10px] text-gray-500 mt-1">e.g. 10% off, capped at ₹200 on large orders.</p>
+                </div>
+              )}
 
               <div className="grid grid-cols-2 gap-4">
                 <div>
@@ -425,7 +471,7 @@ export default function AdminCoupons() {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">End Date *</label>
+                  <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">Expiry Date *</label>
                   <input
                     type="date"
                     required

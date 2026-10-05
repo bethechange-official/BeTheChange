@@ -58,7 +58,8 @@ app.use("/uploads", express.static(env.STORAGE_PATH, {
 
 const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
-  limit: 300,
+  // Relaxed outside production (like authLimiter): local browsing and E2E runs share one IP.
+  limit: env.NODE_ENV === "production" ? 300 : 10000,
   standardHeaders: "draft-7",
   legacyHeaders: false,
   message: { success: false, message: "Too many requests, please try again later" },

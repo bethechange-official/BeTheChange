@@ -1,20 +1,14 @@
-import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
 import { QuantitySelector } from '../components/ui/QuantitySelector';
 import { Button } from '../components/ui/Button';
+import { CouponField } from '../components/cart/CouponField';
+import { PriceBreakdown } from '../components/cart/PriceBreakdown';
 
 export default function Cart() {
-  const { items, subtotal, total, discount, shippingFee, coupon, couponError, applyCoupon, removeCoupon, updateQuantity, removeFromCart } = useCart();
+  const { items, updateQuantity, removeFromCart } = useCart();
   const navigate = useNavigate();
-  
-  const [couponInput, setCouponInput] = useState('');
-
-  const handleApplyCoupon = async () => {
-    if (!couponInput.trim()) return;
-    await applyCoupon(couponInput.trim());
-  };
 
   const handleProceedCheckout = (e) => {
     e.preventDefault();
@@ -53,7 +47,7 @@ export default function Cart() {
               <div key={item.id} className="grid grid-cols-12 gap-4 items-center py-4 border-b border-[#E2DDD6]">
                 <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
                   <Link to={`/product/${item.slug || item.id}`} className="w-16 h-20 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
-                    <img src={item.images?.[0] || item.image} alt={item.name} className="w-full h-full object-cover" />
+                    {(item.images?.[0] || item.image) && <img src={item.images?.[0] || item.image} alt={item.name} className="w-full h-full object-cover" />}
                   </Link>
                   <div>
                     <p className="text-[10px] tracking-widest uppercase text-[#8A8580]">{item.category}</p>
@@ -88,61 +82,8 @@ export default function Cart() {
           <div className="bg-white p-6 md:p-8 border border-[#E2DDD6] h-fit">
             <h2 className="font-serif text-2xl text-[#111111] mb-6">Order Summary</h2>
 
-            {/* Coupon */}
-            <div className="mb-6">
-              <p className="text-[10px] tracking-widest uppercase text-[#8A8580] mb-3">Coupon Code</p>
-              {coupon ? (
-                <div className="flex items-center justify-between bg-green-50 border border-green-200 px-4 py-3">
-                  <div>
-                    <p className="text-xs font-medium text-green-700">{coupon.code}</p>
-                    <p className="text-[10px] text-green-600">Applied</p>
-                  </div>
-                  <button
-                    onClick={removeCoupon}
-                    className="text-xs text-red-500 hover:text-red-700 underline"
-                  >
-                    Remove
-                  </button>
-                </div>
-              ) : (
-                <div className="flex gap-2">
-                  <input
-                    value={couponInput}
-                    onChange={e => setCouponInput(e.target.value.toUpperCase())}
-                    placeholder="Enter code"
-                    className="flex-1 border border-[#E2DDD6] px-3 py-2.5 text-sm focus:outline-none focus:border-[#111111] transition-colors"
-                  />
-                  <button
-                    onClick={handleApplyCoupon}
-                    className="px-4 py-2.5 bg-[#111111] text-white text-[10px] tracking-widest uppercase hover:bg-[#2a2a2a] transition-colors"
-                  >
-                    Apply
-                  </button>
-                </div>
-              )}
-              {couponError && <p className="text-xs text-red-500 mt-2">{couponError}</p>}
-            </div>
-
-            <div className="space-y-3 border-t border-[#E2DDD6] pt-4">
-              <div className="flex justify-between text-sm">
-                <span className="text-[#8A8580]">Subtotal</span>
-                <span className="text-[#111111]">₹{Number(subtotal).toLocaleString()}</span>
-              </div>
-              {discount > 0 && (
-                <div className="flex justify-between text-sm text-green-700">
-                  <span>Discount</span>
-                  <span>-₹{Number(discount).toLocaleString()}</span>
-                </div>
-              )}
-              <div className="flex justify-between text-sm">
-                <span className="text-[#8A8580]">Shipping</span>
-                <span className="text-[#111111]">{shippingFee > 0 ? `₹${Number(shippingFee).toLocaleString()}` : 'Free'}</span>
-              </div>
-              <div className="flex justify-between font-medium text-base border-t border-[#E2DDD6] pt-3">
-                <span className="font-serif text-[#111111]">Total</span>
-                <span className="text-[#111111]">₹{Number(total).toLocaleString()}</span>
-              </div>
-            </div>
+            <CouponField />
+            <PriceBreakdown />
 
             <Button onClick={handleProceedCheckout} className="w-full mt-6 py-4 text-[11px] tracking-[0.25em]">
               Proceed to Checkout

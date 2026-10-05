@@ -113,6 +113,47 @@ export const updateCollection = async (req: AuthenticatedRequest, res: Response)
   }
 };
 
+/**
+ * Sets which products belong to a collection. A product has at most one collection, so listed
+ * products currently in another collection are moved here; products not listed are removed from it.
+ */
+export const setCollectionProducts = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    const productIds = [...new Set((req.body.productIds as string[]) || [])];
+
+    const collection = await prisma.collection.findUnique({ where: { id } });
+    if (!collection) throw new AppError("Collection not found", 404);
+
+    const found = await prisma.product.count({ where: { id: { in: productIds } } });
+    if (found !== productIds.length) throw new AppError("One or more products were not found", 400);
+
+    const result = await prisma.$transaction(async (tx) => {
+      const removed = await tx.product.updateMany({
+        where: { collection: collection.name, id: { notIn: productIds } },
+        data: { collection: null },
+      });
+      const added = await tx.product.updateMany({
+        where: { id: { in: productIds }, OR: [{ collection: null }, { collection: { not: collection.name } }] },
+        data: { collection: collection.name },
+      });
+      return { added: added.count, removed: removed.count };
+    });
+
+    successResponse(res, "Collection products updated", {
+      ...result,
+      productsCount: productIds.length,
+    });
+  } catch (error) {
+    if (error instanceof AppError) {
+      errorResponse(res, error.message, error.statusCode);
+      return;
+    }
+    console.error("Set collection products error:", error);
+    errorResponse(res, "Failed to update collection products", 500);
+  }
+};
+
 export const deleteCollection = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const id = String(req.params.id);

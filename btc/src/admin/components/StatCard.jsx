@@ -1,4 +1,4 @@
-export function StatCard({ title, value, icon: Icon, change, trend = 'up', description, bgAccent = 'bg-white' }) {
+export function StatCard({ title, value, icon: Icon, change, trend = 'up', description, changeTitle, bgAccent = 'bg-white' }) {
   return (
     <div className={`p-6 rounded-xl border border-gray-200/80 shadow-2xs ${bgAccent} hover:shadow-xs transition-all duration-300 flex flex-col justify-between`}>
       <div className="flex items-center justify-between mb-3">
@@ -11,12 +11,13 @@ export function StatCard({ title, value, icon: Icon, change, trend = 'up', descr
       </div>
 
       <div>
-        <h3 className="text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-1">{value}</h3>
+        {/* A <p>, not a heading: global h1–h5 styles force the serif display font, which reads poorly for figures */}
+        <p className="font-sans text-2xl sm:text-3xl font-bold text-gray-900 tracking-tight mb-1">{value}</p>
         {(change || description) && (
-          <div className="flex items-center gap-2 text-xs">
+          <div className="flex items-center gap-2 text-xs" title={changeTitle}>
             {change && (
-              <span className={`font-semibold ${trend === 'up' ? 'text-emerald-600' : 'text-rose-600'}`}>
-                {trend === 'up' ? '↑' : '↓'} {change}
+              <span className={`font-semibold ${trend === 'up' ? 'text-emerald-600' : trend === 'down' ? 'text-rose-600' : 'text-gray-500'}`}>
+                {trend === 'up' ? '↑' : trend === 'down' ? '↓' : '→'} {change}
               </span>
             )}
             {description && <span className="text-gray-400 font-light">{description}</span>}

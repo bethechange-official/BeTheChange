@@ -4,7 +4,7 @@ import { useAuth } from '../context/AuthContext';
 import { Input } from '../components/ui/Input';
 import { Button } from '../components/ui/Button';
 import { Toast } from '../components/ui/Toast';
-import { User, Package, LogOut, Shield, Check, ShoppingBag, MapPin, Sparkles, Truck, Award } from 'lucide-react';
+import { User, Package, LogOut, Shield, Check, ShoppingBag, MapPin, Truck } from 'lucide-react';
 import { motion } from 'framer-motion';
 import { addressService } from '../services/addressService';
 
@@ -155,14 +155,6 @@ export default function Account() {
               </button>
 
               <button
-                onClick={() => setActiveTab('perks')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'perks' ? 'bg-[#111111] text-white shadow-sm' : 'text-[#111111] hover:bg-[#FAF9F6]'}`}
-              >
-                <Award size={15} />
-                <span>Member Rewards</span>
-              </button>
-
-              <button
                 onClick={() => setActiveTab('security')}
                 className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'security' ? 'bg-[#111111] text-white shadow-sm' : 'text-[#111111] hover:bg-[#FAF9F6]'}`}
               >
@@ -241,7 +233,7 @@ export default function Account() {
                         {order.items?.map(item => (
                           <div key={item.id} className="flex items-center gap-4 py-2 border-b border-[#FAF9F6] last:border-0">
                             <div className="w-14 h-14 bg-[#FAF9F6] border border-[#E2DDD6] overflow-hidden flex-shrink-0">
-                              <img src={item.images?.[0]} alt={item.name} className="w-full h-full object-cover" />
+                              {(item.images?.[0]) && <img src={item.images?.[0]} alt={item.name} className="w-full h-full object-cover" />}
                             </div>
                             <div className="flex-1 min-w-0">
                               <p className="font-serif text-base text-[#111111] truncate">{item.name}</p>
@@ -344,42 +336,6 @@ export default function Account() {
               </div>
             )}
 
-            {/* 4. MEMBER PERKS TAB */}
-            {activeTab === 'perks' && (
-              <div className="bg-white border border-[#E2DDD6] p-8 md:p-10 space-y-6 shadow-2xs">
-                <div>
-                  <p className="text-[10px] tracking-[0.25em] uppercase text-[#8A8580] font-medium mb-1">BOTANICAL CIRCLE</p>
-                  <h2 className="font-serif text-2xl md:text-3xl text-[#111111]">Your Member Privileges</h2>
-                  <p className="text-xs text-[#666666] mt-1 font-light">Exclusive benefits and rewards curated for our community.</p>
-                </div>
-
-                <div className="grid sm:grid-cols-3 gap-5 pt-2">
-                  <div className="bg-[#FAF9F6] border border-[#E2DDD6] p-6 text-center space-y-2">
-                    <div className="w-10 h-10 rounded-full bg-white border border-[#E2DDD6] flex items-center justify-center mx-auto text-[#111111]">
-                      <Truck size={18} />
-                    </div>
-                    <h4 className="font-serif text-base text-[#111111]">Free Standard Shipping</h4>
-                    <p className="text-xs text-[#8A8580] font-light">Applied automatically on all orders above ₹499.</p>
-                  </div>
-
-                  <div className="bg-[#FAF9F6] border border-[#E2DDD6] p-6 text-center space-y-2">
-                    <div className="w-10 h-10 rounded-full bg-white border border-[#E2DDD6] flex items-center justify-center mx-auto text-[#111111]">
-                      <Sparkles size={18} />
-                    </div>
-                    <h4 className="font-serif text-base text-[#111111]">Early Access</h4>
-                    <p className="text-xs text-[#8A8580] font-light">Preview new artisan batches 48 hours before public launch.</p>
-                  </div>
-
-                  <div className="bg-[#FAF9F6] border border-[#E2DDD6] p-6 text-center space-y-2">
-                    <div className="w-10 h-10 rounded-full bg-white border border-[#E2DDD6] flex items-center justify-center mx-auto text-[#111111]">
-                      <Award size={18} />
-                    </div>
-                    <h4 className="font-serif text-base text-[#111111]">Birthday Gift</h4>
-                    <p className="text-xs text-[#8A8580] font-light">Exclusive 15% discount voucher on your birthday month.</p>
-                  </div>
-                </div>
-              </div>
-            )}
 
             {/* 5. SECURITY TAB */}
             {activeTab === 'security' && (

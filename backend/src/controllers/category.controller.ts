@@ -113,6 +113,57 @@ export const updateCategory = async (req: AuthenticatedRequest, res: Response): 
   }
 };
 
+/**
+ * Sets which products belong to a category. Every product needs a category, so listed products are
+ * moved here from wherever they are, and products taken out of this category fall back to "Uncategorized"
+ * (the same fallback deleteCategory uses).
+ */
+export const setCategoryProducts = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  try {
+    const id = String(req.params.id);
+    const productIds = [...new Set((req.body.productIds as string[]) || [])];
+
+    const category = await prisma.category.findUnique({ where: { id } });
+    if (!category) throw new AppError("Category not found", 404);
+
+    const found = await prisma.product.count({ where: { id: { in: productIds } } });
+    if (found !== productIds.length) throw new AppError("One or more products were not found", 400);
+
+    const result = await prisma.$transaction(async (tx) => {
+      const leaving = await tx.product.count({ where: { category: category.name, id: { notIn: productIds } } });
+      let removed = 0;
+      if (leaving > 0) {
+        if (category.slug === "uncategorized") {
+          throw new AppError("Products can't be removed from Uncategorized — assign them to another category instead", 400);
+        }
+        await tx.category.upsert({
+          where: { name: "Uncategorized" },
+          update: {},
+          create: { name: "Uncategorized", slug: "uncategorized", isActive: false },
+        });
+        removed = (await tx.product.updateMany({
+          where: { category: category.name, id: { notIn: productIds } },
+          data: { category: "Uncategorized" },
+        })).count;
+      }
+      const added = await tx.product.updateMany({
+        where: { id: { in: productIds }, category: { not: category.name } },
+        data: { category: category.name },
+      });
+      return { added: added.count, removed };
+    });
+
+    successResponse(res, "Category products updated", { ...result, productsCount: productIds.length });
+  } catch (error) {
+    if (error instanceof AppError) {
+      errorResponse(res, error.message, error.statusCode);
+      return;
+    }
+    console.error("Set category products error:", error);
+    errorResponse(res, "Failed to update category products", 500);
+  }
+};
+
 export const deleteCategory = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const id = String(req.params.id);

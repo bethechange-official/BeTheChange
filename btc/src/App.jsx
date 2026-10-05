@@ -1,4 +1,5 @@
-import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { BrowserRouter, Routes, Route, Navigate, useLocation } from 'react-router-dom';
+import { LEGACY_CATEGORY_REDIRECTS } from './utils/categories';
 import { lazy, Suspense } from 'react';
 import { CartProvider } from './context/CartContext';
 import { AuthProvider } from './context/AuthContext';
@@ -45,6 +46,9 @@ function AppContent() {
         <Route path="/" element={<Home />} />
         <Route path="/shop" element={<Shop />} />
         <Route path="/category/:category" element={<CategoryPage />} />
+        {Object.entries(LEGACY_CATEGORY_REDIRECTS).map(([from, to]) => (
+          <Route key={from} path={`/category/${from}`} element={<Navigate to={`/category/${to}`} replace />} />
+        ))}
         <Route path="/product/:id" element={<ProductDetails />} />
         <Route path="/cart" element={<Cart />} />
         <Route path="/checkout" element={<Checkout />} />

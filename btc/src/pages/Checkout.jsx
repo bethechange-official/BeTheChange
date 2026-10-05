@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { useCart } from '../context/CartContext';
 import { useAuth } from '../context/AuthContext';
@@ -8,9 +8,12 @@ import { CheckoutAuthModal } from '../components/cart/CheckoutAuthModal';
 import { User } from 'lucide-react';
 import { addressService } from '../services/addressService';
 import { orderService } from '../services/orderService';
+import { CouponField } from '../components/cart/CouponField';
+import { PriceBreakdown } from '../components/cart/PriceBreakdown';
 
 export default function Checkout() {
-  const { items, subtotal, total, discount, shippingFee, coupon, clearCart } = useCart();
+  const { items, coupon, removeCoupon, resetCart } = useCart();
+  const orderPlacedRef = useRef(false);
   const { user } = useAuth();
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
@@ -118,19 +121,29 @@ export default function Checkout() {
       const response = await orderService.createOrder(orderData);
 
       if (response.success) {
-        await clearCart();
-        navigate('/order-success', { state: response.data.order });
+        // Navigate before emptying the cart: otherwise the empty-cart guard below redirects to /cart
+        // and the customer never sees their confirmation. The server already cleared the cart.
+        orderPlacedRef.current = true;
+        navigate('/order-success', { state: response.data.order, replace: true });
+        resetCart();
       } else {
         setErrors({ submit: response.message });
       }
     } catch (error) {
-      setErrors({ submit: error.message });
+      // 409 with a coupon message: the coupon stopped being valid (expired, limit reached…) after it was applied.
+      // Drop it so the summary shows the real price, and let the customer review before placing the order again.
+      if (error.status === 409 && coupon && /coupon/i.test(error.message)) {
+        removeCoupon();
+        setErrors({ submit: `${error.message}. The coupon has been removed — please review your total and place the order again.` });
+      } else {
+        setErrors({ submit: error.message });
+      }
     } finally {
       setLoading(false);
     }
   };
 
-  if (items.length === 0) {
+  if (items.length === 0 && !orderPlacedRef.current) {
     return <Navigate to="/cart" replace />;
   }
 
@@ -238,7 +251,7 @@ export default function Checkout() {
                 {items.map(item => (
                   <div key={item.id} className="flex gap-3 items-center">
                     <div className="w-12 h-14 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
-                      <img src={item.images?.[0] || item.image} alt={item.name} className="w-full h-full object-cover" />
+                      {(item.images?.[0] || item.image) && <img src={item.images?.[0] || item.image} alt={item.name} className="w-full h-full object-cover" />}
                     </div>
                     <div className="flex-1 min-w-0">
                       <p className="font-serif text-sm text-[#111111] truncate">{item.name}</p>
@@ -248,26 +261,8 @@ export default function Checkout() {
                   </div>
                 ))}
               </div>
-              <div className="space-y-2 border-t border-[#E2DDD6] pt-4">
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#8A8580]">Subtotal</span>
-                  <span>₹{Number(subtotal).toLocaleString()}</span>
-                </div>
-                {discount > 0 && (
-                  <div className="flex justify-between text-sm text-green-700">
-                    <span>Discount ({coupon?.code})</span>
-                    <span>-₹{Number(discount).toLocaleString()}</span>
-                  </div>
-                )}
-                <div className="flex justify-between text-sm">
-                  <span className="text-[#8A8580]">Shipping</span>
-                  <span>{shippingFee > 0 ? `₹${Number(shippingFee).toLocaleString()}` : 'Free'}</span>
-                </div>
-                <div className="flex justify-between font-medium text-base border-t border-[#E2DDD6] pt-3">
-                  <span className="font-serif">Total</span>
-                  <span>₹{Number(total).toLocaleString()}</span>
-                </div>
-              </div>
+              <CouponField />
+              <PriceBreakdown />
               <Button type="submit" loading={loading} className="w-full mt-6">
                 Place Order
               </Button>

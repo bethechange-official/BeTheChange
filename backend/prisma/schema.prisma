@@ -248,6 +248,10 @@ model Order {
   paymentMethod  PaymentMethod @default(COD)
   paymentStatus  PaymentStatus @default(PENDING)
   orderStatus    OrderStatus   @default(PENDING)
+  // Admin WhatsApp notification: SENT | FAILED | NOT_CONFIGURED (null = not attempted yet)
+  whatsappStatus String?       @db.VarChar(20)
+  whatsappError  String?
+  whatsappSentAt DateTime?
   items          OrderItem[]
   createdAt      DateTime      @default(now())
   updatedAt      DateTime      @updatedAt

@@ -1,17 +1,17 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit2, Trash2, Layers, FolderHeart, X, CheckCircle2, Loader2 } from 'lucide-react';
+import { Plus, Edit2, Trash2, Layers, FolderHeart, X, CheckCircle2, Loader2, PackagePlus } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
 import { StatusBadge } from '../components/StatusBadge';
 import { ConfirmModal } from '../components/ConfirmModal';
+import { AssignProductsModal } from '../components/AssignProductsModal';
 import { adminCategoryService } from '../../services/admin/categoryService';
 import { adminCollectionService } from '../../services/admin/collectionService';
-import { adminProductService } from '../../services/admin/productService';
+import { sortCategories } from '../../utils/categories';
 
 export default function AdminCategories() {
   const [activeTab, setActiveTab] = useState('categories'); // 'categories' | 'collections'
   const [categories, setCategories] = useState([]);
   const [collections, setCollections] = useState([]);
-  const [products, setProducts] = useState([]);
 
   const [modalOpen, setModalOpen] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
@@ -19,6 +19,7 @@ export default function AdminCategories() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [productsTarget, setProductsTarget] = useState(null); // { kind, group } whose products are being managed
 
   const [formData, setFormData] = useState({
     name: '',
@@ -32,7 +33,7 @@ export default function AdminCategories() {
     try {
       const response = await adminCategoryService.getAll();
       if (response.success) {
-        setCategories((response.data || []).map((item) => ({ ...item, status: item.isActive ? 'Active' : 'Inactive' })));
+        setCategories(sortCategories((response.data || []).map((item) => ({ ...item, status: item.isActive ? 'Active' : 'Inactive' }))));
       }
     } catch (err) {
       console.error('Failed to load categories:', err);
@@ -50,22 +51,10 @@ export default function AdminCategories() {
     }
   }, []);
 
-  const fetchProducts = useCallback(async () => {
-    try {
-      const response = await adminProductService.getAll({ limit: 1000 });
-      if (response.success) {
-        setProducts(response.data);
-      }
-    } catch (err) {
-      console.error('Failed to load products:', err);
-    }
-  }, []);
-
   useEffect(() => {
     fetchCategories();
     fetchCollections();
-    fetchProducts();
-  }, [fetchCategories, fetchCollections, fetchProducts]);
+  }, [fetchCategories, fetchCollections]);
 
   const openAddModal = () => {
     setEditingItem(null);
@@ -73,7 +62,7 @@ export default function AdminCategories() {
       name: '',
       slug: '',
       description: '',
-      imageUrl: 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80',
+      imageUrl: '',
       status: 'Active'
     });
     setModalOpen(true);
@@ -85,7 +74,7 @@ export default function AdminCategories() {
       name: item.name,
       slug: item.slug,
       description: item.description || '',
-      imageUrl: item.imageUrl || 'https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=600&q=80',
+      imageUrl: item.imageUrl || '',
       status: item.status || 'Active'
     });
     setModalOpen(true);
@@ -110,7 +99,7 @@ export default function AdminCategories() {
             name: formData.name,
             slug: formData.slug,
             description: formData.description,
-            imageUrl: formData.imageUrl,
+            imageUrl: formData.imageUrl || null, // empty = no image
             isActive: formData.status === 'Active',
           });
           setToastMessage('Category updated successfully!');
@@ -119,7 +108,7 @@ export default function AdminCategories() {
             name: formData.name,
             slug: formData.slug,
             description: formData.description,
-            imageUrl: formData.imageUrl,
+            imageUrl: formData.imageUrl || null, // empty = no image
             isActive: formData.status === 'Active',
           });
           setToastMessage('Category created successfully!');
@@ -130,7 +119,7 @@ export default function AdminCategories() {
             name: formData.name,
             slug: formData.slug,
             description: formData.description,
-            imageUrl: formData.imageUrl,
+            imageUrl: formData.imageUrl || null, // empty = no image
             isActive: formData.status === 'Active',
           });
           setToastMessage('Collection updated successfully!');
@@ -139,7 +128,7 @@ export default function AdminCategories() {
             name: formData.name,
             slug: formData.slug,
             description: formData.description,
-            imageUrl: formData.imageUrl,
+            imageUrl: formData.imageUrl || null, // empty = no image
             isActive: formData.status === 'Active',
           });
           setToastMessage('Collection created successfully!');
@@ -194,15 +183,16 @@ export default function AdminCategories() {
     }
   };
 
-  // Calculate items count
+  // The API counts assigned products per category/collection (productsCount), so no product list is needed.
   const getProductCount = (name, type) => {
-    if (type === 'categories') {
-      return products.filter(p => p.category === name).length;
-    }
-    return products.filter(p => p.collection === name).length;
+    const list = type === 'categories' ? categories : collections;
+    return list.find(item => item.name === name)?.productsCount ?? 0;
   };
 
-  const items = activeTab === 'categories' ? categories : collections;
+  // "Uncategorized" is a hidden system fallback, not a real category: only show it when products are
+  // stuck in it, so they can be reassigned.
+  const visibleCategories = categories.filter(c => c.slug !== 'uncategorized' || (c.productsCount ?? 0) > 0);
+  const items = activeTab === 'categories' ? visibleCategories : collections;
 
   return (
     <AdminLayout title="Categories & Collections">
@@ -230,7 +220,7 @@ export default function AdminCategories() {
             }`}
           >
             <Layers size={15} />
-            <span>Categories ({categories.length})</span>
+            <span>Categories ({visibleCategories.length})</span>
           </button>
           <button
             onClick={() => setActiveTab('collections')}
@@ -261,7 +251,7 @@ export default function AdminCategories() {
             <div key={item.id} className="bg-white border border-gray-200/80 rounded-xl overflow-hidden shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
               <div>
                 <div className="relative h-36 bg-gray-100 overflow-hidden">
-                  <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                  {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />}
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
                   <div className="absolute top-3 right-3">
                     <StatusBadge status={item.status || (item.isActive ? 'Active' : 'Inactive')} />
@@ -283,6 +273,14 @@ export default function AdminCategories() {
               </div>
 
               <div className="p-4 pt-0 border-t border-gray-100 mt-2 flex items-center justify-end gap-2">
+                <button
+                  onClick={() => setProductsTarget({ kind: activeTab === 'categories' ? 'category' : 'collection', group: item })}
+                  disabled={loading}
+                  className="mr-auto inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-900 hover:text-white transition-colors disabled:opacity-50"
+                >
+                  <PackagePlus size={14} />
+                  <span>Manage Products</span>
+                </button>
                 <button
                   onClick={() => openEditModal(item)}
                   disabled={loading}
@@ -401,6 +399,22 @@ export default function AdminCategories() {
             </form>
           </div>
         </div>
+      )}
+
+      {productsTarget && (
+        <AssignProductsModal
+          kind={productsTarget.kind}
+          group={productsTarget.group}
+          onClose={() => setProductsTarget(null)}
+          onSaved={(result) => {
+            setProductsTarget(null);
+            // Either kind can move products between groups, so refresh both counts.
+            fetchCategories();
+            fetchCollections();
+            setToastMessage(`“${productsTarget.group.name}” now has ${result.productsCount} product${result.productsCount === 1 ? '' : 's'}.`);
+            setTimeout(() => setToastMessage(''), 3000);
+          }}
+        />
       )}
 
       {/* Delete Confirmation Modal */}

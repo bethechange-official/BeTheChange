@@ -65,16 +65,16 @@ export function CartDrawer({ isOpen, onClose }) {
             </div>
 
             <div className="border-t border-[#E2DDD6] px-6 py-5 space-y-3">
-              {coupon && (
-                <div className="flex justify-between text-xs text-green-700">
-                  <span>Coupon: {coupon.code}</span>
-                  <span>-₹{discount.toLocaleString()}</span>
-                </div>
-              )}
               <div className="flex justify-between text-sm">
                 <span className="text-[#8A8580]">Subtotal</span>
                 <span className="font-medium text-[#111111]">₹{subtotal.toLocaleString()}</span>
               </div>
+              {coupon && (
+                <div className="flex justify-between text-xs text-green-700">
+                  <span>Coupon Discount ({coupon.code})</span>
+                  <span>-₹{discount.toLocaleString()}</span>
+                </div>
+              )}
               <div className="flex justify-between font-medium text-base border-t border-[#E2DDD6] pt-3">
                 <span className="font-serif text-[#111111]">Total</span>
                 <span className="text-[#111111]">₹{total.toLocaleString()}</span>

@@ -164,6 +164,8 @@ export default function AdminCustomers() {
         }
         pagination={{
           currentPage: pagination.page,
+          total: pagination.total,
+          limit: pagination.limit,
           totalPages: pagination.totalPages,
           onPageChange: (page) => setPagination(prev => ({ ...prev, page: page })),
         }}

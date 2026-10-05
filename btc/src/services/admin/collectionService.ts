@@ -37,6 +37,15 @@ export const adminCollectionService = {
     }
   },
 
+  /** Replaces the collection's products with exactly `productIds`. */
+  async setProducts(id: string, productIds: string[]) {
+    try {
+      return await adminApi.setCollectionProducts(id, productIds);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
   async delete(id: string) {
     try {
       return await adminApi.deleteCollection(id);

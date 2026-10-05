@@ -6,11 +6,18 @@ export function ProductImageGallery({ images = [], name = 'Product' }) {
   const [isZoomed, setIsZoomed] = useState(false);
   const [mousePos, setMousePos] = useState({ x: 50, y: 50 });
 
-  const validImages = Array.isArray(images) && images.length > 0
-    ? images.filter(Boolean)
-    : ['https://images.unsplash.com/photo-1556228720-195a672e8a03?w=800&q=80'];
-
+  const validImages = Array.isArray(images) ? images.filter(Boolean) : [];
   const currentImage = validImages[Math.min(active, validImages.length - 1)] || validImages[0];
+
+  // No photo uploaded yet: show a neutral panel rather than a stock photo of some other product.
+  if (validImages.length === 0) {
+    return (
+      <div className="aspect-[4/5] sm:aspect-square bg-[#F4F2EE] border border-[#EBE7E0] rounded-xs flex flex-col items-center justify-center text-center p-6">
+        <p className="font-serif text-2xl text-[#111111]">{name}</p>
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[#8A8580] mt-2">Image coming soon</p>
+      </div>
+    );
+  }
 
   const handleMouseMove = (e) => {
     const { left, top, width, height } = e.currentTarget.getBoundingClientRect();

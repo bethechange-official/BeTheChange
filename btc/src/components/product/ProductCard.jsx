@@ -30,11 +30,15 @@ export function ProductCard({ product, onAddToCart }) {
     >
       {/* IMAGE CONTAINER */}
       <Link to={`/product/${product.slug || product.id}`} className="block overflow-hidden relative bg-[#F4F2EE] aspect-[3/4] mb-2.5">
-        <img
-          src={hovered && product.images[1] ? product.images[1] : product.images[0]}
-          alt={product.name}
-          className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
-        />
+        {product.images?.[0] ? (
+          <img
+            src={hovered && product.images[1] ? product.images[1] : product.images[0]}
+            alt={product.name}
+            className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105"
+          />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center p-4 text-center font-serif text-lg text-[#8A8580]">{product.name}</div>
+        )}
         
         {/* BADGE (Top Left) */}
         {product.featured ? (

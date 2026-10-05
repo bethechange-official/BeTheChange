@@ -7,7 +7,7 @@ import { AppError } from "../middleware/error.middleware";
 const defaultSettings = {
   storeName: "Be The Change (BTC)",
   storeEmail: "contact@bethechange.com",
-  storePhone: "+91 98765 43210",
+  storePhone: "+91 63008 36017",
   storeAddress: "12 Botanical Avenue, Jubilee Hills, Hyderabad, Telangana 500033",
   shippingFee: 50,
   freeShippingThreshold: 999,

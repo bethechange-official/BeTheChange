@@ -37,6 +37,15 @@ export const adminCategoryService = {
     }
   },
 
+  /** Replaces the category's products with exactly `productIds` (removed ones move to Uncategorized). */
+  async setProducts(id: string, productIds: string[]) {
+    try {
+      return await adminApi.setCategoryProducts(id, productIds);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
   async delete(id: string) {
     try {
       return await adminApi.deleteCategory(id);

@@ -27,7 +27,8 @@ export default function EditProduct() {
       .then(([categoryResponse, collectionResponse, productResponse]) => {
         setCategories(categoryResponse.data || []);
         setCollections(collectionResponse.data || []);
-        setFormData(productResponse.data);
+        // Form controls need '' rather than null for empty optional fields (the API saves '' as "none").
+        setFormData({ ...productResponse.data, collection: productResponse.data?.collection ?? '' });
         setImageUrls(productResponse.data?.images || []);
       })
       .catch((err) => setError(err.message || 'Failed to load product'));

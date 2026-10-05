@@ -121,9 +121,9 @@ export default function AdminProducts() {
       accessor: 'price',
       cell: (row) => (
         <div>
-          <span className="font-bold text-gray-900">\u20B9{row.price?.toLocaleString()}</span>
+          <span className="font-bold text-gray-900">₹{row.price?.toLocaleString()}</span>
           {row.originalPrice && (
-            <span className="text-[10px] text-gray-400 line-through block">\u20B9{row.originalPrice?.toLocaleString()}</span>
+            <span className="text-[10px] text-gray-400 line-through block">₹{row.originalPrice?.toLocaleString()}</span>
           )}
         </div>
       )
@@ -238,6 +238,8 @@ export default function AdminProducts() {
         }
         pagination={{
           currentPage: pagination.page,
+          total: pagination.total,
+          limit: pagination.limit,
           totalPages: pagination.totalPages,
           onPageChange: handlePageChange,
         }}

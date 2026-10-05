@@ -28,7 +28,7 @@ export const addressUpdateSchema = z.object({
 export const idParamSchema = z.object({ params: z.object({ id: uuidParam }) });
 
 export const couponValidationSchema = z.object({
-  body: z.object({ code: z.string().trim().min(2).max(50), subtotal: z.number().nonnegative() }),
+  body: z.object({ code: z.string().trim().min(2).max(50), subtotal: z.number().nonnegative().optional() }),
 });
 
 export const contactSchema = z.object({

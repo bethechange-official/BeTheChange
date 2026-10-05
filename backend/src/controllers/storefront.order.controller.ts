@@ -5,7 +5,8 @@ import { prisma } from "../config/db";
 import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { AppError } from "../middleware/error.middleware";
 import { errorResponse, successResponse } from "../utils/apiResponse";
-import { calculateCouponDiscount, getExistingCart } from "../utils/storefront";
+import { assertCouponApplicable, calculateCartSubtotal, calculateCouponDiscount, getExistingCart } from "../utils/storefront";
+import { notifyAdminOfOrder } from "../utils/whatsapp";
 
 const formatOrder = (order: any) => ({
   ...order,
@@ -49,15 +50,17 @@ export const createStorefrontOrder = async (req: AuthenticatedRequest, res: Resp
         throw new AppError("Complete customer and delivery address details are required", 400);
       }
 
-      const subtotal = Math.round(cart.items.reduce((sum, item) => sum + Number(item.product.price) * item.quantity, 0) * 100) / 100;
+      // Prices, subtotal and discount are always recomputed here from the database; client-sent amounts are never trusted.
+      const subtotal = calculateCartSubtotal(cart.items);
       let coupon = null;
       let discountAmount = 0;
       const couponCode = req.body.couponCode ? String(req.body.couponCode).trim().toUpperCase() : undefined;
       if (couponCode) {
-        const now = new Date();
-        coupon = await tx.coupon.findFirst({ where: { code: couponCode, isActive: true, startDate: { lte: now }, expiryDate: { gte: now } } });
-        if (!coupon || coupon.usedCount >= coupon.usageLimit || subtotal < Number(coupon.minimumOrderAmount)) {
-          throw new AppError("Coupon is no longer valid for this order", 409);
+        try {
+          coupon = assertCouponApplicable(await tx.coupon.findUnique({ where: { code: couponCode } }), subtotal);
+        } catch (error) {
+          if (error instanceof AppError) throw new AppError(`Coupon ${couponCode} can no longer be applied: ${error.message}`, 409);
+          throw error;
         }
         discountAmount = calculateCouponDiscount(coupon, subtotal);
       }
@@ -130,6 +133,9 @@ export const createStorefrontOrder = async (req: AuthenticatedRequest, res: Resp
     }, { isolationLevel: Prisma.TransactionIsolationLevel.Serializable });
 
     successResponse(res, "Order placed successfully", { order: formatOrder(order) }, 201);
+    // Notify the admin on WhatsApp after the order is committed and the customer has their response;
+    // the outcome is stored on the order (and never affects it).
+    void notifyAdminOfOrder(order.id);
   } catch (error) {
     if (error instanceof AppError) return void errorResponse(res, error.message, error.statusCode);
     throw error;

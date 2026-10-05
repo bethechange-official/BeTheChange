@@ -30,7 +30,7 @@ export const adminCouponService = {
     discountType: 'PERCENTAGE' | 'FLAT';
     discountValue: number;
     minimumOrderAmount?: number;
-    maximumDiscountAmount?: number;
+    maximumDiscountAmount?: number | null;
     startDate: string;
     expiryDate: string;
     usageLimit: number;
@@ -49,7 +49,7 @@ export const adminCouponService = {
     discountType?: 'PERCENTAGE' | 'FLAT';
     discountValue?: number;
     minimumOrderAmount?: number;
-    maximumDiscountAmount?: number;
+    maximumDiscountAmount?: number | null;
     startDate?: string;
     expiryDate?: string;
     usageLimit?: number;

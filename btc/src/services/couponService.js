@@ -1,7 +1,8 @@
 import { api } from './api';
 
 export const couponService = {
-  async validateCoupon(code, subtotal) {
-    return api.post('/coupons/validate', { code, subtotal });
+  // The server prices the coupon against the caller's own cart, so no amounts are sent.
+  async validateCoupon(code) {
+    return api.post('/coupons/validate', { code });
   },
 };

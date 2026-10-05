@@ -43,7 +43,7 @@ export default function CategoryPage() {
     <main className="pt-18 md:pt-22 min-h-screen bg-[#FAF9F6]">
       {cat && (
         <div className="relative h-48 md:h-64 overflow-hidden bg-[#F3EFE8]">
-          <img src={cat.imageUrl || 'https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=600&q=80'} alt={cat.name} className="w-full h-full object-cover opacity-60" />
+          {cat.imageUrl && <img src={cat.imageUrl} alt={cat.name} className="w-full h-full object-cover opacity-60" />}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
             <p className="text-[10px] tracking-[0.25em] uppercase text-[#8A8580] mb-2">Collection</p>
             <h1 className="font-serif text-4xl md:text-5xl text-[#111111]">{cat.name}</h1>

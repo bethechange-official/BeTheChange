@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { Heart, Star, ShieldCheck, Truck, Sparkles, Check, ArrowRight, Leaf, Clock, RefreshCw, ShoppingBag } from 'lucide-react';
+import { Heart, ShieldCheck, Truck, Sparkles, Check, ArrowRight, Leaf, Clock, RefreshCw, ShoppingBag } from 'lucide-react';
 import { ProductImageGallery } from '../components/product/ProductImageGallery';
 import { Accordion } from '../components/product/Accordion';
 import { QuantitySelector } from '../components/ui/QuantitySelector';
@@ -194,17 +194,6 @@ export default function ProductDetails() {
                 {product.name}
               </h1>
 
-              {/* Rating + Social Proof */}
-              <div className="flex items-center gap-3">
-                <div className="flex items-center gap-1">
-                  {[...Array(5)].map((_, i) => (
-                    <Star key={i} size={13} fill="#111111" className="text-[#111111]" />
-                  ))}
-                </div>
-                <span className="text-xs text-[#5C554E] font-medium">
-                  4.9 <span className="text-[#8A8580] font-light">(84 ritual reviews)</span>
-                </span>
-              </div>
             </div>
 
             {/* Price & Savings */}

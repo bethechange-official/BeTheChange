@@ -25,6 +25,14 @@ export const adminOrderService = {
     }
   },
 
+  async resendWhatsapp(id: string) {
+    try {
+      return await adminApi.resendOrderWhatsapp(id);
+    } catch (error) {
+      throw handleApiError(error);
+    }
+  },
+
   async updateStatus(id: string, data: {
     orderStatus?: string;
     paymentStatus?: string;

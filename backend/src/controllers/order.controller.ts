@@ -5,6 +5,7 @@ import { AuthenticatedRequest } from "../middleware/auth.middleware";
 import { AppError } from "../middleware/error.middleware";
 import { errorResponse, successResponse } from "../utils/apiResponse";
 import { getQueryInt, getQueryString } from "../utils/query";
+import { notifyAdminOfOrder } from "../utils/whatsapp";
 
 const validOrderTransitions: Record<OrderStatus, OrderStatus[]> = {
   PENDING: ["CONFIRMED", "CANCELLED"],
@@ -31,6 +32,9 @@ const formatOrder = <T extends Record<string, any>>(order: T) => ({
   totalAmount: Number(order.totalAmount),
   coupon: order.coupon ? { ...order.coupon, discountValue: Number(order.coupon.discountValue) } : order.coupon,
   items: order.items?.map((item: Record<string, any>) => ({ ...item, price: Number(item.price) })),
+  // The admin UI offers only these, so it can never request a transition the API would reject.
+  allowedOrderStatuses: validOrderTransitions[order.orderStatus as OrderStatus] ?? [],
+  allowedPaymentStatuses: validPaymentTransitions[order.paymentStatus as PaymentStatus] ?? [],
 });
 
 export const getOrders = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
@@ -92,6 +96,18 @@ export const getOrderById = async (req: AuthenticatedRequest, res: Response): Pr
   }
 };
 
+/** Re-sends the admin WhatsApp notification for an order (e.g. after fixing the WhatsApp setup). */
+export const resendOrderWhatsapp = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
+  const id = String(req.params.id);
+  if (!/^[0-9a-f-]{36}$/i.test(id)) return void errorResponse(res, "Order not found", 404);
+  const exists = await prisma.order.findUnique({ where: { id }, select: { id: true } });
+  if (!exists) return void errorResponse(res, "Order not found", 404);
+  const result = await notifyAdminOfOrder(id);
+  const order = await prisma.order.findUniqueOrThrow({ where: { id }, select: { whatsappStatus: true, whatsappError: true, whatsappSentAt: true } });
+  if (result.status === "SENT") return void successResponse(res, "WhatsApp notification sent", order);
+  errorResponse(res, result.error || "WhatsApp notification failed", result.status === "NOT_CONFIGURED" ? 503 : 502);
+};
+
 export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response): Promise<void> => {
   try {
     const id = String(req.params.id);
@@ -107,18 +123,35 @@ export const updateOrderStatus = async (req: AuthenticatedRequest, res: Response
       throw new AppError(`Cannot transition payment from ${order.paymentStatus} to ${paymentStatus}`, 400);
     }
 
+    // A refunded order's money has gone back, so its payment can't stay PAID (it would still count as revenue).
+    const nextPaymentStatus = orderStatus === "REFUNDED" && order.paymentStatus === "PAID" && !paymentStatus ? "REFUNDED" : paymentStatus;
+
     const updated = await prisma.$transaction(async (tx) => {
+      // Claim the transition atomically: if another admin changed this order since we read it, nothing matches
+      // and we stop, so side effects such as restocking can never run twice.
+      const claimed = await tx.order.updateMany({
+        where: { id, orderStatus: order.orderStatus, paymentStatus: order.paymentStatus },
+        data: { orderStatus, paymentStatus: nextPaymentStatus },
+      });
+      if (claimed.count !== 1) throw new AppError("This order was just updated by someone else. Refresh and try again.", 409);
+
       if (orderStatus === "CANCELLED" && order.orderStatus !== "CANCELLED") {
         for (const item of order.items) {
           if (item.productId) {
             await tx.product.updateMany({ where: { id: item.productId }, data: { stock: { increment: item.quantity } } });
           }
         }
+        // Give the coupon use back so a cancelled order doesn't count against the usage limit.
+        if (order.couponId) {
+          await tx.coupon.updateMany({ where: { id: order.couponId, usedCount: { gt: 0 } }, data: { usedCount: { decrement: 1 } } });
+        }
       }
-      return tx.order.update({
+      return tx.order.findUniqueOrThrow({
         where: { id },
-        data: { orderStatus, paymentStatus },
-        include: { items: { select: { id: true, productName: true, price: true, quantity: true, image: true } } },
+        include: {
+          items: { select: { id: true, productId: true, productName: true, price: true, quantity: true, image: true } },
+          coupon: { select: { code: true, discountType: true, discountValue: true } },
+        },
       });
     });
 

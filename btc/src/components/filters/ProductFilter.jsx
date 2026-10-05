@@ -1,6 +1,20 @@
+import { useEffect, useState } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { categoryService } from '../../services/categoryService';
+import { sortCategories } from '../../utils/categories';
 
-const CATEGORIES = ['All', 'Household Products', 'Glycerin Soaps', 'Cold Process Soaps', 'Skin Care Products', 'Hair Care Products'];
+// Loaded from the API so the filter always matches the categories managed in admin.
+function useCategoryOptions() {
+  const [names, setNames] = useState([]);
+  useEffect(() => {
+    let active = true;
+    categoryService.getCategories()
+      .then((res) => active && setNames(sortCategories(res.data || []).map((c) => c.name)))
+      .catch(() => {});
+    return () => { active = false; };
+  }, []);
+  return ['All', ...names];
+}
 const CONCERNS = ['All', 'Hydration', 'Acne & Blemishes', 'Brightening', 'Sensitive Skin'];
 const SORT_OPTIONS = [
   { value: 'featured', label: 'Featured' },
@@ -10,12 +24,13 @@ const SORT_OPTIONS = [
 ];
 
 export function ProductFilter({ filters, onChange }) {
+  const categories = useCategoryOptions();
   return (
     <div className="flex flex-wrap items-center gap-4">
       <FilterSelect
         label="Category"
         value={filters.category}
-        options={CATEGORIES}
+        options={categories.includes(filters.category) ? categories : [...categories, filters.category]}
         onChange={v => onChange({ ...filters, category: v })}
       />
       <FilterSelect

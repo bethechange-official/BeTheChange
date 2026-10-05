@@ -126,3 +126,21 @@ Back up both systems independently:
 - Send encrypted, off-VPS backups of `/var/lib/bethechange/uploads` to another machine or object store.
 
 Test a database and image restore periodically. A database backup alone does not contain the uploaded image bytes.
+
+## WhatsApp order alerts (optional)
+
+Every new order can be sent automatically to the admin's WhatsApp (+91 63008 36017) through Meta's WhatsApp
+Business Cloud API. It stays off until `WHATSAPP_ACCESS_TOKEN` and `WHATSAPP_PHONE_NUMBER_ID` are set in the
+backend environment. Orders work normally either way, and each order in admin shows its WhatsApp status with a
+Resend button. Setup steps and the message template to register are in `backend/WHATSAPP.md`.
+
+## End-to-end tests
+
+`tests/full-e2e.spec.ts` drives the real UI against **local** dev servers and creates/changes data, so run it
+only against a development database, never production:
+
+```bash
+E2E_ADMIN_EMAIL=you@example.com E2E_ADMIN_PASSWORD='…' npx playwright test tests/full-e2e.spec.ts
+```
+
+It registers a throwaway customer and creates its own products and coupons, then hides/deletes them afterwards.
