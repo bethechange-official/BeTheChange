@@ -326,7 +326,7 @@ export default function AddProduct() {
           <div className="bg-white border border-gray-200/80 rounded-xl p-6 shadow-2xs space-y-4">
             <h3 className="text-base font-bold text-gray-900 font-serif border-b border-gray-100 pb-3">Product Images</h3>
             <label className="block border-2 border-dashed border-gray-200 rounded-lg p-4 text-center text-xs font-semibold text-gray-700 cursor-pointer hover:border-gray-400">
-              {uploading ? 'Uploading images…' : 'Upload JPG, PNG, WebP, or GIF (max 5 MB each)'}
+              {uploading ? 'Uploading images…' : 'Upload JPG, PNG, WebP, or GIF (max 10 MB each)'}
               <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" multiple onChange={handleImageUpload} disabled={uploading} className="hidden" />
             </label>
             

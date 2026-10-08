@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
-import { Eye, EyeOff, Lock, Mail, User, Phone, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User, Phone, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Register() {
@@ -23,7 +23,7 @@ export default function Register() {
     const errs = {};
     if (!form.name.trim()) errs.name = 'Full name is required';
     if (!form.email.includes('@')) errs.email = 'Valid email address required';
-    if (form.phone.length < 10) errs.phone = 'Valid 10-digit phone number required';
+    if (form.phone.length < 10) errs.phone = 'Valid phone number required';
     if (form.password.length < 8) errs.password = 'Password must be at least 8 characters';
     if (form.password !== form.confirm) errs.confirm = 'Passwords do not match';
     if (Object.keys(errs).length) { setErrors(errs); return; }
@@ -40,209 +40,201 @@ export default function Register() {
   };
 
   return (
-    <main className="pt-18 md:pt-22 min-h-screen bg-[#FAF9F6] text-[#111111] flex items-center justify-center p-4 md:p-8">
-      <div className="w-full max-w-[1100px] bg-white border border-[#E2DDD6] shadow-xl overflow-hidden grid lg:grid-cols-12 min-h-[680px]">
-        
-        {/* LEFT COLUMN — Editorial Brand Image */}
-        <div className="lg:col-span-5 relative bg-[#111111] text-white p-8 md:p-12 flex flex-col justify-between overflow-hidden hidden md:flex">
-          <div className="absolute inset-0 z-0">
-            <img
-              src="https://images.unsplash.com/photo-1570172619644-dfd03ed5d881?w=1200&q=85"
-              alt="Be The Change Rituals"
-              className="w-full h-full object-cover opacity-40 object-center"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/60 to-transparent" />
+    <main className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-8 left-8">
+        <Link to="/" className="text-gray-500 hover:text-gray-900 flex items-center gap-2 text-sm font-medium transition-colors">
+          <ArrowLeft size={16} />
+          Back to Home
+        </Link>
+      </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <div className="h-12 w-12 bg-black text-white flex items-center justify-center rounded-xl mx-auto shadow-lg text-xl font-serif font-bold tracking-wider mb-6">
+            B
           </div>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+            Create an account
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Join us and begin your journey.
+          </p>
+        </motion.div>
+      </div>
 
-          <div className="relative z-10">
-            <p className="text-[10px] tracking-[0.35em] uppercase text-white/60 mb-2 font-light">BE THE CHANGE</p>
-            <h2 className="font-serif text-3xl md:text-4xl text-white leading-tight font-normal">
-              Join our mindful<br />community.
-            </h2>
-          </div>
-
-          <div className="relative z-10 space-y-6 my-10">
-            <div className="flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white flex-shrink-0 mt-0.5">
-                <Sparkles size={14} />
-              </div>
-              <div>
-                <h4 className="font-serif text-base text-white">Thoughtful Rewards</h4>
-                <p className="text-xs text-white/70 font-light mt-0.5 leading-relaxed">
-                  Enjoy early access to new small-batch releases.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white flex-shrink-0 mt-0.5">
-                <ShieldCheck size={14} />
-              </div>
-              <div>
-                <h4 className="font-serif text-base text-white">Fast & Secure</h4>
-                <p className="text-xs text-white/70 font-light mt-0.5 leading-relaxed">
-                  Save your address and view order status from your account.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10 pt-6 border-t border-white/15">
-            <p className="text-[11px] text-white/60 italic font-serif">
-              "Crafted with care, designed for everyday well-being."
-            </p>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN — Form Area */}
-        <div className="lg:col-span-7 bg-[#FAF9F6] p-8 md:p-12 flex flex-col justify-center">
-          
-          {/* Header Switcher */}
-          <div className="flex items-center justify-between border-b border-[#E2DDD6] pb-6 mb-6">
-            <div>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-[#8A8580] font-medium mb-1">JOIN US</p>
-              <h1 className="font-serif text-3xl md:text-4xl text-[#111111]">Create Account</h1>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <Link to="/login" className="px-3 py-1.5 text-[#8A8580] hover:text-[#111111] text-[10px] tracking-widest uppercase transition-colors">Sign In</Link>
-              <span className="px-3 py-1.5 bg-[#111111] text-white text-[10px] tracking-widest uppercase">Register</span>
-            </div>
-          </div>
-
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-gray-100"
+        >
           {authError && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-5 p-4 bg-red-50 border border-red-200 text-red-700 text-xs font-light"
-            >
+            <div className="mb-6 p-4 bg-red-50/50 border border-red-200/50 rounded-lg text-red-600 text-sm flex items-start">
+              <div className="mt-0.5 mr-2">
+                <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+              </div>
               {authError}
-            </motion.div>
+            </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            
-            {/* Full Name */}
-            <div className="space-y-1">
-              <label className="block text-[10px] tracking-[0.25em] uppercase font-semibold text-[#111111]">
-                Full Name
+          <form className="space-y-4" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="name" className="block text-sm font-medium text-gray-700">
+                Full name
               </label>
-              <div className="relative flex items-center">
-                <User size={15} className="absolute left-4 text-[#8A8580]" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <User className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
+                  id="name"
+                  name="name"
                   type="text"
+                  required
                   value={form.name}
                   onChange={e => set('name', e.target.value)}
-                  placeholder="Sarah Jenkins"
-                  className="w-full bg-white border border-[#E2DDD6] focus:border-[#111111] pl-11 pr-4 py-3 text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none transition-colors"
+                  className={`block w-full pl-10 py-3 sm:text-sm border-gray-300 border rounded-lg focus:ring-black focus:border-black outline-none transition-colors ${errors.name ? 'border-red-300' : 'border-gray-200'}`}
+                  placeholder="John Doe"
                 />
               </div>
-              {errors.name && <p className="text-[11px] text-red-600 font-light mt-0.5">{errors.name}</p>}
+              {errors.name && <p className="mt-1 text-xs text-red-600">{errors.name}</p>}
             </div>
 
-            {/* Email Address */}
-            <div className="space-y-1">
-              <label className="block text-[10px] tracking-[0.25em] uppercase font-semibold text-[#111111]">
-                Email Address
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
               </label>
-              <div className="relative flex items-center">
-                <Mail size={15} className="absolute left-4 text-[#8A8580]" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
+                  id="email"
+                  name="email"
                   type="email"
+                  required
                   value={form.email}
                   onChange={e => set('email', e.target.value)}
-                  placeholder="sarah@example.com"
-                  className="w-full bg-white border border-[#E2DDD6] focus:border-[#111111] pl-11 pr-4 py-3 text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none transition-colors"
+                  className={`block w-full pl-10 py-3 sm:text-sm border-gray-300 border rounded-lg focus:ring-black focus:border-black outline-none transition-colors ${errors.email ? 'border-red-300' : 'border-gray-200'}`}
+                  placeholder="you@example.com"
                 />
               </div>
-              {errors.email && <p className="text-[11px] text-red-600 font-light mt-0.5">{errors.email}</p>}
+              {errors.email && <p className="mt-1 text-xs text-red-600">{errors.email}</p>}
             </div>
 
-            {/* Phone Number */}
-            <div className="space-y-1">
-              <label className="block text-[10px] tracking-[0.25em] uppercase font-semibold text-[#111111]">
-                Phone Number
+            <div>
+              <label htmlFor="phone" className="block text-sm font-medium text-gray-700">
+                Phone number
               </label>
-              <div className="relative flex items-center">
-                <Phone size={15} className="absolute left-4 text-[#8A8580]" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Phone className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
+                  id="phone"
+                  name="phone"
                   type="tel"
+                  required
                   value={form.phone}
                   onChange={e => set('phone', e.target.value)}
-                  placeholder="+91 98765 43210"
-                  className="w-full bg-white border border-[#E2DDD6] focus:border-[#111111] pl-11 pr-4 py-3 text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none transition-colors"
+                  className={`block w-full pl-10 py-3 sm:text-sm border-gray-300 border rounded-lg focus:ring-black focus:border-black outline-none transition-colors ${errors.phone ? 'border-red-300' : 'border-gray-200'}`}
+                  placeholder="+1 (555) 000-0000"
                 />
               </div>
-              {errors.phone && <p className="text-[11px] text-red-600 font-light mt-0.5">{errors.phone}</p>}
+              {errors.phone && <p className="mt-1 text-xs text-red-600">{errors.phone}</p>}
             </div>
 
-            {/* Passwords (2 columns on tablet/desktop) */}
-            <div className="grid sm:grid-cols-2 gap-3">
-              <div className="space-y-1">
-                <label className="block text-[10px] tracking-[0.25em] uppercase font-semibold text-[#111111]">
+            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+              <div>
+                <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password
                 </label>
-                <div className="relative flex items-center">
-                  <Lock size={15} className="absolute left-4 text-[#8A8580]" />
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
                   <input
-                    type={showPassword ? 'text' : 'password'}
+                    id="password"
+                    name="password"
+                    type={showPassword ? "text" : "password"}
+                    required
                     value={form.password}
                     onChange={e => set('password', e.target.value)}
+                    className={`block w-full pl-10 pr-10 py-3 sm:text-sm border-gray-300 border rounded-lg focus:ring-black focus:border-black outline-none transition-colors ${errors.password ? 'border-red-300' : 'border-gray-200'}`}
                     placeholder="••••••••"
-                    className="w-full bg-white border border-[#E2DDD6] focus:border-[#111111] pl-11 pr-10 py-3 text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none transition-colors"
+                  />
+                </div>
+                {errors.password && <p className="mt-1 text-xs text-red-600">{errors.password}</p>}
+              </div>
+
+              <div>
+                <label htmlFor="confirm" className="block text-sm font-medium text-gray-700">
+                  Confirm
+                </label>
+                <div className="mt-1 relative rounded-md shadow-sm">
+                  <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                    <Lock className="h-5 w-5 text-gray-400" />
+                  </div>
+                  <input
+                    id="confirm"
+                    name="confirm"
+                    type={showPassword ? "text" : "password"}
+                    required
+                    value={form.confirm}
+                    onChange={e => set('confirm', e.target.value)}
+                    className={`block w-full pl-10 py-3 sm:text-sm border-gray-300 border rounded-lg focus:ring-black focus:border-black outline-none transition-colors ${errors.confirm ? 'border-red-300' : 'border-gray-200'}`}
+                    placeholder="••••••••"
                   />
                   <button
                     type="button"
-                    onClick={() => setShowPassword(s => !s)}
-                    className="absolute right-3 text-[#8A8580] hover:text-[#111111] transition-colors"
+                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                    onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff size={15} /> : <Eye size={15} />}
+                    {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                   </button>
                 </div>
-                {errors.password && <p className="text-[11px] text-red-600 font-light mt-0.5">{errors.password}</p>}
-              </div>
-
-              <div className="space-y-1">
-                <label className="block text-[10px] tracking-[0.25em] uppercase font-semibold text-[#111111]">
-                  Confirm Password
-                </label>
-                <div className="relative flex items-center">
-                  <Lock size={15} className="absolute left-4 text-[#8A8580]" />
-                  <input
-                    type={showPassword ? 'text' : 'password'}
-                    value={form.confirm}
-                    onChange={e => set('confirm', e.target.value)}
-                    placeholder="••••••••"
-                    className="w-full bg-white border border-[#E2DDD6] focus:border-[#111111] pl-11 pr-4 py-3 text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none transition-colors"
-                  />
-                </div>
-                {errors.confirm && <p className="text-[11px] text-red-600 font-light mt-0.5">{errors.confirm}</p>}
+                {errors.confirm && <p className="mt-1 text-xs text-red-600">{errors.confirm}</p>}
               </div>
             </div>
 
-            {/* Submit Button */}
-            <div className="pt-3">
+            <div className="pt-2">
               <Button
                 type="submit"
                 loading={loading}
-                className="w-full bg-[#111111] text-white hover:bg-[#2A2A2A] py-4 text-[11px] tracking-[0.25em] font-semibold"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all"
               >
-                CREATE MY ACCOUNT
+                Create Account
               </Button>
             </div>
           </form>
 
-          {/* Footer Link */}
-          <div className="mt-6 pt-5 border-t border-[#E2DDD6] text-center">
-            <p className="text-xs text-[#8A8580] font-light">
-              Already have an account?{' '}
-              <Link to="/login" className="text-[#111111] font-semibold tracking-wide uppercase text-[11px] underline hover:text-[#5C554E] ml-1 inline-flex items-center gap-1">
-                SIGN IN HERE <ArrowRight size={11} />
-              </Link>
-            </p>
-          </div>
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  Already have an account?
+                </span>
+              </div>
+            </div>
 
-        </div>
+            <div className="mt-6">
+              <Link
+                to="/login"
+                className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all"
+              >
+                Sign in instead
+              </Link>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </main>
   );

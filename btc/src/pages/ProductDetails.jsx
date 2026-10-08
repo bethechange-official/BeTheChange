@@ -85,9 +85,9 @@ export default function ProductDetails() {
 
   if (loading) {
     return (
-      <main className="pt-24 min-h-screen bg-[#FAF9F6] flex flex-col items-center justify-center">
-        <div className="w-10 h-10 border-2 border-[#111111] border-t-transparent rounded-full animate-spin mb-4" />
-        <p className="font-serif text-sm tracking-widest uppercase text-[#8A8580] animate-pulse">
+      <main className="min-h-screen bg-[#F8F5F0] flex flex-col items-center justify-center">
+        <div className="w-10 h-10 border-2 border-[#1F1A16] border-t-transparent rounded-full animate-spin mb-4" />
+        <p className="font-serif text-sm tracking-widest uppercase text-[#8C8178] animate-pulse">
           Crafting Product Experience…
         </p>
       </main>
@@ -96,20 +96,20 @@ export default function ProductDetails() {
 
   if (!product) {
     return (
-      <main className="pt-28 pb-20 min-h-screen bg-[#FAF9F6] flex items-center justify-center px-6">
-        <div className="text-center max-w-md bg-white border border-[#E2DDD6] p-10 shadow-xs">
-          <div className="w-12 h-12 rounded-full bg-[#F4F2EE] text-[#111111] flex items-center justify-center mx-auto mb-4">
+      <main className="pt-10 pb-20 min-h-screen bg-[#F8F5F0] flex items-center justify-center px-6">
+        <div className="text-center max-w-md bg-white border border-[#E4DDD2] p-10 shadow-xs">
+          <div className="w-12 h-12 rounded-full bg-[#EFE9E0] text-[#1F1A16] flex items-center justify-center mx-auto mb-4">
             <Sparkles size={20} />
           </div>
-          <h1 className="font-serif text-2xl md:text-3xl text-[#111111] mb-2 font-normal">
+          <h1 className="font-serif text-2xl md:text-3xl text-[#1F1A16] mb-2 font-normal">
             Product Not Found
           </h1>
-          <p className="text-xs text-[#8A8580] leading-relaxed mb-6 font-light">
+          <p className="text-xs text-[#8C8178] leading-relaxed mb-6 font-light">
             The botanical ritual you are looking for might have been archived or moved.
           </p>
           <Link
             to="/shop"
-            className="inline-flex items-center justify-center px-6 py-3 bg-[#111111] hover:bg-[#2A2A2A] text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-all"
+            className="inline-flex items-center justify-center px-6 py-3 bg-[#1F1A16] hover:bg-[#3A322B] text-white text-[11px] tracking-[0.2em] uppercase font-semibold transition-all"
           >
             Explore Catalog
           </Link>
@@ -122,26 +122,26 @@ export default function ProductDetails() {
   const benefitsList = parseList(product.benefits);
 
   return (
-    <main className="pt-20 md:pt-24 pb-20 bg-[#FAF9F6] min-h-screen text-[#111111]">
+    <main className="pt-6 md:pt-8 pb-20 bg-[#F8F5F0] min-h-screen text-[#1F1A16]">
       <div className="max-w-[1360px] mx-auto px-5 sm:px-8 md:px-12">
         {/* Editorial Breadcrumbs */}
-        <nav className="text-[10px] tracking-[0.25em] uppercase text-[#8A8580] mb-8 font-medium flex items-center gap-2 flex-wrap">
-          <Link to="/" className="hover:text-[#111111] transition-colors">Home</Link>
+        <nav className="text-[10px] tracking-[0.25em] uppercase text-[#8C8178] mb-8 font-medium flex items-center gap-2 flex-wrap">
+          <Link to="/" className="hover:text-[#1F1A16] transition-colors">Home</Link>
           <span>/</span>
-          <Link to="/shop" className="hover:text-[#111111] transition-colors">Shop</Link>
+          <Link to="/shop" className="hover:text-[#1F1A16] transition-colors">Shop</Link>
           <span>/</span>
           {product.category && (
             <>
               <Link
                 to={`/category/${product.category.toLowerCase().replace(/\s+/g, '-')}`}
-                className="hover:text-[#111111] transition-colors"
+                className="hover:text-[#1F1A16] transition-colors"
               >
                 {product.category}
               </Link>
               <span>/</span>
             </>
           )}
-          <span className="text-[#111111] font-semibold truncate max-w-[240px] sm:max-w-none">{product.name}</span>
+          <span className="text-[#1F1A16] font-semibold truncate max-w-[240px] sm:max-w-none">{product.name}</span>
         </nav>
 
         {/* Product Hero Section */}
@@ -154,19 +154,19 @@ export default function ProductDetails() {
             {/* Botanical Trust Pillars */}
             <div className="grid grid-cols-3 gap-3 pt-4 border-t border-[#EAE6DE]">
               <div className="bg-white/80 border border-[#E8E4DC] p-3 text-center rounded-xs shadow-2xs">
-                <Leaf size={16} className="mx-auto mb-1.5 text-[#5C554E]" />
-                <p className="text-[10px] tracking-wider uppercase font-semibold text-[#111111]">100% Plant-Based</p>
-                <p className="text-[9px] text-[#8A8580] mt-0.5 font-light">Zero harmful sulfates or parabens</p>
+                <Leaf size={16} className="mx-auto mb-1.5 text-[#5E554D]" />
+                <p className="text-[10px] tracking-wider uppercase font-semibold text-[#1F1A16]">100% Plant-Based</p>
+                <p className="text-[9px] text-[#8C8178] mt-0.5 font-light">Zero harmful sulfates or parabens</p>
               </div>
               <div className="bg-white/80 border border-[#E8E4DC] p-3 text-center rounded-xs shadow-2xs">
-                <Truck size={16} className="mx-auto mb-1.5 text-[#5C554E]" />
-                <p className="text-[10px] tracking-wider uppercase font-semibold text-[#111111]">Cash on Delivery</p>
-                <p className="text-[9px] text-[#8A8580] mt-0.5 font-light">Pay conveniently at your doorstep</p>
+                <Truck size={16} className="mx-auto mb-1.5 text-[#5E554D]" />
+                <p className="text-[10px] tracking-wider uppercase font-semibold text-[#1F1A16]">Cash on Delivery</p>
+                <p className="text-[9px] text-[#8C8178] mt-0.5 font-light">Pay conveniently at your doorstep</p>
               </div>
               <div className="bg-white/80 border border-[#E8E4DC] p-3 text-center rounded-xs shadow-2xs">
-                <ShieldCheck size={16} className="mx-auto mb-1.5 text-[#5C554E]" />
-                <p className="text-[10px] tracking-wider uppercase font-semibold text-[#111111]">Small Batch Purity</p>
-                <p className="text-[9px] text-[#8A8580] mt-0.5 font-light">Crafted for maximum potency</p>
+                <ShieldCheck size={16} className="mx-auto mb-1.5 text-[#5E554D]" />
+                <p className="text-[10px] tracking-wider uppercase font-semibold text-[#1F1A16]">Small Batch Purity</p>
+                <p className="text-[9px] text-[#8C8178] mt-0.5 font-light">Crafted for maximum potency</p>
               </div>
             </div>
           </div>
@@ -177,20 +177,20 @@ export default function ProductDetails() {
             {/* Header / Titles */}
             <div>
               <div className="flex items-center gap-2 mb-2">
-                <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-[#8A8580]">
+                <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-[#8C8178]">
                   {product.category || 'Apothecary Ritual'}
                 </span>
                 {product.collection && (
                   <>
-                    <span className="text-[#8A8580]">•</span>
-                    <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-[#8A8580]">
+                    <span className="text-[#8C8178]">•</span>
+                    <span className="text-[10px] tracking-[0.25em] uppercase font-semibold text-[#8C8178]">
                       {product.collection}
                     </span>
                   </>
                 )}
               </div>
 
-              <h1 className="font-serif text-3xl sm:text-4xl text-[#111111] font-normal leading-snug mb-3">
+              <h1 className="font-serif text-3xl sm:text-4xl text-[#1F1A16] font-normal leading-snug mb-3">
                 {product.name}
               </h1>
 
@@ -199,21 +199,21 @@ export default function ProductDetails() {
             {/* Price & Savings */}
             <div className="p-4 bg-white border border-[#E8E4DC] rounded-xs shadow-2xs">
               <div className="flex items-baseline gap-3 mb-1">
-                <span className="font-serif text-3xl font-normal text-[#111111]">
+                <span className="font-serif text-3xl font-normal text-[#1F1A16]">
                   ₹{Number(product.price).toLocaleString()}
                 </span>
                 {product.originalPrice && Number(product.originalPrice) > Number(product.price) && (
                   <>
-                    <span className="text-sm text-[#8A8580] line-through font-light">
+                    <span className="text-sm text-[#8C8178] line-through font-light">
                       ₹{Number(product.originalPrice).toLocaleString()}
                     </span>
-                    <span className="text-[9px] tracking-wider uppercase font-bold bg-[#111111] text-white px-2 py-0.5 rounded-2xs">
+                    <span className="text-[9px] tracking-wider uppercase font-bold bg-[#1F1A16] text-white px-2 py-0.5 rounded-2xs">
                       {discount}% OFF
                     </span>
                   </>
                 )}
               </div>
-              <p className="text-[11px] text-[#8A8580] font-light flex items-center gap-1.5">
+              <p className="text-[11px] text-[#8C8178] font-light flex items-center gap-1.5">
                 <Check size={13} className="text-emerald-700" />
                 <span>Inclusive of all taxes • <strong>Cash on Delivery (COD) Available</strong></span>
               </p>
@@ -221,11 +221,11 @@ export default function ProductDetails() {
 
             {/* Short Description */}
             {product.shortDescription ? (
-              <p className="text-xs sm:text-sm text-[#5C554E] font-light leading-relaxed">
+              <p className="text-xs sm:text-sm text-[#5E554D] font-light leading-relaxed">
                 {product.shortDescription}
               </p>
             ) : product.description ? (
-              <p className="text-xs sm:text-sm text-[#5C554E] font-light leading-relaxed line-clamp-3">
+              <p className="text-xs sm:text-sm text-[#5E554D] font-light leading-relaxed line-clamp-3">
                 {product.description}
               </p>
             ) : null}
@@ -234,13 +234,13 @@ export default function ProductDetails() {
             <div className="grid grid-cols-2 gap-3 text-xs">
               {product.size && (
                 <div className="bg-white p-3 border border-[#E8E4DC]">
-                  <p className="text-[10px] tracking-wider uppercase text-[#8A8580] mb-0.5">Net Volume / Size</p>
-                  <p className="text-[#111111] font-semibold">{product.size}</p>
+                  <p className="text-[10px] tracking-wider uppercase text-[#8C8178] mb-0.5">Net Volume / Size</p>
+                  <p className="text-[#1F1A16] font-semibold">{product.size}</p>
                 </div>
               )}
               <div className="bg-white p-3 border border-[#E8E4DC]">
-                <p className="text-[10px] tracking-wider uppercase text-[#8A8580] mb-0.5">Focus Concern</p>
-                <p className="text-[#111111] font-semibold">{product.skinConcern || 'Everyday Radiance'}</p>
+                <p className="text-[10px] tracking-wider uppercase text-[#8C8178] mb-0.5">Focus Concern</p>
+                <p className="text-[#1F1A16] font-semibold">{product.skinConcern || 'Everyday Radiance'}</p>
               </div>
             </div>
 
@@ -257,7 +257,7 @@ export default function ProductDetails() {
                 <Button
                   onClick={handleAddToCart}
                   disabled={product.stock <= 0 || adding}
-                  className="flex-1 py-4 bg-[#111111] hover:bg-[#2A2A2A] text-white text-[11px] tracking-[0.2em] font-semibold flex items-center justify-center gap-2"
+                  className="flex-1 py-4 bg-[#1F1A16] hover:bg-[#3A322B] text-white text-[11px] tracking-[0.2em] font-semibold flex items-center justify-center gap-2"
                 >
                   <ShoppingBag size={15} />
                   <span>{product.stock <= 0 ? 'OUT OF STOCK' : adding ? 'ADDING…' : 'ADD TO BAG'}</span>
@@ -269,10 +269,10 @@ export default function ProductDetails() {
                     setWishlisted((w) => !w);
                     setToast(wishlisted ? 'Removed from wishlist' : 'Saved to wishlist');
                   }}
-                  className="w-12 h-12 border border-[#E8E4DC] bg-white flex items-center justify-center hover:border-[#111111] transition-colors shadow-2xs"
+                  className="w-12 h-12 border border-[#E8E4DC] bg-white flex items-center justify-center hover:border-[#1F1A16] transition-colors shadow-2xs"
                   aria-label="Wishlist"
                 >
-                  <Heart size={18} fill={wishlisted ? '#111111' : 'none'} className="text-[#111111]" />
+                  <Heart size={18} fill={wishlisted ? '#1F1A16' : 'none'} className="text-[#1F1A16]" />
                 </button>
               </div>
 
@@ -289,7 +289,7 @@ export default function ProductDetails() {
             <div className="pt-4 border-t border-[#EAE6DE]">
               {product.description && (
                 <Accordion title="Formula & Philosophy">
-                  <div className="text-xs sm:text-sm text-[#5C554E] font-light leading-relaxed whitespace-pre-line py-1">
+                  <div className="text-xs sm:text-sm text-[#5E554D] font-light leading-relaxed whitespace-pre-line py-1">
                     {product.description}
                   </div>
                 </Accordion>
@@ -300,8 +300,8 @@ export default function ProductDetails() {
                   <div className="py-2">
                     <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       {ingredientsList.map((ing, idx) => (
-                        <li key={idx} className="flex items-center gap-2 text-xs text-[#5C554E]">
-                          <span className="w-1.5 h-1.5 rounded-full bg-[#8A8580]" />
+                        <li key={idx} className="flex items-center gap-2 text-xs text-[#5E554D]">
+                          <span className="w-1.5 h-1.5 rounded-full bg-[#8C8178]" />
                           <span>{ing}</span>
                         </li>
                       ))}
@@ -310,7 +310,7 @@ export default function ProductDetails() {
                 </Accordion>
               ) : product.ingredients ? (
                 <Accordion title="Active Botanicals & Ingredients">
-                  <p className="text-xs sm:text-sm text-[#5C554E] font-light leading-relaxed py-1">
+                  <p className="text-xs sm:text-sm text-[#5E554D] font-light leading-relaxed py-1">
                     {product.ingredients}
                   </p>
                 </Accordion>
@@ -321,7 +321,7 @@ export default function ProductDetails() {
                   <div className="py-2">
                     <ul className="space-y-2">
                       {benefitsList.map((ben, idx) => (
-                        <li key={idx} className="flex items-start gap-2.5 text-xs text-[#5C554E]">
+                        <li key={idx} className="flex items-start gap-2.5 text-xs text-[#5E554D]">
                           <Check size={14} className="text-emerald-800 flex-shrink-0 mt-0.5" />
                           <span>{ben}</span>
                         </li>
@@ -331,7 +331,7 @@ export default function ProductDetails() {
                 </Accordion>
               ) : product.benefits ? (
                 <Accordion title="Key Ritual Benefits">
-                  <p className="text-xs sm:text-sm text-[#5C554E] font-light leading-relaxed py-1">
+                  <p className="text-xs sm:text-sm text-[#5E554D] font-light leading-relaxed py-1">
                     {product.benefits}
                   </p>
                 </Accordion>
@@ -339,14 +339,14 @@ export default function ProductDetails() {
 
               {(product.usageInstructions || product.usage) && (
                 <Accordion title="Application Ritual (How to Use)">
-                  <p className="text-xs sm:text-sm text-[#5C554E] font-light leading-relaxed py-1">
+                  <p className="text-xs sm:text-sm text-[#5E554D] font-light leading-relaxed py-1">
                     {product.usageInstructions || product.usage}
                   </p>
                 </Accordion>
               )}
 
               <Accordion title="Shipping & COD Fulfillment">
-                <div className="text-xs text-[#5C554E] font-light space-y-2 py-1 leading-relaxed">
+                <div className="text-xs text-[#5E554D] font-light space-y-2 py-1 leading-relaxed">
                   <p>• <strong>Payment</strong>: Cash on Delivery (COD) only. Pay cash when your parcel arrives.</p>
                   <p>• <strong>Dispatch</strong>: Hand-packed and dispatched within 24 to 48 hours.</p>
                   <p>• <strong>Free Shipping</strong>: Complimentary delivery on orders above ₹999 across all pin codes.</p>
@@ -361,16 +361,16 @@ export default function ProductDetails() {
           <div className="mt-24 pt-16 border-t border-[#EAE6DE]">
             <div className="flex items-center justify-between mb-8">
               <div>
-                <p className="text-[10px] tracking-[0.3em] uppercase text-[#8A8580] font-semibold mb-1">
+                <p className="text-[10px] tracking-[0.3em] uppercase text-[#8C8178] font-semibold mb-1">
                   CURATED RECOMMENDATIONS
                 </p>
-                <h2 className="font-serif text-2xl sm:text-3xl text-[#111111] font-normal">
+                <h2 className="font-serif text-2xl sm:text-3xl text-[#1F1A16] font-normal">
                   Complete Your Daily Ritual
                 </h2>
               </div>
               <Link
                 to="/shop"
-                className="text-[11px] tracking-widest uppercase font-semibold text-[#111111] hover:underline flex items-center gap-1.5"
+                className="text-[11px] tracking-widest uppercase font-semibold text-[#1F1A16] hover:underline flex items-center gap-1.5"
               >
                 View All <ArrowRight size={13} />
               </Link>

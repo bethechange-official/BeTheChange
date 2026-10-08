@@ -15,8 +15,8 @@ export function Modal({ isOpen, onClose, title, children }) {
       <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" onClick={onClose} />
       <div className="relative bg-white w-full max-w-md mx-4 p-8 shadow-2xl">
         <div className="flex items-center justify-between mb-6">
-          {title && <h3 className="font-serif text-2xl text-[#111111]">{title}</h3>}
-          <button onClick={onClose} className="ml-auto text-[#8A8580] hover:text-[#111111] transition-colors">
+          {title && <h3 className="font-serif text-2xl text-[#1F1A16]">{title}</h3>}
+          <button onClick={onClose} className="ml-auto text-[#8C8178] hover:text-[#1F1A16] transition-colors">
             <X size={18} />
           </button>
         </div>

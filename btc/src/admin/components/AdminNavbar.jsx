@@ -45,7 +45,7 @@ export function AdminNavbar({ title, onToggleSidebar }) {
             <p className="text-xs font-semibold text-gray-900 leading-tight">
               {currentAdmin ? currentAdmin.name : 'BTC Administrator'}
             </p>
-            <p className="text-[10px] text-gray-500">{currentAdmin ? currentAdmin.email : 'admin@btc.com'}</p>
+            <p className="text-[10px] text-gray-500">{currentAdmin?.email || ''}</p>
           </div>
 
           <button

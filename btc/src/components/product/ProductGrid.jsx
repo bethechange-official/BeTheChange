@@ -10,14 +10,14 @@ export function ProductGrid({ products, onAddToCart, cols = 4 }) {
   if (!products.length) {
     return (
       <div className="py-24 text-center">
-        <p className="font-serif text-2xl text-[#8A8580]">No products found.</p>
-        <p className="text-sm text-[#8A8580] mt-2">Try adjusting your filters.</p>
+        <p className="font-serif italic text-3xl text-[#8C8178]">No products found.</p>
+        <p className="text-sm text-[#8C8178] mt-2">Try adjusting your filters.</p>
       </div>
     );
   }
 
   return (
-    <div className={`grid ${colClass} gap-x-8 gap-y-14 md:gap-x-10 md:gap-y-16`}>
+    <div className={`grid ${colClass} gap-x-4 gap-y-12 sm:gap-x-8 md:gap-x-10 md:gap-y-16`}>
       {products.map(p => (
         <ProductCard key={p.id} product={p} onAddToCart={onAddToCart} />
       ))}

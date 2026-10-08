@@ -37,7 +37,7 @@ export const getSettings = async (req: AuthenticatedRequest, res: Response): Pro
 };
 
 export const getPublicSettings = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
-  res.set("Cache-Control", "public, max-age=300, stale-while-revalidate=60");
+  res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=60");
   const settings = await prisma.setting.findMany({
     where: { key: { in: ["shippingFee", "freeShippingThreshold", "currency"] } },
   });

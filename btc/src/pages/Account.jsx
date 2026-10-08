@@ -30,7 +30,7 @@ export default function Account() {
   }, [activeTab, user]);
 
   if (authLoading) {
-    return <main className="pt-24 min-h-screen flex items-center justify-center bg-[#FAF9F6]">Loading…</main>;
+    return <main className="min-h-screen flex items-center justify-center bg-[#F8F5F0]">Loading…</main>;
   }
 
   // Redirect if not logged in
@@ -76,23 +76,23 @@ export default function Account() {
     : 'U';
 
   return (
-    <main className="pt-18 md:pt-22 pb-24 min-h-screen bg-[#FAF9F6] text-[#111111]">
+    <main className="pb-24 min-h-screen bg-[#F8F5F0] text-[#1F1A16]">
       <div className="max-w-[1300px] mx-auto px-6 md:px-10">
         
         {/* TOP HERO MEMBER CARD */}
-        <div className="relative bg-[#111111] text-white p-8 md:p-12 mb-10 overflow-hidden shadow-lg">
+        <div className="relative bg-[#1F1A16] text-white p-8 md:p-12 mb-10 overflow-hidden shadow-lg">
           <div className="absolute inset-0 z-0 opacity-25">
             <img
               src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=1600&q=80"
               alt="Member Header"
               className="w-full h-full object-cover object-center"
             />
-            <div className="absolute inset-0 bg-gradient-to-r from-[#111111] via-[#111111]/90 to-transparent" />
+            <div className="absolute inset-0 bg-gradient-to-r from-[#1F1A16] via-[#1F1A16]/90 to-transparent" />
           </div>
 
           <div className="relative z-10 flex flex-col md:flex-row md:items-center justify-between gap-6">
             <div className="flex items-center gap-6">
-              <div className="w-20 h-20 rounded-full bg-white text-[#111111] font-serif text-3xl flex items-center justify-center font-bold flex-shrink-0 shadow-md">
+              <div className="w-20 h-20 rounded-full bg-white text-[#1F1A16] font-serif text-3xl flex items-center justify-center font-bold flex-shrink-0 shadow-md">
                 {initials}
               </div>
               <div>
@@ -111,7 +111,7 @@ export default function Account() {
 
             <button
               onClick={handleLogout}
-              className="inline-flex items-center gap-2 border border-white/20 hover:border-white px-5 py-2.5 text-[10px] tracking-[0.2em] uppercase font-semibold text-white transition-all bg-white/10 hover:bg-white hover:text-[#111111] self-start md:self-auto"
+              className="inline-flex items-center gap-2 border border-white/20 hover:border-white px-5 py-2.5 text-[10px] tracking-[0.2em] uppercase font-semibold text-white transition-all bg-white/10 hover:bg-white hover:text-[#1F1A16] self-start md:self-auto"
             >
               <LogOut size={13} />
               Sign Out
@@ -124,14 +124,14 @@ export default function Account() {
           
           {/* LEFT SIDEBAR NAVIGATION */}
           <div className="lg:col-span-3">
-            <div className="bg-white border border-[#E2DDD6] p-3 space-y-1.5 shadow-2xs sticky top-32">
-              <p className="text-[9px] tracking-[0.25em] uppercase text-[#8A8580] font-semibold px-4 pt-3 pb-2">
+            <div className="bg-white border border-[#E4DDD2] p-3 space-y-1.5 shadow-2xs sticky top-32">
+              <p className="text-[9px] tracking-[0.25em] uppercase text-[#8C8178] font-semibold px-4 pt-3 pb-2">
                 ACCOUNT MANAGEMENT
               </p>
 
               <button
                 onClick={() => setActiveTab('orders')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'orders' ? 'bg-[#111111] text-white shadow-sm' : 'text-[#111111] hover:bg-[#FAF9F6]'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'orders' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-[#F8F5F0]'}`}
               >
                 <Package size={15} />
                 <span>My Orders</span>
@@ -140,7 +140,7 @@ export default function Account() {
 
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'profile' ? 'bg-[#111111] text-white shadow-sm' : 'text-[#111111] hover:bg-[#FAF9F6]'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'profile' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-[#F8F5F0]'}`}
               >
                 <User size={15} />
                 <span>Profile Details</span>
@@ -148,7 +148,7 @@ export default function Account() {
 
               <button
                 onClick={() => setActiveTab('addresses')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'addresses' ? 'bg-[#111111] text-white shadow-sm' : 'text-[#111111] hover:bg-[#FAF9F6]'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'addresses' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-[#F8F5F0]'}`}
               >
                 <MapPin size={15} />
                 <span>Addresses</span>
@@ -156,13 +156,13 @@ export default function Account() {
 
               <button
                 onClick={() => setActiveTab('security')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'security' ? 'bg-[#111111] text-white shadow-sm' : 'text-[#111111] hover:bg-[#FAF9F6]'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'security' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-[#F8F5F0]'}`}
               >
                 <Shield size={15} />
                 <span>Security</span>
               </button>
 
-              <div className="pt-3 border-t border-[#F3EFE8] mt-2">
+              <div className="pt-3 border-t border-[#EFE9E0] mt-2">
                 <button
                   onClick={handleLogout}
                   className="w-full flex items-center gap-3 px-4 py-3 text-[11px] tracking-[0.2em] uppercase font-semibold text-red-600 hover:bg-red-50 transition-colors text-left"
@@ -180,14 +180,14 @@ export default function Account() {
             {/* 1. ORDERS TAB */}
             {activeTab === 'orders' && (
               <div className="space-y-6">
-                <div className="bg-white border border-[#E2DDD6] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="bg-white border border-[#E4DDD2] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="font-serif text-2xl md:text-3xl text-[#111111]">Order History</h2>
-                    <p className="text-xs text-[#8A8580] mt-1 font-light">View and track all your recent purchases and delivery updates.</p>
+                    <h2 className="font-serif text-2xl md:text-3xl text-[#1F1A16]">Order History</h2>
+                    <p className="text-xs text-[#8C8178] mt-1 font-light">View and track all your recent purchases and delivery updates.</p>
                   </div>
                   <Link
                     to="/shop"
-                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#111111] text-[#111111] hover:bg-[#111111] hover:text-white text-[10px] tracking-[0.2em] uppercase font-semibold transition-all"
+                    className="inline-flex items-center gap-2 px-5 py-2.5 border border-[#1F1A16] text-[#1F1A16] hover:bg-[#1F1A16] hover:text-white text-[10px] tracking-[0.2em] uppercase font-semibold transition-all"
                   >
                     <ShoppingBag size={13} />
                     <span>BROWSE SHOP</span>
@@ -201,27 +201,27 @@ export default function Account() {
                       initial={{ opacity: 0, y: 15 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, delay: idx * 0.08 }}
-                      className="bg-white border border-[#E2DDD6] p-6 space-y-5 shadow-2xs hover:border-[#111111] transition-colors"
+                      className="bg-white border border-[#E4DDD2] p-6 space-y-5 shadow-2xs hover:border-[#1F1A16] transition-colors"
                     >
                       {/* Order Header */}
-                      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#F3EFE8]">
+                      <div className="flex flex-wrap items-center justify-between gap-4 pb-4 border-b border-[#EFE9E0]">
                         <div className="flex items-center gap-6">
                           <div>
-                            <span className="text-[9px] tracking-[0.2em] uppercase text-[#8A8580]">Order Reference</span>
-                            <p className="font-serif text-lg font-medium text-[#111111]">{order.orderId}</p>
+                            <span className="text-[9px] tracking-[0.2em] uppercase text-[#8C8178]">Order Reference</span>
+                            <p className="font-serif text-lg font-medium text-[#1F1A16]">{order.orderId}</p>
                           </div>
                           <div>
-                            <span className="text-[9px] tracking-[0.2em] uppercase text-[#8A8580]">Date Placed</span>
-                            <p className="text-xs text-[#111111] font-medium">{order.createdAt}</p>
+                            <span className="text-[9px] tracking-[0.2em] uppercase text-[#8C8178]">Date Placed</span>
+                            <p className="text-xs text-[#1F1A16] font-medium">{order.createdAt}</p>
                           </div>
                         </div>
 
                         <div className="flex items-center gap-4">
                           <div>
-                            <span className="text-[9px] tracking-[0.2em] uppercase text-[#8A8580]">Total Amount</span>
-                            <p className="text-base font-semibold text-[#111111]">₹{order.total?.toLocaleString()}</p>
+                            <span className="text-[9px] tracking-[0.2em] uppercase text-[#8C8178]">Total Amount</span>
+                            <p className="text-base font-semibold text-[#1F1A16]">₹{order.total?.toLocaleString()}</p>
                           </div>
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#FAF9F6] border border-[#E2DDD6] text-[10px] tracking-widest uppercase font-semibold text-[#111111]">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F8F5F0] border border-[#E4DDD2] text-[10px] tracking-widest uppercase font-semibold text-[#1F1A16]">
                             <Truck size={12} className="text-emerald-700" />
                             {order.status || 'Confirmed'}
                           </span>
@@ -231,22 +231,22 @@ export default function Account() {
                       {/* Items List */}
                       <div className="space-y-3 pt-1">
                         {order.items?.map(item => (
-                          <div key={item.id} className="flex items-center gap-4 py-2 border-b border-[#FAF9F6] last:border-0">
-                            <div className="w-14 h-14 bg-[#FAF9F6] border border-[#E2DDD6] overflow-hidden flex-shrink-0">
+                          <div key={item.id} className="flex items-center gap-4 py-2 border-b border-[#F8F5F0] last:border-0">
+                            <div className="w-14 h-14 bg-[#F8F5F0] border border-[#E4DDD2] overflow-hidden flex-shrink-0">
                               {(item.images?.[0]) && <img src={item.images?.[0]} alt={item.name} className="w-full h-full object-cover" />}
                             </div>
                             <div className="flex-1 min-w-0">
-                              <p className="font-serif text-base text-[#111111] truncate">{item.name}</p>
-                              <p className="text-[#8A8580] text-xs font-light">Quantity: {item.quantity} &bull; ₹{item.price.toLocaleString()} each</p>
+                              <p className="font-serif text-base text-[#1F1A16] truncate">{item.name}</p>
+                              <p className="text-[#8C8178] text-xs font-light">Quantity: {item.quantity} &bull; ₹{item.price.toLocaleString()} each</p>
                             </div>
-                            <span className="font-semibold text-sm text-[#111111]">₹{(item.price * item.quantity).toLocaleString()}</span>
+                            <span className="font-semibold text-sm text-[#1F1A16]">₹{(item.price * item.quantity).toLocaleString()}</span>
                           </div>
                         ))}
                       </div>
 
                       {/* Fulfilment note */}
-                      <div className="pt-3 flex items-center justify-between border-t border-[#F3EFE8]">
-                        <p className="text-xs text-[#8A8580] font-light">Order status is updated manually by our fulfilment team.</p>
+                      <div className="pt-3 flex items-center justify-between border-t border-[#EFE9E0]">
+                        <p className="text-xs text-[#8C8178] font-light">Order status is updated manually by our fulfilment team.</p>
                       </div>
                     </motion.div>
                   ))}
@@ -256,10 +256,10 @@ export default function Account() {
 
             {/* 2. PROFILE DETAILS TAB */}
             {activeTab === 'profile' && (
-              <div className="bg-white border border-[#E2DDD6] p-8 md:p-10 space-y-6 shadow-2xs">
+              <div className="bg-white border border-[#E4DDD2] p-8 md:p-10 space-y-6 shadow-2xs">
                 <div>
-                  <p className="text-[10px] tracking-[0.25em] uppercase text-[#8A8580] font-medium mb-1">PERSONAL DETAILS</p>
-                  <h2 className="font-serif text-2xl md:text-3xl text-[#111111]">Edit Profile Information</h2>
+                  <p className="text-[10px] tracking-[0.25em] uppercase text-[#8C8178] font-medium mb-1">PERSONAL DETAILS</p>
+                  <h2 className="font-serif text-2xl md:text-3xl text-[#1F1A16]">Edit Profile Information</h2>
                   <p className="text-xs text-[#666666] mt-1 font-light">Update your account name, contact number, and default contact details.</p>
                 </div>
 
@@ -292,7 +292,7 @@ export default function Account() {
                   />
 
                   <div className="pt-4">
-                    <Button type="submit" size="md" className="bg-[#111111] text-white hover:bg-[#2A2A2A] px-8 py-3.5 text-[11px] tracking-[0.2em]">
+                    <Button type="submit" size="md" className="bg-[#1F1A16] text-white hover:bg-[#3A322B] px-8 py-3.5 text-[11px] tracking-[0.2em]">
                       {saved ? 'Saved Successfully ✓' : 'Save Changes'}
                     </Button>
                   </div>
@@ -303,32 +303,32 @@ export default function Account() {
             {/* 3. ADDRESSES TAB */}
             {activeTab === 'addresses' && (
               <div className="space-y-6">
-                <div className="bg-white border border-[#E2DDD6] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                <div className="bg-white border border-[#E4DDD2] p-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div>
-                    <h2 className="font-serif text-2xl text-[#111111]">Saved Delivery Addresses</h2>
-                    <p className="text-xs text-[#8A8580] mt-1 font-light">Manage your default shipping destinations for fast checkout.</p>
+                    <h2 className="font-serif text-2xl text-[#1F1A16]">Saved Delivery Addresses</h2>
+                    <p className="text-xs text-[#8C8178] mt-1 font-light">Manage your default shipping destinations for fast checkout.</p>
                   </div>
                 </div>
 
                 {savedAddresses.length === 0 ? (
-                  <div className="bg-white border border-[#E2DDD6] p-8 text-center">
-                    <p className="text-sm text-[#8A8580] font-light">No saved addresses yet. Add one during checkout.</p>
+                  <div className="bg-white border border-[#E4DDD2] p-8 text-center">
+                    <p className="text-sm text-[#8C8178] font-light">No saved addresses yet. Add one during checkout.</p>
                   </div>
                 ) : (
                   <div className="grid sm:grid-cols-2 gap-6">
                     {savedAddresses.map(addr => (
-                      <div key={addr.id} className={`bg-white border p-6 space-y-2 relative ${addr.isDefault ? 'border-[#111111]' : 'border-[#E2DDD6]'}`}>
+                      <div key={addr.id} className={`bg-white border p-6 space-y-2 relative ${addr.isDefault ? 'border-[#1F1A16]' : 'border-[#E4DDD2]'}`}>
                         {addr.isDefault && (
-                          <span className="absolute top-4 right-4 text-[9px] tracking-widest uppercase font-semibold px-2 py-0.5 bg-[#111111] text-white">
+                          <span className="absolute top-4 right-4 text-[9px] tracking-widest uppercase font-semibold px-2 py-0.5 bg-[#1F1A16] text-white">
                             DEFAULT
                           </span>
                         )}
-                        <p className="font-serif text-lg text-[#111111]">{addr.name}</p>
+                        <p className="font-serif text-lg text-[#1F1A16]">{addr.name}</p>
                         <p className="text-xs text-[#555555] font-light leading-relaxed">
                           {addr.addressLine1}{addr.addressLine2 ? `, ${addr.addressLine2}` : ''}
                         </p>
                         <p className="text-xs text-[#555555] font-light">{addr.city}, {addr.state} — {addr.pincode}</p>
-                        <p className="text-xs text-[#8A8580] font-light">Phone: {addr.phone}</p>
+                        <p className="text-xs text-[#8C8178] font-light">Phone: {addr.phone}</p>
                       </div>
                     ))}
                   </div>
@@ -339,19 +339,19 @@ export default function Account() {
 
             {/* 5. SECURITY TAB */}
             {activeTab === 'security' && (
-              <div className="bg-white border border-[#E2DDD6] p-8 md:p-10 space-y-6 shadow-2xs">
+              <div className="bg-white border border-[#E4DDD2] p-8 md:p-10 space-y-6 shadow-2xs">
                 <div>
-                  <h2 className="font-serif text-2xl md:text-3xl text-[#111111]">Security & Account Controls</h2>
-                  <p className="text-xs text-[#8A8580] mt-1 font-light">Manage your session and account access.</p>
+                  <h2 className="font-serif text-2xl md:text-3xl text-[#1F1A16]">Security & Account Controls</h2>
+                  <p className="text-xs text-[#8C8178] mt-1 font-light">Manage your session and account access.</p>
                 </div>
 
-                <div className="border-t border-[#F3EFE8] pt-6">
-                  <p className="text-xs text-[#8A8580] font-light">Password changes are not available from the account portal. Please contact support if you need to reset your password.</p>
+                <div className="border-t border-[#EFE9E0] pt-6">
+                  <p className="text-xs text-[#8C8178] font-light">Password changes are not available from the account portal. Please contact support if you need to reset your password.</p>
                 </div>
 
-                <div className="border-t border-[#F3EFE8] pt-8 mt-8">
+                <div className="border-t border-[#EFE9E0] pt-8 mt-8">
                   <h3 className="font-serif text-lg text-red-600 mb-2">Sign Out of Account</h3>
-                  <p className="text-xs text-[#8A8580] mb-4 font-light">
+                  <p className="text-xs text-[#8C8178] mb-4 font-light">
                     Terminates your current session on this browser.
                   </p>
                   <Button variant="outline" onClick={handleLogout} size="sm" className="border-red-600 text-red-600 hover:bg-red-600 hover:text-white">

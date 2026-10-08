@@ -31,7 +31,7 @@ export const upload = multer({
   },
   limits: {
     files: 8,
-    fileSize: 5 * 1024 * 1024,
+    fileSize: 10 * 1024 * 1024,
     fields: 10,
   },
 });
@@ -85,12 +85,13 @@ export const removeManagedImagesIfUnused = async (urls: string[]): Promise<void>
   for (const url of [...new Set(urls)]) {
     const filename = managedFilename(url);
     if (!filename) continue;
-    const [productImage, categoryImage, collectionImage] = await Promise.all([
+    const [productImage, categoryImage, collectionImage, bannerImage] = await Promise.all([
       prisma.productImage.findFirst({ where: { url }, select: { id: true } }),
       prisma.category.findFirst({ where: { imageUrl: url }, select: { id: true } }),
       prisma.collection.findFirst({ where: { imageUrl: url }, select: { id: true } }),
+      prisma.banner.findFirst({ where: { imageUrl: url }, select: { id: true } }),
     ]);
-    if (productImage || categoryImage || collectionImage) continue;
+    if (productImage || categoryImage || collectionImage || bannerImage) continue;
     await fs.promises.unlink(path.join(productImageDirectory, filename)).catch((error: NodeJS.ErrnoException) => {
       if (error.code !== "ENOENT") console.error(`Failed to remove unused upload ${filename}:`, error);
     });

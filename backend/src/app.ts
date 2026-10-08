@@ -28,6 +28,9 @@ import addressRoutes from "./routes/address.routes";
 import storefrontMiscRoutes from "./routes/storefront.misc.routes";
 import storefrontOrderRoutes from "./routes/storefront.order.routes";
 import publicSettingsRoutes from "./routes/public.settings.routes";
+import bannerRoutes from "./routes/banner.routes";
+import storefrontBannerRoutes from "./routes/storefront.banner.routes";
+import storefrontCollectionRoutes from "./routes/storefront.collection.routes";
 
 const app = express();
 app.disable("x-powered-by");
@@ -94,6 +97,7 @@ app.use("/api/admin/coupons", couponRoutes);
 app.use("/api/admin/orders", orderRoutes);
 app.use("/api/admin/settings", settingsRoutes);
 app.use("/api/admin/customers", customerRoutes);
+app.use("/api/admin/banners", bannerRoutes);
 
 app.use("/api/auth", customerAuthRoutes);
 app.use("/api/products", storefrontProductRoutes);
@@ -102,6 +106,8 @@ app.use("/api/cart", cartRoutes);
 app.use("/api/addresses", addressRoutes);
 app.use("/api/orders", storefrontOrderRoutes);
 app.use("/api/settings", publicSettingsRoutes);
+app.use("/api/banners", storefrontBannerRoutes);
+app.use("/api/collections", storefrontCollectionRoutes);
 app.use("/api", storefrontMiscRoutes);
 
 app.post(
@@ -125,12 +131,13 @@ app.delete("/api/admin/upload/:filename", authMiddleware, adminOnlyMiddleware, a
   try {
     const filename = path.basename(String(req.params.filename));
     if (filename !== String(req.params.filename)) throw new AppError("Invalid filename", 400);
-    const [productImage, categoryImage, collectionImage] = await Promise.all([
+    const [productImage, categoryImage, collectionImage, bannerImage] = await Promise.all([
       prisma.productImage.findFirst({ where: { url: { contains: filename } }, select: { id: true } }),
       prisma.category.findFirst({ where: { imageUrl: { contains: filename } }, select: { id: true } }),
       prisma.collection.findFirst({ where: { imageUrl: { contains: filename } }, select: { id: true } }),
+      prisma.banner.findFirst({ where: { imageUrl: { contains: filename } }, select: { id: true } }),
     ]);
-    if (productImage || categoryImage || collectionImage) throw new AppError("Image is still referenced by catalog data", 409);
+    if (productImage || categoryImage || collectionImage || bannerImage) throw new AppError("Image is still referenced by catalog data", 409);
     await fs.promises.unlink(path.join(productImageDirectory, filename)).catch((error: NodeJS.ErrnoException) => {
       if (error.code !== "ENOENT") throw error;
     });

@@ -7,6 +7,7 @@ import {
   Users,
   ShoppingBag,
   Settings,
+  GalleryHorizontalEnd,
   LogOut,
   X
 } from 'lucide-react';
@@ -27,6 +28,7 @@ export function AdminSidebar({ isOpen, onClose }) {
     { to: '/admin/coupons', label: 'Coupons', icon: Tag },
     { to: '/admin/customers', label: 'Customers', icon: Users },
     { to: '/admin/orders', label: 'Orders', icon: ShoppingBag },
+    { to: '/admin/sliders', label: 'Home Page Sliders', icon: GalleryHorizontalEnd },
     { to: '/admin/settings', label: 'Settings', icon: Settings },
   ];
 

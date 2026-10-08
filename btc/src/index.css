@@ -1,16 +1,52 @@
-@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400&family=Manrope:wght@300;400;500;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;1,300;1,400;1,500&family=Jost:wght@300;400;500;600&display=swap');
 @import "tailwindcss";
 
 @theme {
   --font-serif: 'Cormorant Garamond', Georgia, serif;
-  --font-sans: 'Manrope', system-ui, sans-serif;
+  --font-sans: 'Jost', system-ui, sans-serif;
 
-  --color-ink: #111111;
-  --color-ivory: #FAF9F6;
-  --color-cream: #F3EFE8;
-  --color-sand: #E8E0D4;
-  --color-muted: #8A8580;
-  --color-border: #E2DDD6;
+  /* Warm apothecary palette */
+  --color-espresso: #1F1A16;
+  --color-ink: #1F1A16;
+  --color-paper: #F8F5F0;
+  --color-ivory: #F8F5F0;
+  --color-bone: #EFE9E0;
+  --color-cream: #F3EEE6;
+  --color-sand: #E4DCCF;
+  --color-clay: #A2785A;
+  --color-sage: #7D8466;
+  --color-muted: #8C8178;
+  --color-border: #E4DDD2;
+}
+
+@keyframes marquee {
+  from { transform: translateX(0); }
+  to { transform: translateX(-50%); }
+}
+
+.animate-marquee {
+  animation: marquee 38s linear infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-marquee { animation: none; }
+}
+
+/* Outlined serif numerals used in editorial sections */
+.text-outline {
+  color: transparent;
+  -webkit-text-stroke: 1px var(--outline-color, #C9B8A3);
+}
+
+/* Fine grain overlay for warm surfaces */
+.grain::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.35;
+  mix-blend-mode: multiply;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 0.5 0 0 0 0 0.45 0 0 0 0 0.4 0 0 0 .08 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
 }
 
 *, *::before, *::after { box-sizing: border-box; }
@@ -19,8 +55,8 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-sans);
-  background-color: #FAF9F6;
-  color: #111111;
+  background-color: #F8F5F0;
+  color: #1F1A16;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
@@ -42,7 +78,9 @@ input, textarea, select {
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #FAF9F6; }
+::-webkit-scrollbar-track { background: #F8F5F0; }
+
+::selection { background: #E4DCCF; color: #1F1A16; }
 ::-webkit-scrollbar-thumb { background: #C8C0B4; border-radius: 2px; }
 
 /* Dedicated Navbar Logo CSS */

@@ -1,11 +1,12 @@
 import { useState, useEffect, useCallback } from 'react';
-import { Plus, Edit2, Trash2, Layers, FolderHeart, X, CheckCircle2, Loader2, PackagePlus } from 'lucide-react';
+import { Plus, Edit2, Trash2, Layers, FolderHeart, X, CheckCircle2, Loader2, PackagePlus, Upload, Image as ImageIcon } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
 import { StatusBadge } from '../components/StatusBadge';
 import { ConfirmModal } from '../components/ConfirmModal';
 import { AssignProductsModal } from '../components/AssignProductsModal';
 import { adminCategoryService } from '../../services/admin/categoryService';
 import { adminCollectionService } from '../../services/admin/collectionService';
+import { adminApi } from '../../services/admin/api';
 import { sortCategories } from '../../utils/categories';
 
 export default function AdminCategories() {
@@ -19,6 +20,7 @@ export default function AdminCategories() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
   const [toastMessage, setToastMessage] = useState('');
+  const [uploading, setUploading] = useState(false);
   const [productsTarget, setProductsTarget] = useState(null); // { kind, group } whose products are being managed
 
   const [formData, setFormData] = useState({
@@ -78,6 +80,23 @@ export default function AdminCategories() {
       status: item.status || 'Active'
     });
     setModalOpen(true);
+  };
+
+  const handleImageUpload = async (event) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+    setUploading(true);
+    setError('');
+    try {
+      const response = await adminApi.uploadImages([file]);
+      const url = response.data?.images?.[0]?.url;
+      if (url) setFormData(prev => ({ ...prev, imageUrl: url }));
+    } catch (err) {
+      setError(err.message || 'Image upload failed');
+    } finally {
+      setUploading(false);
+      event.target.value = '';
+    }
   };
 
   const handleNameChange = (e) => {
@@ -251,14 +270,22 @@ export default function AdminCategories() {
             <div key={item.id} className="bg-white border border-gray-200/80 rounded-xl overflow-hidden shadow-2xs hover:shadow-xs transition-all flex flex-col justify-between">
               <div>
                 <div className="relative h-36 bg-gray-100 overflow-hidden">
-                  {item.imageUrl && <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />}
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                  {item.imageUrl ? (
+                    <>
+                      <img src={item.imageUrl} alt={item.name} className="w-full h-full object-cover" />
+                      <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                    </>
+                  ) : (
+                    <div className="absolute top-3 left-4 flex items-center gap-1.5 text-[10px] font-semibold uppercase tracking-wider text-gray-400">
+                      <ImageIcon size={13} /> No image
+                    </div>
+                  )}
                   <div className="absolute top-3 right-3">
                     <StatusBadge status={item.status || (item.isActive ? 'Active' : 'Inactive')} />
                   </div>
-                  <div className="absolute bottom-3 left-4 right-4 text-white">
+                  <div className={`absolute bottom-3 left-4 right-4 ${item.imageUrl ? 'text-white' : 'text-gray-900'}`}>
                     <h3 className="font-serif text-xl font-bold leading-tight">{item.name}</h3>
-                    <p className="text-[10px] text-white/80 font-mono">{item.slug}</p>
+                    <p className={`text-[10px] font-mono ${item.imageUrl ? 'text-white/80' : 'text-gray-500'}`}>{item.slug}</p>
                   </div>
                 </div>
 
@@ -359,13 +386,42 @@ export default function AdminCategories() {
               </div>
 
               <div>
-                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">Image URL</label>
-                <input
-                  type="url"
-                  value={formData.imageUrl}
-                  onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
-                  className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 focus:outline-none"
-                />
+                <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">Image</label>
+                <div className="flex items-start gap-3">
+                  <div className="w-20 h-24 shrink-0 rounded-lg bg-gray-100 border border-gray-200 overflow-hidden flex items-center justify-center">
+                    {formData.imageUrl ? (
+                      <img src={formData.imageUrl} alt="" className="w-full h-full object-cover" />
+                    ) : (
+                      <ImageIcon size={20} className="text-gray-300" />
+                    )}
+                  </div>
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="flex items-center gap-2">
+                      <label className={`inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-gray-200 text-xs font-semibold text-gray-700 hover:bg-gray-900 hover:text-white transition-colors cursor-pointer ${uploading ? 'opacity-50 pointer-events-none' : ''}`}>
+                        {uploading ? <Loader2 size={13} className="animate-spin" /> : <Upload size={13} />}
+                        <span>{uploading ? 'Uploading…' : 'Upload image'}</span>
+                        <input type="file" accept="image/jpeg,image/png,image/webp,image/gif" className="hidden" onChange={handleImageUpload} />
+                      </label>
+                      {formData.imageUrl && (
+                        <button
+                          type="button"
+                          onClick={() => setFormData(prev => ({ ...prev, imageUrl: '' }))}
+                          className="text-xs font-semibold text-gray-500 hover:text-rose-600"
+                        >
+                          Remove
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      type="text"
+                      value={formData.imageUrl}
+                      onChange={(e) => setFormData(prev => ({ ...prev, imageUrl: e.target.value }))}
+                      placeholder="…or paste an image URL"
+                      className="w-full bg-gray-50 border border-gray-200 rounded-lg px-3 py-2 text-xs text-gray-900 focus:outline-none"
+                    />
+                    <p className="text-[10px] text-gray-400">Shown on the homepage category card. Portrait (4:5) works best, max 10 MB.</p>
+                  </div>
+                </div>
               </div>
 
               <div>

@@ -37,7 +37,7 @@ export function CouponField() {
 
   return (
     <div className="mb-6">
-      <p className="text-[10px] tracking-widest uppercase text-[#8A8580] mb-3">Coupon Code</p>
+      <p className="text-[10px] tracking-widest uppercase text-[#8C8178] mb-3">Coupon Code</p>
       {coupon ? (
         <div className="flex items-center justify-between gap-3 bg-green-50 border border-green-200 px-4 py-3">
           <div className="flex items-start gap-2 min-w-0">
@@ -66,13 +66,13 @@ export function CouponField() {
             onKeyDown={handleKeyDown}
             placeholder="Enter code"
             aria-label="Coupon code"
-            className="flex-1 min-w-0 border border-[#E2DDD6] px-3 py-2.5 text-sm uppercase focus:outline-none focus:border-[#111111] transition-colors"
+            className="flex-1 min-w-0 border border-[#E4DDD2] px-3 py-2.5 text-sm uppercase focus:outline-none focus:border-[#1F1A16] transition-colors"
           />
           <button
             type="button"
             onClick={handleApply}
             disabled={applying || !input.trim()}
-            className="px-4 py-2.5 bg-[#111111] text-white text-[10px] tracking-widest uppercase hover:bg-[#2a2a2a] transition-colors disabled:opacity-50"
+            className="px-4 py-2.5 bg-[#1F1A16] text-white text-[10px] tracking-widest uppercase hover:bg-[#3A322B] transition-colors disabled:opacity-50"
           >
             {applying ? 'Applying…' : 'Apply'}
           </button>

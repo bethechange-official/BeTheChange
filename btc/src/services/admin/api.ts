@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+const API_BASE_URL = import.meta.env.VITE_API_URL || '/api';
 const nativeFetch = globalThis.fetch.bind(globalThis);
 
 interface AdminAuthData {
@@ -45,6 +45,32 @@ type CouponListItem = {
 type CouponDetail = CouponListItem & {
   description?: string;
   maximumDiscountAmount?: number;
+};
+
+type BannerItem = {
+  id: string;
+  title?: string | null;
+  subtitle?: string | null;
+  imageUrl: string;
+  linkUrl?: string | null;
+  ctaLabel?: string | null;
+  sortOrder: number;
+  isActive: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
+  createdAt: string;
+  updatedAt: string;
+};
+
+type BannerInput = {
+  title?: string | null;
+  subtitle?: string | null;
+  imageUrl: string;
+  linkUrl?: string | null;
+  ctaLabel?: string | null;
+  isActive?: boolean;
+  startsAt?: string | null;
+  endsAt?: string | null;
 };
 
 type CategoryListItem = {
@@ -233,13 +259,23 @@ const getAuthHeader = () => {
 };
 
 const handleResponse = async <T>(response: Response): Promise<T> => {
-  const data = await response.json();
+  if (response.status === 413) {
+    throw new Error('File is too large. Each image must be 10 MB or smaller.');
+  }
+  let data;
+  try {
+    data = await response.json();
+  } catch {
+    // Empty/non-JSON body: the API is down or a proxy answered instead of it.
+    throw new Error('Cannot reach the server. Please make sure the backend is running and try again.');
+  }
   if (!response.ok) {
     if (response.status === 401) {
       localStorage.removeItem('btc_admin_auth');
       window.location.href = '/admin/login';
     }
-    throw new Error(data.message || 'Something went wrong');
+    const detail = data.errors?.[0]?.message;
+    throw new Error(detail ? `${data.message}: ${detail}` : data.message || 'Something went wrong');
   }
   return data;
 };
@@ -830,6 +866,48 @@ export const adminApi = {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
       body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  async getBanners(): Promise<ApiResponse<BannerItem[]>> {
+    const response = await fetch(`${API_BASE_URL}/admin/banners`, {
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+    });
+    return handleResponse(response);
+  },
+
+  async createBanner(data: BannerInput): Promise<ApiResponse<BannerItem>> {
+    const response = await fetch(`${API_BASE_URL}/admin/banners`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  async updateBanner(id: string, data: Partial<BannerInput>): Promise<ApiResponse<BannerItem>> {
+    const response = await fetch(`${API_BASE_URL}/admin/banners/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify(data),
+    });
+    return handleResponse(response);
+  },
+
+  async reorderBanners(ids: string[]): Promise<ApiResponse<BannerItem[]>> {
+    const response = await fetch(`${API_BASE_URL}/admin/banners/reorder`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
+      body: JSON.stringify({ ids }),
+    });
+    return handleResponse(response);
+  },
+
+  async deleteBanner(id: string): Promise<ApiResponse> {
+    const response = await fetch(`${API_BASE_URL}/admin/banners/${id}`, {
+      method: 'DELETE',
+      headers: { 'Content-Type': 'application/json', ...getAuthHeader() },
     });
     return handleResponse(response);
   },

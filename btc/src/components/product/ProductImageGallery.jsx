@@ -12,9 +12,9 @@ export function ProductImageGallery({ images = [], name = 'Product' }) {
   // No photo uploaded yet: show a neutral panel rather than a stock photo of some other product.
   if (validImages.length === 0) {
     return (
-      <div className="aspect-[4/5] sm:aspect-square bg-[#F4F2EE] border border-[#EBE7E0] rounded-xs flex flex-col items-center justify-center text-center p-6">
-        <p className="font-serif text-2xl text-[#111111]">{name}</p>
-        <p className="text-[10px] tracking-[0.2em] uppercase text-[#8A8580] mt-2">Image coming soon</p>
+      <div className="aspect-[4/5] sm:aspect-square bg-[#EFE9E0] border border-[#EBE7E0] rounded-xs flex flex-col items-center justify-center text-center p-6">
+        <p className="font-serif text-2xl text-[#1F1A16]">{name}</p>
+        <p className="text-[10px] tracking-[0.2em] uppercase text-[#8C8178] mt-2">Image coming soon</p>
       </div>
     );
   }
@@ -30,7 +30,7 @@ export function ProductImageGallery({ images = [], name = 'Product' }) {
     <div className="flex flex-col gap-4 select-none">
       {/* Main Image Viewport */}
       <div
-        className="relative overflow-hidden bg-[#F4F2EE] border border-[#EBE7E0] aspect-[4/5] sm:aspect-square rounded-xs cursor-crosshair group shadow-2xs"
+        className="relative overflow-hidden bg-[#EFE9E0] border border-[#EBE7E0] aspect-[4/5] sm:aspect-square rounded-xs cursor-crosshair group shadow-2xs"
         onMouseEnter={() => setIsZoomed(true)}
         onMouseLeave={() => setIsZoomed(false)}
         onMouseMove={handleMouseMove}
@@ -45,7 +45,7 @@ export function ProductImageGallery({ images = [], name = 'Product' }) {
         />
 
         {/* Zoom Hint Indicator */}
-        <div className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-xs text-[#111111] p-2 rounded-full shadow-xs opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none">
+        <div className="absolute bottom-3 right-3 bg-white/80 backdrop-blur-xs text-[#1F1A16] p-2 rounded-full shadow-xs opacity-60 group-hover:opacity-100 transition-opacity pointer-events-none">
           <ZoomIn size={14} />
         </div>
 
@@ -58,7 +58,7 @@ export function ProductImageGallery({ images = [], name = 'Product' }) {
                 e.stopPropagation();
                 setActive((prev) => (prev - 1 + validImages.length) % validImages.length);
               }}
-              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-xs text-[#111111] flex items-center justify-center shadow-xs hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+              className="absolute left-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-xs text-[#1F1A16] flex items-center justify-center shadow-xs hover:bg-white transition-all opacity-0 group-hover:opacity-100"
               aria-label="Previous image"
             >
               <ChevronLeft size={18} />
@@ -69,7 +69,7 @@ export function ProductImageGallery({ images = [], name = 'Product' }) {
                 e.stopPropagation();
                 setActive((prev) => (prev + 1) % validImages.length);
               }}
-              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-xs text-[#111111] flex items-center justify-center shadow-xs hover:bg-white transition-all opacity-0 group-hover:opacity-100"
+              className="absolute right-3 top-1/2 -translate-y-1/2 w-9 h-9 rounded-full bg-white/90 backdrop-blur-xs text-[#1F1A16] flex items-center justify-center shadow-xs hover:bg-white transition-all opacity-0 group-hover:opacity-100"
               aria-label="Next image"
             >
               <ChevronRight size={18} />
@@ -86,9 +86,9 @@ export function ProductImageGallery({ images = [], name = 'Product' }) {
               key={i}
               type="button"
               onClick={() => setActive(i)}
-              className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-[#F4F2EE] border-2 rounded-xs overflow-hidden transition-all ${
+              className={`relative flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-[#EFE9E0] border-2 rounded-xs overflow-hidden transition-all ${
                 active === i
-                  ? 'border-[#111111] shadow-xs scale-102'
+                  ? 'border-[#1F1A16] shadow-xs scale-102'
                   : 'border-transparent opacity-65 hover:opacity-100'
               }`}
             >

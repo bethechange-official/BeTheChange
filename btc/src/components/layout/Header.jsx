@@ -18,7 +18,6 @@ export function Header() {
   const { itemCount } = useCart();
   const { user, logout } = useAuth();
   
-  const searchRef = useRef(null);
   const userMenuRef = useRef(null);
   const navigate = useNavigate();
   const location = useLocation();
@@ -32,7 +31,7 @@ export function Header() {
   // Close dropdown on outside click
   useEffect(() => {
     const handler = (e) => {
-      if (searchRef.current && !searchRef.current.contains(e.target)) {
+      if (!e.target.closest('[data-search]')) {
         setSearchOpen(false);
       }
       if (userMenuRef.current && !userMenuRef.current.contains(e.target)) {
@@ -77,49 +76,102 @@ export function Header() {
   };
 
   const navLinks = [
-    { to: '/shop', label: 'SHOP ALL' },
-    { to: '/category/skin-care-products', label: 'SKINCARE' },
-    { to: '/category/lip-care', label: 'LIP CARE' },
-    { to: '/category/hair-care-products', label: 'HAIR CARE' },
-    { to: '/category/household-products', label: 'HOUSEHOLD' },
-    { to: '/contact', label: 'CONTACT' },
+    { to: '/shop', label: 'Shop All' },
+    { to: '/category/skin-care-products', label: 'Skincare' },
+    { to: '/category/lip-care', label: 'Lip Care' },
+    { to: '/category/hair-care-products', label: 'Hair Care' },
+    { to: '/category/household-products', label: 'Household' },
   ];
 
-  const isLinkActive = (to) => {
-    return location.pathname === to;
-  };
+  const isLinkActive = (to) => location.pathname === to;
+
+  const navLinkClass = (to) =>
+    `relative text-[11px] tracking-[0.22em] uppercase font-medium whitespace-nowrap text-[#1F1A16] transition-colors hover:text-[#A2785A]
+     after:absolute after:left-0 after:-bottom-1.5 after:h-px after:bg-[#A2785A] after:transition-all after:duration-500
+     ${isLinkActive(to) ? 'after:w-full' : 'after:w-0 hover:after:w-full'}`;
+
+  const iconBtn = 'text-[#1F1A16] hover:text-[#A2785A] transition-colors p-1.5';
+
+  // Called as a function (not a component) so the input keeps focus between renders.
+  const renderSearch = (className = '') => (
+    <div data-search className={`relative ${className}`}>
+      <form onSubmit={handleSubmit} className="flex items-center h-11 bg-[#EFE9E0] border border-transparent focus-within:border-[#1F1A16]/25 focus-within:bg-[#F8F5F0] rounded-full pl-5 pr-1.5 transition-colors">
+        <Search size={16} strokeWidth={1.5} className="text-[#8C8178] shrink-0" />
+        <input
+          value={query}
+          onChange={e => { setQuery(e.target.value); setSearchOpen(true); }}
+          onFocus={() => setSearchOpen(true)}
+          placeholder="Search serums, lip balms, hair oils…"
+          aria-label="Search products"
+          className="flex-1 min-w-0 bg-transparent text-sm text-[#1F1A16] placeholder:text-[#9A8F85] focus:outline-none px-3"
+        />
+        {query && (
+          <button type="button" onClick={() => setQuery('')} className="text-[#8C8178] hover:text-[#1F1A16] p-1.5" aria-label="Clear search">
+            <X size={15} strokeWidth={1.5} />
+          </button>
+        )}
+        <button type="submit" className="h-8 px-4 rounded-full bg-[#1F1A16] text-[#F8F5F0] text-[10px] tracking-[0.2em] uppercase hover:bg-[#3A322B] transition-colors shrink-0">
+          Search
+        </button>
+      </form>
+
+      {searchOpen && (
+        <div className="absolute top-full left-0 right-0 mt-2 bg-[#F8F5F0] border border-[#E4DDD2] shadow-[0_30px_60px_-20px_rgba(31,26,22,0.25)] z-[90] max-h-96 overflow-y-auto">
+          {query.trim().length <= 1 ? (
+            <div className="p-5">
+              <p className="text-[10px] tracking-[0.24em] uppercase text-[#8C8178] mb-3">Popular searches</p>
+              <div className="flex flex-wrap gap-2">
+                {['Serum', 'Lip balm', 'Hair oil', 'Face wash', 'Soap'].map(term => (
+                  <button
+                    key={term}
+                    type="button"
+                    onClick={() => setQuery(term)}
+                    className="text-xs px-3.5 py-1.5 border border-[#E4DDD2] text-[#1F1A16] hover:border-[#1F1A16] transition-colors rounded-full"
+                  >
+                    {term}
+                  </button>
+                ))}
+              </div>
+            </div>
+          ) : results.length === 0 ? (
+            <p className="p-5 text-sm text-[#8C8178] font-light">No results for “{query}”</p>
+          ) : (
+            results.map(p => (
+              <button
+                key={p.id}
+                type="button"
+                onClick={() => handleResultClick(p.slug || p.id)}
+                className="w-full flex items-center gap-4 px-5 py-3 border-b border-[#E4DDD2] last:border-0 text-left hover:bg-[#EFE9E0] transition-colors"
+              >
+                <div className="w-10 h-12 bg-[#EFE9E0] shrink-0 overflow-hidden">
+                  {p.images?.[0] && <img src={p.images[0]} alt="" className="w-full h-full object-cover" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-[9px] tracking-[0.24em] uppercase text-[#A2785A]">{p.category}</p>
+                  <p className="font-serif text-base text-[#1F1A16] truncate">{p.name}</p>
+                </div>
+                <span className="text-sm text-[#1F1A16] shrink-0">₹{p.price.toLocaleString('en-IN')}</span>
+              </button>
+            ))
+          )}
+        </div>
+      )}
+    </div>
+  );
 
   return (
     <>
-      <header className={`fixed top-0 left-0 right-0 z-[80] transition-all duration-300 ${scrolled ? 'bg-white/95 backdrop-blur-md shadow-sm' : 'bg-[#FAF9F6]'}`}>
-        <div className="max-w-[1400px] mx-auto px-4 sm:px-6 md:px-10">
-          <div className="flex items-center justify-between h-16 md:h-18">
-
-            {/* LEFT — Logo */}
-            <Link to="/" className="flex items-center flex-shrink-0">
-              <img
-                src="/logo.png"
-                alt="Be The Change"
-                className="brand-logo-img"
-              />
+      <header className={`sticky top-0 z-[80] transition-colors duration-500 ${scrolled ? 'bg-[#F8F5F0]/92 backdrop-blur-xl' : 'bg-[#F8F5F0]'} shadow-[0_1px_0_#E4DDD2]`}>
+        {/* Row 1 — logo · search · actions */}
+        <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10">
+          <div className="flex items-center gap-4 lg:gap-10 h-16 md:h-[76px]">
+            <Link to="/" className="flex items-center shrink-0" aria-label="Be The Change — home">
+              <img src="/logo.png" alt="Be The Change" className="brand-logo-img" />
             </Link>
 
-            {/* CENTER — Nav links (desktop) */}
-            <nav className="hidden lg:flex items-center gap-6 xl:gap-8 flex-shrink-0">
-              {navLinks.map(l => (
-                <Link
-                  key={l.label}
-                  to={l.to}
-                  className={`text-[11px] tracking-[0.2em] uppercase font-semibold transition-all duration-200 whitespace-nowrap text-[#111111] hover:text-[#5C554E] ${isLinkActive(l.to) ? 'border-b border-[#111111] pb-0.5' : ''}`}
-                >
-                  {l.label}
-                </Link>
-              ))}
-            </nav>
+            {renderSearch('hidden md:block flex-1 max-w-2xl mx-auto')}
 
-            {/* RIGHT — Icons & User Dropdown */}
-            <div className="flex items-center gap-3 sm:gap-4 md:gap-5 flex-shrink-0 ml-auto lg:ml-0">
-              
+            <div className="flex items-center gap-1 sm:gap-2 md:gap-3 ml-auto md:ml-0 shrink-0">
               {/* Account Trigger */}
               <div ref={userMenuRef} className="relative block">
                 {user ? (
@@ -131,233 +183,155 @@ export function Header() {
                         setUserMenuOpen(o => !o);
                       }
                     }}
-                    className="flex items-center gap-2 text-[#111111] hover:opacity-80 transition-opacity"
+                    className="flex items-center p-1"
                     aria-label="Account Menu"
                   >
-                    <div className="w-8 h-8 rounded-full bg-[#111111] text-white text-[11px] font-serif flex items-center justify-center font-semibold shadow-2xs">
+                    <div className="w-8 h-8 rounded-full bg-[#1F1A16] text-[#F8F5F0] text-[13px] font-serif flex items-center justify-center hover:bg-[#A2785A] transition-colors">
                       {user.name ? user.name[0].toUpperCase() : 'U'}
                     </div>
                   </Link>
                 ) : (
-                  <Link
-                    to="/login"
-                    className="inline-flex items-center gap-1 px-2.5 py-1 sm:px-4 sm:py-2 rounded-full border border-[#111111] text-[#111111] hover:bg-[#111111] hover:text-white text-[9px] sm:text-[10px] tracking-[0.1em] sm:tracking-[0.18em] uppercase font-semibold transition-all duration-200 shadow-2xs whitespace-nowrap"
-                  >
-                    <User size={12} className="flex-shrink-0" />
-                    <span className="hidden sm:inline">LOGIN / REGISTER</span>
-                    <span className="sm:hidden">LOGIN</span>
+                  <Link to="/login" className={`${iconBtn} flex items-center gap-2`} aria-label="Sign in">
+                    <User size={19} strokeWidth={1.4} />
+                    <span className="hidden lg:inline text-[11px] tracking-[0.22em] uppercase font-medium">Sign in</span>
                   </Link>
                 )}
 
-                {/* User Dropdown Menu */}
                 {user && userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-3 w-56 bg-white border border-[#E2DDD6] shadow-lg py-2 z-[90]">
-                    <div className="px-4 py-3 border-b border-[#F3EFE8]">
-                      <p className="text-[10px] tracking-[0.2em] uppercase text-[#8A8580]">Signed in as</p>
-                      <p className="font-serif text-sm font-medium text-[#111111] truncate">{user.name}</p>
-                      <p className="text-[11px] text-[#8A8580] truncate">{user.email}</p>
+                  <div className="absolute right-0 top-full mt-4 w-60 bg-[#F8F5F0] border border-[#E4DDD2] shadow-[0_24px_48px_-12px_rgba(31,26,22,0.18)] py-2 z-[90]">
+                    <div className="px-5 py-4 border-b border-[#E4DDD2]">
+                      <p className="text-[9px] tracking-[0.28em] uppercase text-[#A2785A]">Signed in as</p>
+                      <p className="font-serif text-lg text-[#1F1A16] truncate mt-1">{user.name}</p>
+                      <p className="text-[11px] text-[#8C8178] truncate">{user.email}</p>
                     </div>
-                    
-                    <Link
-                      to="/account"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#111111] hover:bg-[#FAF9F6] transition-colors"
-                    >
-                      <User size={14} />
+                    <Link to="/account" onClick={() => setUserMenuOpen(false)} className="w-full flex items-center gap-3 px-5 py-3 text-xs tracking-wide text-[#1F1A16] hover:bg-[#EFE9E0] transition-colors">
+                      <User size={14} strokeWidth={1.5} />
                       My Profile
                     </Link>
-
-                    <Link
-                      to="/account"
-                      onClick={() => setUserMenuOpen(false)}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-[#111111] hover:bg-[#FAF9F6] transition-colors border-b border-[#F3EFE8]"
-                    >
-                      <Package size={14} />
+                    <Link to="/account" onClick={() => setUserMenuOpen(false)} className="w-full flex items-center gap-3 px-5 py-3 text-xs tracking-wide text-[#1F1A16] hover:bg-[#EFE9E0] transition-colors border-b border-[#E4DDD2]">
+                      <Package size={14} strokeWidth={1.5} />
                       Order History
                     </Link>
-
                     <button
                       onClick={() => { logout(); setUserMenuOpen(false); navigate('/'); }}
-                      className="w-full flex items-center gap-2.5 px-4 py-2.5 text-xs text-red-600 hover:bg-red-50 transition-colors text-left font-medium"
+                      className="w-full flex items-center gap-3 px-5 py-3 text-xs tracking-wide text-[#9B3B2E] hover:bg-[#EFE9E0] transition-colors text-left"
                     >
-                      <LogOut size={14} />
+                      <LogOut size={14} strokeWidth={1.5} />
                       Sign Out
                     </button>
                   </div>
                 )}
               </div>
 
-              {/* SEARCH ICON BUTTON (Beside Wishlist Icon) */}
-              <button
-                onClick={() => setSearchOpen(o => !o)}
-                className="text-[#111111] hover:opacity-40 transition-opacity p-1"
-                aria-label="Search"
-              >
-                <Search size={19} />
+              <button className={`hidden sm:block ${iconBtn}`} aria-label="Wishlist">
+                <Heart size={19} strokeWidth={1.4} />
               </button>
 
-              {/* WISHLIST ICON BUTTON */}
-              <button
-                className="hidden sm:block text-[#111111] hover:opacity-40 transition-opacity p-1"
-                aria-label="Wishlist"
-              >
-                <Heart size={19} />
-              </button>
-              
-              {/* CART ICON BUTTON */}
-              <button
-                onClick={() => setCartOpen(true)}
-                className="relative text-[#111111] hover:opacity-40 transition-opacity p-1"
-                aria-label="Cart"
-              >
-                <ShoppingBag size={19} />
+              <button onClick={() => setCartOpen(true)} className={`relative ${iconBtn}`} aria-label="Cart">
+                <ShoppingBag size={19} strokeWidth={1.4} />
                 {itemCount > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-[#111111] text-white text-[9px] rounded-full flex items-center justify-center font-medium">
+                  <span className="absolute top-0 -right-0.5 min-w-4 h-4 px-1 bg-[#A2785A] text-white text-[9px] rounded-full flex items-center justify-center font-medium">
                     {itemCount}
                   </span>
                 )}
               </button>
 
-              {/* Mobile hamburger */}
-              <button
-                className="lg:hidden text-[#111111] hover:opacity-40 transition-opacity p-1"
-                onClick={() => setMobileOpen(true)}
-                aria-label="Menu"
-              >
-                <Menu size={22} />
+              <button className={`lg:hidden ${iconBtn}`} onClick={() => setMobileOpen(true)} aria-label="Menu">
+                <Menu size={21} strokeWidth={1.4} />
               </button>
             </div>
-
           </div>
+
+          {/* Mobile search, below the logo row */}
+          {renderSearch('md:hidden pb-3')}
         </div>
 
-        {/* SEARCH OVERLAY DROPDOWN (Toggled by Search Icon) */}
-        {searchOpen && (
-          <div ref={searchRef} className="absolute top-full left-0 right-0 bg-white/98 backdrop-blur-md border-b border-[#E2DDD6] shadow-lg py-4 px-6 md:px-10 z-[85]">
-            <div className="max-w-[700px] mx-auto relative">
-              <form onSubmit={handleSubmit} className="w-full flex items-center bg-[#FAF9F6] border border-[#111111] rounded-full px-4 py-2">
-                <Search size={16} className="text-[#8A8580] mr-3 flex-shrink-0" />
-                <input
-                  autoFocus
-                  value={query}
-                  onChange={e => setQuery(e.target.value)}
-                  placeholder="Search skincare, lip care, hair care, household..."
-                  className="flex-1 bg-transparent text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none font-sans"
-                />
-                <button
-                  type="button"
-                  onClick={() => { setQuery(''); setSearchOpen(false); }}
-                  className="text-[#8A8580] hover:text-[#111111] ml-2 p-1"
-                >
-                  <X size={16} />
-                </button>
-              </form>
-
-              {/* Instant Search Results */}
-              {query.trim().length > 1 && (
-                <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E2DDD6] shadow-xl rounded-sm max-h-80 overflow-y-auto z-[90]">
-                  {results.length === 0 ? (
-                    <p className="px-4 py-4 text-sm text-[#8A8580]">No results for "{query}"</p>
-                  ) : (
-                    results.map(p => (
-                      <button
-                        key={p.id}
-                        onClick={() => handleResultClick(p.id)}
-                        className="w-full flex items-center gap-3 px-4 py-3 hover:bg-[#FAF9F6] transition-colors border-b border-[#F3EFE8] last:border-0 text-left"
-                      >
-                        <div className="w-10 h-10 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
-                          <img src={p.images?.[0] || 'https://via.placeholder.com/40'} alt={p.name} className="w-full h-full object-cover" />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <p className="text-[10px] tracking-widest uppercase text-[#8A8580]">{p.category}</p>
-                          <p className="font-serif text-sm text-[#111111] truncate">{p.name}</p>
-                        </div>
-                        <span className="text-sm font-semibold text-[#111111] flex-shrink-0">₹{p.price.toLocaleString()}</span>
-                      </button>
-                    ))
-                  )}
-                </div>
-              )}
-            </div>
+        {/* Row 2 — navigation (desktop) */}
+        <nav className="hidden lg:block border-t border-[#E4DDD2]">
+          <div className="max-w-[1480px] mx-auto px-10 h-12 flex items-center justify-center gap-10 xl:gap-14">
+            {[...navLinks, { to: '/about', label: 'Our Story' }, { to: '/contact', label: 'Contact' }].map(l => (
+              <Link key={l.label} to={l.to} className={navLinkClass(l.to)}>
+                {l.label}
+              </Link>
+            ))}
           </div>
-        )}
-
-        {/* Bottom border */}
-        <div className="h-px bg-[#E2DDD6]" />
+        </nav>
       </header>
 
       {/* Mobile Navigation Drawer */}
-      <div className={`fixed inset-0 z-[110] bg-white flex flex-col transition-transform duration-500 ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
-        <div className="flex items-center justify-between px-6 py-4 border-b border-[#E2DDD6]">
+      <div
+        className={`fixed inset-0 z-[105] bg-[#1F1A16]/40 backdrop-blur-sm transition-opacity duration-500 lg:hidden ${mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+        onClick={() => setMobileOpen(false)}
+      />
+      <div className={`fixed inset-y-0 left-0 w-full max-w-sm z-[110] bg-[#F8F5F0] flex flex-col transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+        <div className="flex items-center justify-between px-6 h-16 border-b border-[#E4DDD2]">
           <Link to="/" onClick={() => setMobileOpen(false)}>
-            <img src="/logo.png" alt="Be The Change" className="h-12 w-auto object-contain" />
+            <img src="/logo.png" alt="Be The Change" className="h-11 w-auto object-contain" />
           </Link>
-          <button onClick={() => setMobileOpen(false)} className="text-[#111111]">
-            <X size={22} />
+          <button onClick={() => setMobileOpen(false)} className="text-[#1F1A16] p-1" aria-label="Close menu">
+            <X size={21} strokeWidth={1.4} />
           </button>
         </div>
 
-        {/* Mobile search */}
-        <div className="px-6 pt-6 pb-2">
+        <div className="px-6 pt-6">
           <form onSubmit={(e) => { handleSubmit(e); setMobileOpen(false); }}>
-            <div className="flex items-center border border-[#E2DDD6] bg-[#FAF9F6] px-4 py-3 rounded-full">
-              <Search size={14} className="text-[#8A8580] mr-3 flex-shrink-0" />
+            <div className="flex items-center border-b border-[#1F1A16] pb-2">
+              <Search size={15} strokeWidth={1.4} className="text-[#8C8178] mr-3 flex-shrink-0" />
               <input
                 value={query}
                 onChange={e => setQuery(e.target.value)}
-                placeholder="Search products..."
-                className="flex-1 bg-transparent text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none"
+                placeholder="Search products"
+                className="flex-1 bg-transparent font-serif text-lg text-[#1F1A16] placeholder:text-[#B5AA9D] placeholder:italic focus:outline-none"
               />
             </div>
           </form>
         </div>
 
-        {/* Mobile user greeting if logged in */}
-        {user && (
-          <div className="mx-6 mt-4 p-4 bg-[#FAF9F6] border border-[#E2DDD6] flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-full bg-[#111111] text-white font-serif text-xs flex items-center justify-center">
-                {user.name ? user.name[0].toUpperCase() : 'U'}
-              </div>
-              <div>
-                <p className="text-[9px] tracking-widest uppercase text-[#8A8580]">Welcome</p>
-                <p className="font-serif text-sm font-medium text-[#111111]">{user.name}</p>
-              </div>
-            </div>
-            <Link
-              to="/account"
-              onClick={() => setMobileOpen(false)}
-              className="text-[10px] tracking-widest uppercase font-semibold text-[#111111] underline"
-            >
-              Account
-            </Link>
-          </div>
-        )}
-
-        <nav className="flex flex-col px-6 py-6 gap-0 overflow-y-auto">
-          {[...navLinks, { to: user ? '/account' : '/login', label: user ? 'MY ACCOUNT' : 'ACCOUNT' }].map(l => (
+        <nav className="flex flex-col px-6 py-6 overflow-y-auto">
+          {[...navLinks, { to: '/about', label: 'Our Story' }, { to: '/contact', label: 'Contact' }].map((l, i) => (
             <NavLink
               key={l.label}
               to={l.to}
               onClick={() => setMobileOpen(false)}
-              className="font-serif text-2xl text-[#111111] border-b border-[#F3EFE8] py-4 hover:opacity-50 transition-opacity"
+              className="group flex items-baseline gap-4 border-b border-[#E4DDD2] py-4"
             >
-              {l.label}
+              <span className="text-[10px] text-[#A2785A] tabular-nums">{String(i + 1).padStart(2, '0')}</span>
+              <span className="font-serif text-[26px] font-light text-[#1F1A16] group-hover:italic transition-all">{l.label}</span>
             </NavLink>
           ))}
         </nav>
 
-        {user && (
-          <div className="mt-auto p-6 border-t border-[#E2DDD6]">
-            <button
-              onClick={() => { logout(); setMobileOpen(false); navigate('/'); }}
-              className="w-full py-3.5 border border-red-600 text-red-600 text-[11px] tracking-[0.2em] uppercase font-semibold flex items-center justify-center gap-2"
+        <div className="mt-auto p-6 border-t border-[#E4DDD2] bg-[#EFE9E0]">
+          {user ? (
+            <div className="flex items-center justify-between">
+              <Link to="/account" onClick={() => setMobileOpen(false)} className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-full bg-[#1F1A16] text-[#F8F5F0] font-serif text-sm flex items-center justify-center">
+                  {user.name ? user.name[0].toUpperCase() : 'U'}
+                </div>
+                <div>
+                  <p className="text-[9px] tracking-[0.24em] uppercase text-[#8C8178]">My account</p>
+                  <p className="font-serif text-base text-[#1F1A16]">{user.name}</p>
+                </div>
+              </Link>
+              <button
+                onClick={() => { logout(); setMobileOpen(false); navigate('/'); }}
+                className="text-[10px] tracking-[0.22em] uppercase text-[#9B3B2E] flex items-center gap-1.5"
+              >
+                <LogOut size={13} strokeWidth={1.5} />
+                Sign out
+              </button>
+            </div>
+          ) : (
+            <Link
+              to="/login"
+              onClick={() => setMobileOpen(false)}
+              className="w-full py-3.5 bg-[#1F1A16] text-[#F8F5F0] text-[11px] tracking-[0.24em] uppercase font-medium flex items-center justify-center gap-2"
             >
-              <LogOut size={14} />
-              Sign Out
-            </button>
-          </div>
-        )}
+              <User size={14} strokeWidth={1.5} />
+              Sign in / Register
+            </Link>
+          )}
+        </div>
       </div>
 
       <CartDrawer isOpen={cartOpen} onClose={() => setCartOpen(false)} />

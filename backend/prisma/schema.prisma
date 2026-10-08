@@ -304,3 +304,22 @@ model Setting {
 
   @@map("settings")
 }
+
+// Homepage hero slider ("ads"). Managed in Admin → Hero Slider; the storefront shows active slides inside their date window.
+model Banner {
+  id        String    @id @default(uuid()) @db.Uuid
+  title     String?   @db.VarChar(120)
+  subtitle  String?   @db.VarChar(250)
+  imageUrl  String
+  linkUrl   String?
+  ctaLabel  String?   @db.VarChar(40)
+  sortOrder Int       @default(0)
+  isActive  Boolean   @default(true)
+  startsAt  DateTime?
+  endsAt    DateTime?
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+
+  @@index([isActive, sortOrder])
+  @@map("banners")
+}

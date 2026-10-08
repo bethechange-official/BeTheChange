@@ -28,7 +28,7 @@ export const errorHandler = (
   }
 
   if (err instanceof multer.MulterError) {
-    errorResponse(res, err.code === "LIMIT_FILE_SIZE" ? "Image must be 5 MB or smaller" : err.message, 400);
+    errorResponse(res, err.code === "LIMIT_FILE_SIZE" ? "Image must be 10 MB or smaller" : err.message, 400);
     return;
   }
 

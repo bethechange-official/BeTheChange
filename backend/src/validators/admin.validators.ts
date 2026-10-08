@@ -252,3 +252,41 @@ export const settingsUpdateSchema = z.object({
     currency: z.string().optional().nullable(),
   }),
 });
+
+// Internal storefront path ("/shop", "/product/x") or an absolute http(s) URL.
+const bannerLinkSchema = z
+  .string()
+  .trim()
+  .max(500)
+  .refine((v) => v === "" || /^\/(?!\/)/.test(v) || /^https?:\/\//i.test(v), "Link must start with / or http(s)://");
+
+const optionalText = (max: number) => z.string().trim().max(max).optional().nullable().transform((v) => (v ? v : null));
+const optionalDate = z.union([z.string().datetime({ offset: true }), z.literal(""), z.null()]).optional()
+  .transform((v) => (v ? new Date(v) : v === undefined ? undefined : null));
+
+const bannerFields = {
+  title: optionalText(120),
+  subtitle: optionalText(250),
+  imageUrl: imageUrlSchema,
+  linkUrl: bannerLinkSchema.optional().nullable().transform((v) => (v ? v : null)),
+  ctaLabel: optionalText(40),
+  sortOrder: z.number().int().min(0).max(9999).optional(),
+  isActive: z.boolean().optional(),
+  startsAt: optionalDate,
+  endsAt: optionalDate,
+};
+
+const endsAfterStart = (b: { startsAt?: Date | null; endsAt?: Date | null }) => !b.startsAt || !b.endsAt || b.endsAt > b.startsAt;
+
+export const bannerCreateSchema = z.object({
+  body: z.object(bannerFields).refine(endsAfterStart, { message: "End date must be after start date", path: ["endsAt"] }),
+});
+
+export const bannerUpdateSchema = z.object({
+  body: z.object(bannerFields).partial().refine(endsAfterStart, { message: "End date must be after start date", path: ["endsAt"] }),
+  params: z.object({ id: z.string().uuid("Invalid banner ID") }),
+});
+
+export const bannerReorderSchema = z.object({
+  body: z.object({ ids: z.array(z.string().uuid("Invalid banner ID")).min(1).max(100) }),
+});

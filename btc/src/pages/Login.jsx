@@ -2,7 +2,7 @@ import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '../components/ui/Button';
-import { Eye, EyeOff, Lock, Mail, Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, ArrowLeft } from 'lucide-react';
 import { motion } from 'framer-motion';
 
 export default function Login() {
@@ -36,158 +36,155 @@ export default function Login() {
   };
 
   return (
-    <main className="pt-18 md:pt-22 min-h-screen bg-[#FAF9F6] text-[#111111] flex items-center justify-center p-4 md:p-8">
-      <div className="w-full max-w-[1100px] bg-white border border-[#E2DDD6] shadow-xl overflow-hidden grid lg:grid-cols-12 min-h-[640px]">
-        
-        {/* LEFT COLUMN — Editorial Brand Image & Features */}
-        <div className="lg:col-span-5 relative bg-[#111111] text-white p-8 md:p-12 flex flex-col justify-between overflow-hidden hidden md:flex">
-          <div className="absolute inset-0 z-0">
-            <img
-              src="https://images.unsplash.com/photo-1556228578-8c89e6adf883?w=1200&q=85"
-              alt="Be The Change Skincare"
-              className="w-full h-full object-cover opacity-40 object-center"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-[#111111] via-[#111111]/60 to-transparent" />
+    <main className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8 relative">
+      <div className="absolute top-8 left-8">
+        <Link to="/" className="text-gray-500 hover:text-gray-900 flex items-center gap-2 text-sm font-medium transition-colors">
+          <ArrowLeft size={16} />
+          Back to Home
+        </Link>
+      </div>
+
+      <div className="sm:mx-auto sm:w-full sm:max-w-md">
+        <motion.div 
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center"
+        >
+          <div className="h-12 w-12 bg-black text-white flex items-center justify-center rounded-xl mx-auto shadow-lg text-xl font-serif font-bold tracking-wider mb-6">
+            B
           </div>
+          <h2 className="text-3xl font-bold tracking-tight text-gray-900">
+            Welcome back
+          </h2>
+          <p className="mt-2 text-sm text-gray-600">
+            Please enter your details to sign in.
+          </p>
+        </motion.div>
+      </div>
 
-          <div className="relative z-10">
-            <p className="text-[10px] tracking-[0.35em] uppercase text-white/60 mb-2 font-light">BE THE CHANGE</p>
-            <h2 className="font-serif text-3xl md:text-4xl text-white leading-tight font-normal">
-              Everyday rituals<br />begin here.
-            </h2>
-          </div>
-
-          <div className="relative z-10 space-y-6 my-12">
-            <div className="flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white flex-shrink-0 mt-0.5">
-                <Sparkles size={14} />
-              </div>
-              <div>
-                <h4 className="font-serif text-base text-white">Curated Collections</h4>
-                <p className="text-xs text-white/70 font-light mt-0.5 leading-relaxed">
-                  Thoughtful products for skin, body, hair, and home.
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-start gap-4">
-              <div className="w-8 h-8 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center text-white flex-shrink-0 mt-0.5">
-                <ShieldCheck size={14} />
-              </div>
-              <div>
-                <h4 className="font-serif text-base text-white">Seamless Account</h4>
-                <p className="text-xs text-white/70 font-light mt-0.5 leading-relaxed">
-                  Track orders, save default addresses, and view purchase history.
-                </p>
-              </div>
-            </div>
-          </div>
-
-          <div className="relative z-10 pt-6 border-t border-white/15">
-            <p className="text-[11px] text-white/60 italic font-serif">
-              "Simple, honest formulations designed for your daily routine."
-            </p>
-          </div>
-        </div>
-
-        {/* RIGHT COLUMN — Form Area */}
-        <div className="lg:col-span-7 bg-[#FAF9F6] p-8 md:p-14 flex flex-col justify-center">
-          
-          {/* Header Switcher */}
-          <div className="flex items-center justify-between border-b border-[#E2DDD6] pb-6 mb-8">
-            <div>
-              <p className="text-[10px] tracking-[0.3em] uppercase text-[#8A8580] font-medium mb-1">WELCOME BACK</p>
-              <h1 className="font-serif text-3xl md:text-4xl text-[#111111]">Sign In</h1>
-            </div>
-
-            <div className="flex items-center gap-2 text-xs font-medium">
-              <span className="px-3 py-1.5 bg-[#111111] text-white text-[10px] tracking-widest uppercase">Sign In</span>
-              <Link to="/register" className="px-3 py-1.5 text-[#8A8580] hover:text-[#111111] text-[10px] tracking-widest uppercase transition-colors">Register</Link>
-            </div>
-          </div>
-
+      <div className="mt-8 sm:mx-auto sm:w-full sm:max-w-md">
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="bg-white py-8 px-4 shadow-xl sm:rounded-2xl sm:px-10 border border-gray-100"
+        >
           {authError && (
-            <motion.div
-              initial={{ opacity: 0, y: -10 }}
-              animate={{ opacity: 1, y: 0 }}
-              className="mb-6 p-4 bg-red-50 border border-red-200 text-red-700 text-xs font-light"
-            >
+            <div className="mb-6 p-4 bg-red-50/50 border border-red-200/50 rounded-lg text-red-600 text-sm flex items-start">
+              <div className="mt-0.5 mr-2">
+                <svg className="w-4 h-4 text-red-500" fill="currentColor" viewBox="0 0 20 20"><path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clipRule="evenodd" /></svg>
+              </div>
               {authError}
-            </motion.div>
+            </div>
           )}
 
-          <form onSubmit={handleSubmit} className="space-y-6">
-            
-            {/* Email Field */}
-            <div className="space-y-1.5">
-              <label className="block text-[10px] tracking-[0.25em] uppercase font-semibold text-[#111111]">
-                Email Address
+          <form className="space-y-6" onSubmit={handleSubmit}>
+            <div>
+              <label htmlFor="email" className="block text-sm font-medium text-gray-700">
+                Email address
               </label>
-              <div className="relative flex items-center">
-                <Mail size={16} className="absolute left-4 text-[#8A8580]" />
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Mail className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
+                  id="email"
+                  name="email"
                   type="email"
+                  autoComplete="email"
+                  required
                   value={form.email}
                   onChange={e => set('email', e.target.value)}
-                  placeholder="your.email@example.com"
-                  className="w-full bg-white border border-[#E2DDD6] focus:border-[#111111] pl-11 pr-4 py-3.5 text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none transition-colors"
+                  className={`block w-full pl-10 py-3 sm:text-sm border-gray-300 border rounded-lg focus:ring-black focus:border-black outline-none transition-colors ${errors.email ? 'border-red-300' : 'border-gray-200'}`}
+                  placeholder="you@example.com"
                 />
               </div>
-              {errors.email && <p className="text-[11px] text-red-600 font-light mt-1">{errors.email}</p>}
+              {errors.email && <p className="mt-2 text-sm text-red-600">{errors.email}</p>}
             </div>
 
-            {/* Password Field */}
-            <div className="space-y-1.5">
-              <div className="flex items-center justify-between">
-                <label className="block text-[10px] tracking-[0.25em] uppercase font-semibold text-[#111111]">
-                  Password
-                </label>
-              </div>
-              <div className="relative flex items-center">
-                <Lock size={16} className="absolute left-4 text-[#8A8580]" />
+            <div>
+              <label htmlFor="password" className="block text-sm font-medium text-gray-700">
+                Password
+              </label>
+              <div className="mt-1 relative rounded-md shadow-sm">
+                <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Lock className="h-5 w-5 text-gray-400" />
+                </div>
                 <input
-                  type={showPassword ? 'text' : 'password'}
+                  id="password"
+                  name="password"
+                  type={showPassword ? "text" : "password"}
+                  autoComplete="current-password"
+                  required
                   value={form.password}
                   onChange={e => set('password', e.target.value)}
+                  className={`block w-full pl-10 pr-10 py-3 sm:text-sm border-gray-300 border rounded-lg focus:ring-black focus:border-black outline-none transition-colors ${errors.password ? 'border-red-300' : 'border-gray-200'}`}
                   placeholder="••••••••"
-                  className="w-full bg-white border border-[#E2DDD6] focus:border-[#111111] pl-11 pr-11 py-3.5 text-sm text-[#111111] placeholder:text-[#C8C0B4] focus:outline-none transition-colors"
                 />
                 <button
                   type="button"
-                  onClick={() => setShowPassword(s => !s)}
-                  className="absolute right-4 text-[#8A8580] hover:text-[#111111] transition-colors"
-                  aria-label="Toggle password visibility"
+                  className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+                  onClick={() => setShowPassword(!showPassword)}
                 >
-                  {showPassword ? <EyeOff size={16} /> : <Eye size={16} />}
+                  {showPassword ? <EyeOff className="h-5 w-5" /> : <Eye className="h-5 w-5" />}
                 </button>
               </div>
-              {errors.password && <p className="text-[11px] text-red-600 font-light mt-1">{errors.password}</p>}
+              {errors.password && <p className="mt-2 text-sm text-red-600">{errors.password}</p>}
             </div>
 
-            {/* Action Buttons */}
-            <div className="pt-2 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center">
+                <input
+                  id="remember-me"
+                  name="remember-me"
+                  type="checkbox"
+                  className="h-4 w-4 text-black focus:ring-black border-gray-300 rounded cursor-pointer"
+                />
+                <label htmlFor="remember-me" className="ml-2 block text-sm text-gray-900 cursor-pointer">
+                  Remember me
+                </label>
+              </div>
+
+              <div className="text-sm">
+                <a href="#" className="font-medium text-gray-900 hover:text-gray-700">
+                  Forgot password?
+                </a>
+              </div>
+            </div>
+
+            <div>
               <Button
                 type="submit"
                 loading={loading}
-                className="w-full bg-[#111111] text-white hover:bg-[#2A2A2A] py-4 text-[11px] tracking-[0.25em] font-semibold"
+                className="w-full flex justify-center py-3 px-4 border border-transparent rounded-lg shadow-sm text-sm font-medium text-white bg-black hover:bg-gray-900 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all"
               >
-                SIGN IN TO ACCOUNT
+                Sign in
               </Button>
-
             </div>
           </form>
 
-          {/* Footer Link */}
-          <div className="mt-8 pt-6 border-t border-[#E2DDD6] text-center">
-            <p className="text-xs text-[#8A8580] font-light">
-              Don't have an account yet?{' '}
-              <Link to="/register" className="text-[#111111] font-semibold tracking-wide uppercase text-[11px] underline hover:text-[#5C554E] ml-1 inline-flex items-center gap-1">
-                CREATE ACCOUNT <ArrowRight size={11} />
-              </Link>
-            </p>
-          </div>
+          <div className="mt-8">
+            <div className="relative">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full border-t border-gray-200" />
+              </div>
+              <div className="relative flex justify-center text-sm">
+                <span className="px-2 bg-white text-gray-500">
+                  New to Be The Change?
+                </span>
+              </div>
+            </div>
 
-        </div>
+            <div className="mt-6">
+              <Link
+                to="/register"
+                className="w-full flex justify-center py-3 px-4 border border-gray-300 rounded-lg shadow-sm text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-black transition-all"
+              >
+                Create an account
+              </Link>
+            </div>
+          </div>
+        </motion.div>
       </div>
     </main>
   );

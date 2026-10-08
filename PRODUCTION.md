@@ -47,7 +47,7 @@ npm run db:seed
 npm run dev
 ```
 
-The seed is idempotent and creates the first administrator, categories, collections, and store settings. It refuses to run unless explicit admin credentials are provided.
+The seed is idempotent and creates the first administrator, categories, collections, and store settings. It refuses to run unless explicit admin credentials are provided, and `SEED_ADMIN_PASSWORD` must be at least 12 characters. It does not create any products; add those in **Admin → Products**.
 
 In another terminal, from `btc`:
 
@@ -70,6 +70,8 @@ Test this sequence before deployment:
 
 1. Log in as the seeded administrator.
 2. Create a category and product, upload a JPG/PNG/WebP/GIF, and confirm its URL starts with `/uploads/products/`.
+   Add the product to a collection (Admin → Categories → Collections → Manage Products) and confirm the collection appears as a section on the homepage.
+   Add a banner in **Admin → Home Page Sliders** (1200 × 600 px) and confirm it appears below the hero.
 3. Register a customer, add the product to the cart, apply a coupon if desired, and place a COD order.
 4. Confirm stock decreases and the order appears in both the customer account and admin orders.
 5. Cancel the order in admin and confirm stock is restored.
@@ -82,9 +84,9 @@ Install Docker Engine, the Compose plugin, and a TLS reverse proxy such as Caddy
 sudo install -d -o 1000 -g 1000 -m 0750 /var/lib/bethechange/uploads/products
 ```
 
-The Compose file mounts that host directory at `/data/uploads` in the backend container. Product image files are UUID-named, limited to 5 MB, and checked by MIME type and binary signature. The database stores only relative public links such as `/uploads/products/UUID.webp`.
+The Compose file mounts that host directory at `/data/uploads` in the backend container. Uploaded image files (products, categories, slider banners) are UUID-named, limited to 10 MB each, and checked by MIME type and binary signature. The bundled nginx config allows up to 90 MB only on `/api/admin/upload`; if you put another proxy (e.g. Caddy) in front, it must allow at least 10 MB request bodies. The database stores only relative public links such as `/uploads/products/UUID.webp`.
 
-Copy `backend/.env.example` to `backend/.env.production`. Use the same Neon URLs, new production-only JWT secrets, the real HTTPS origin, and a production admin password:
+Copy `backend/.env.example` to `backend/.env.production` and fill in the production PostgreSQL URLs (`DATABASE_URL` pooled, `DIRECT_URL` direct), two new random JWT secrets (`openssl rand -base64 48` each), the real HTTPS origin, and the real administrator email plus a strong unique password (12+ characters):
 
 ```env
 FRONTEND_URL="https://shop.example.com"
@@ -97,9 +99,13 @@ From the project root on the VPS:
 ```bash
 docker compose -f docker-compose.production.yml build
 docker compose -f docker-compose.production.yml run --rm backend npm run prisma:migrate:deploy
-docker compose -f docker-compose.production.yml run --rm backend npm run db:seed
+docker compose -f docker-compose.production.yml run --rm backend npm run db:seed:prod
 docker compose -f docker-compose.production.yml up -d
 ```
+
+`db:seed:prod` runs the compiled seed (`dist/seed.js`); the production image contains no TypeScript tooling, so use it instead of `db:seed` there. After the first successful login you may remove `SEED_ADMIN_PASSWORD` from `.env.production`.
+
+If the database was originally created with `prisma db push` (it has tables but no `_prisma_migrations` history), `migrate deploy` stops with error P3005. Confirm the schema matches with a **read-only** diff, then baseline the already-applied migrations with `npx prisma migrate resolve --applied <migration_name>` before deploying. Never point `--shadow-database-url` at a database that holds real data: Prisma wipes the shadow database.
 
 The Compose stack binds the storefront to `127.0.0.1:8080`; it does not expose Express or uploads directly. A minimal Caddy site is:
 

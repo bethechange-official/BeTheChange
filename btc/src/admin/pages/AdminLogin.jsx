@@ -66,7 +66,7 @@ export default function AdminLogin() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="admin@btc.com"
+                placeholder="you@example.com"
                 className="w-full bg-[#FAF9F6] border border-[#E2DDD6] focus:border-[#111111] rounded-xl pl-10 pr-4 py-3 text-sm text-[#111111] placeholder:text-gray-400 focus:outline-none transition-colors font-sans"
               />
             </div>

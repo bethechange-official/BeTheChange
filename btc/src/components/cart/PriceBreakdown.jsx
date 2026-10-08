@@ -7,10 +7,10 @@ export function PriceBreakdown() {
   const { subtotal, discount, coupon, shippingFee, total } = useCart();
 
   return (
-    <div className="space-y-3 border-t border-[#E2DDD6] pt-4">
+    <div className="space-y-3 border-t border-[#E4DDD2] pt-4">
       <div className="flex justify-between text-sm">
-        <span className="text-[#8A8580]">Subtotal</span>
-        <span className="text-[#111111]">{formatINR(subtotal)}</span>
+        <span className="text-[#8C8178]">Subtotal</span>
+        <span className="text-[#1F1A16]">{formatINR(subtotal)}</span>
       </div>
       {coupon && (
         <div className="flex justify-between gap-3 text-sm text-green-700">
@@ -23,17 +23,17 @@ export function PriceBreakdown() {
       )}
       {coupon && (
         <div className="flex justify-between text-sm">
-          <span className="text-[#8A8580]">Amount after discount</span>
-          <span className="text-[#111111]">{formatINR(Math.max(0, subtotal - discount))}</span>
+          <span className="text-[#8C8178]">Amount after discount</span>
+          <span className="text-[#1F1A16]">{formatINR(Math.max(0, subtotal - discount))}</span>
         </div>
       )}
       <div className="flex justify-between text-sm">
-        <span className="text-[#8A8580]">Shipping</span>
-        <span className="text-[#111111]">{shippingFee > 0 ? formatINR(shippingFee) : 'Free'}</span>
+        <span className="text-[#8C8178]">Shipping</span>
+        <span className="text-[#1F1A16]">{shippingFee > 0 ? formatINR(shippingFee) : 'Free'}</span>
       </div>
-      <div className="flex justify-between font-medium text-base border-t border-[#E2DDD6] pt-3">
-        <span className="font-serif text-[#111111]">Final Amount</span>
-        <span className="text-[#111111]">{formatINR(total)}</span>
+      <div className="flex justify-between font-medium text-base border-t border-[#E4DDD2] pt-3">
+        <span className="font-serif text-[#1F1A16]">Final Amount</span>
+        <span className="text-[#1F1A16]">{formatINR(total)}</span>
       </div>
     </div>
   );

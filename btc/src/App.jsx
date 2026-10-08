@@ -31,14 +31,17 @@ const AdminCustomers = lazy(() => import('./admin/pages/AdminCustomers'));
 const AdminOrders = lazy(() => import('./admin/pages/AdminOrders'));
 const AdminOrderDetails = lazy(() => import('./admin/pages/AdminOrderDetails'));
 const AdminSettings = lazy(() => import('./admin/pages/AdminSettings'));
+const AdminSliders = lazy(() => import('./admin/pages/AdminSliders'));
 
 function AppContent() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin');
+  const isAuthRoute = location.pathname === '/login' || location.pathname === '/register';
+  const hideLayout = isAdminRoute || isAuthRoute;
 
   return (
     <>
-      {!isAdminRoute && <Header />}
+      {!hideLayout && <Header />}
       
       <Suspense fallback={<main className="min-h-screen flex items-center justify-center">Loading…</main>}>
       <Routes>
@@ -71,6 +74,7 @@ function AppContent() {
         <Route path="/admin/customers" element={<ProtectedRoute><AdminCustomers /></ProtectedRoute>} />
         <Route path="/admin/orders" element={<ProtectedRoute><AdminOrders /></ProtectedRoute>} />
         <Route path="/admin/orders/:id" element={<ProtectedRoute><AdminOrderDetails /></ProtectedRoute>} />
+        <Route path="/admin/sliders" element={<ProtectedRoute><AdminSliders /></ProtectedRoute>} />
         <Route path="/admin/settings" element={<ProtectedRoute><AdminSettings /></ProtectedRoute>} />
 
         {/* 404 Catch All */}
@@ -78,7 +82,7 @@ function AppContent() {
       </Routes>
       </Suspense>
 
-      {!isAdminRoute && <Footer />}
+      {!hideLayout && <Footer />}
     </>
   );
 }

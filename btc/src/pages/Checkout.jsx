@@ -148,26 +148,26 @@ export default function Checkout() {
   }
 
   return (
-    <main className="pt-18 md:pt-22 pb-24 min-h-screen bg-[#FAF9F6] text-[#111111]">
+    <main className="pb-24 min-h-screen bg-[#F8F5F0] text-[#1F1A16]">
       <div className="max-w-[1200px] mx-auto px-6 md:px-10">
-        <h1 className="font-serif text-4xl md:text-5xl text-[#111111] mb-8">Checkout</h1>
+        <h1 className="font-serif text-4xl md:text-5xl text-[#1F1A16] mb-8">Checkout</h1>
 
         {/* Guest checkout warning banner if not logged in */}
         {!user && (
-          <div className="mb-8 p-5 bg-white border border-[#E2DDD6] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
+          <div className="mb-8 p-5 bg-white border border-[#E4DDD2] flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-2xs">
             <div className="flex items-center gap-4">
-              <div className="w-9 h-9 rounded-full bg-[#111111] text-white flex items-center justify-center font-serif text-sm flex-shrink-0">
+              <div className="w-9 h-9 rounded-full bg-[#1F1A16] text-white flex items-center justify-center font-serif text-sm flex-shrink-0">
                 <User size={16} />
               </div>
               <div>
-                <p className="text-xs font-semibold text-[#111111] uppercase tracking-wider">Checking out as Guest</p>
+                <p className="text-xs font-semibold text-[#1F1A16] uppercase tracking-wider">Checking out as Guest</p>
                 <p className="text-xs text-[#666666] font-light mt-0.5">Sign in to save order history and use prefilled details.</p>
               </div>
             </div>
             <button
               type="button"
               onClick={() => setAuthModalOpen(true)}
-              className="px-5 py-2.5 bg-[#111111] text-white hover:bg-[#2A2A2A] text-[10px] tracking-[0.2em] uppercase font-semibold transition-all self-start sm:self-auto"
+              className="px-5 py-2.5 bg-[#1F1A16] text-white hover:bg-[#3A322B] text-[10px] tracking-[0.2em] uppercase font-semibold transition-all self-start sm:self-auto"
             >
               Sign In / Register
             </button>
@@ -184,7 +184,7 @@ export default function Checkout() {
             {/* Form */}
             <div className="lg:col-span-2 space-y-10">
               <div>
-                <h2 className="font-serif text-2xl text-[#111111] mb-6">Customer Information</h2>
+                <h2 className="font-serif text-2xl text-[#1F1A16] mb-6">Customer Information</h2>
                 <div className="grid md:grid-cols-2 gap-4">
                   <Input label="Full Name" value={form.name} onChange={e => set('name', e.target.value)} error={errors.name} placeholder="Your full name" />
                   <Input label="Email" type="email" value={form.email} onChange={e => set('email', e.target.value)} error={errors.email} placeholder="your@email.com" />
@@ -193,11 +193,11 @@ export default function Checkout() {
               </div>
 
               <div>
-                <h2 className="font-serif text-2xl text-[#111111] mb-6">Delivery Address</h2>
+                <h2 className="font-serif text-2xl text-[#1F1A16] mb-6">Delivery Address</h2>
 
                 {savedAddresses.length > 0 && (
                   <div className="mb-6">
-                    <p className="text-sm text-[#8A8580] mb-3">Select saved address</p>
+                    <p className="text-sm text-[#8C8178] mb-3">Select saved address</p>
                     <div className="space-y-2">
                       {savedAddresses.map(addr => (
                         <button
@@ -206,13 +206,13 @@ export default function Checkout() {
                           onClick={() => handleAddressSelect(addr)}
                           className={`w-full p-4 border rounded text-left transition-all ${
                             selectedAddressId === addr.id
-                              ? 'border-[#111111] bg-[#FAF9F6]'
-                              : 'border-[#E2DDD6] hover:border-[#8A8580]'
+                              ? 'border-[#1F1A16] bg-[#F8F5F0]'
+                              : 'border-[#E4DDD2] hover:border-[#8C8178]'
                           }`}
                         >
-                          <p className="font-medium text-[#111111]">{addr.name}</p>
-                          <p className="text-sm text-[#8A8580]">{addr.addressLine1}, {addr.city} - {addr.pincode}</p>
-                          <p className="text-sm text-[#8A8580]">{addr.phone}</p>
+                          <p className="font-medium text-[#1F1A16]">{addr.name}</p>
+                          <p className="text-sm text-[#8C8178]">{addr.addressLine1}, {addr.city} - {addr.pincode}</p>
+                          <p className="text-sm text-[#8C8178]">{addr.phone}</p>
                         </button>
                       ))}
                     </div>
@@ -236,28 +236,28 @@ export default function Checkout() {
                       id="saveAddress"
                       checked={form.isDefault}
                       onChange={e => set('isDefault', e.target.checked)}
-                      className="w-4 h-4 text-[#111111] border-[#E2DDD6] rounded focus:ring-[#111111]"
+                      className="w-4 h-4 text-[#1F1A16] border-[#E4DDD2] rounded focus:ring-[#1F1A16]"
                     />
-                    <label htmlFor="saveAddress" className="text-sm text-[#8A8580]">Save as default address</label>
+                    <label htmlFor="saveAddress" className="text-sm text-[#8C8178]">Save as default address</label>
                   </div>
                 )}
               </div>
             </div>
 
             {/* Summary */}
-            <div className="bg-white p-6 md:p-8 border border-[#E2DDD6] h-fit">
-              <h2 className="font-serif text-2xl text-[#111111] mb-6">Order Summary</h2>
+            <div className="bg-white p-6 md:p-8 border border-[#E4DDD2] h-fit">
+              <h2 className="font-serif text-2xl text-[#1F1A16] mb-6">Order Summary</h2>
               <div className="space-y-4 mb-6">
                 {items.map(item => (
                   <div key={item.id} className="flex gap-3 items-center">
-                    <div className="w-12 h-14 bg-[#F3EFE8] flex-shrink-0 overflow-hidden">
+                    <div className="w-12 h-14 bg-[#EFE9E0] flex-shrink-0 overflow-hidden">
                       {(item.images?.[0] || item.image) && <img src={item.images?.[0] || item.image} alt={item.name} className="w-full h-full object-cover" />}
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-serif text-sm text-[#111111] truncate">{item.name}</p>
-                      <p className="text-xs text-[#8A8580]">Qty: {item.qty}</p>
+                      <p className="font-serif text-sm text-[#1F1A16] truncate">{item.name}</p>
+                      <p className="text-xs text-[#8C8178]">Qty: {item.qty}</p>
                     </div>
-                    <span className="text-sm text-[#111111] flex-shrink-0">₹{(Number(item.price) * item.qty).toLocaleString()}</span>
+                    <span className="text-sm text-[#1F1A16] flex-shrink-0">₹{(Number(item.price) * item.qty).toLocaleString()}</span>
                   </div>
                 ))}
               </div>
@@ -266,7 +266,7 @@ export default function Checkout() {
               <Button type="submit" loading={loading} className="w-full mt-6">
                 Place Order
               </Button>
-              <p className="text-[10px] text-[#8A8580] text-center mt-3 leading-relaxed">
+              <p className="text-[10px] text-[#8C8178] text-center mt-3 leading-relaxed">
                 By placing your order, you agree to our Terms & Privacy Policy.
               </p>
             </div>

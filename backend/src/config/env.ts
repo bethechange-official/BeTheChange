@@ -31,7 +31,7 @@ const schema = z.object({
   WHATSAPP_TEMPLATE_LANGUAGE: z.string().default("en"),
   WHATSAPP_API_URL: z.string().url().default("https://graph.facebook.com/v21.0"),
   SEED_ADMIN_EMAIL: z.string().email().optional(),
-  SEED_ADMIN_PASSWORD: z.string().min(12).optional(),
+  SEED_ADMIN_PASSWORD: z.string().min(12, "SEED_ADMIN_PASSWORD must be at least 12 characters").optional(),
 });
 
 const parsed = schema.safeParse(process.env);

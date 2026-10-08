@@ -58,13 +58,13 @@ function FilterSelect({ label, value, options, values, onChange }) {
       <select
         value={value}
         onChange={e => onChange(e.target.value)}
-        className="appearance-none bg-transparent border border-[#E2DDD6] text-[11px] tracking-widest uppercase text-[#111111] pl-4 pr-8 py-2.5 focus:outline-none focus:border-[#111111] cursor-pointer hover:border-[#111111] transition-colors"
+        className="appearance-none bg-transparent border border-[#E4DDD2] text-[11px] tracking-widest uppercase text-[#1F1A16] pl-4 pr-8 py-2.5 focus:outline-none focus:border-[#1F1A16] cursor-pointer hover:border-[#1F1A16] transition-colors"
       >
         {options.map((opt, i) => (
           <option key={opt} value={values ? values[i] : opt}>{opt}</option>
         ))}
       </select>
-      <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8A8580] pointer-events-none" />
+      <ChevronDown size={12} className="absolute right-3 top-1/2 -translate-y-1/2 text-[#8C8178] pointer-events-none" />
     </div>
   );
 }
