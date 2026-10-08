@@ -50,6 +50,26 @@ export const createStorefrontOrder = async (req: AuthenticatedRequest, res: Resp
         throw new AppError("Complete customer and delivery address details are required", 400);
       }
 
+      let user = null;
+      if (req.user) {
+        user = await tx.user.findUnique({ where: { id: req.user.id } });
+      }
+      if (!user) {
+        user = await tx.user.findUnique({ where: { email: customerEmail } });
+        if (!user) {
+          user = await tx.user.create({
+            data: {
+              name: customerName,
+              email: customerEmail,
+              phone: customerPhone,
+              passwordHash: crypto.randomBytes(16).toString("hex"),
+              role: "CUSTOMER",
+              isActive: true,
+            },
+          });
+        }
+      }
+
       // Prices, subtotal and discount are always recomputed here from the database; client-sent amounts are never trusted.
       const subtotal = calculateCartSubtotal(cart.items);
       let coupon = null;
@@ -98,7 +118,7 @@ export const createStorefrontOrder = async (req: AuthenticatedRequest, res: Resp
       const created = await tx.order.create({
         data: {
           orderNumber: orderNumber(),
-          userId: req.user?.id,
+          userId: user.id,
           customerName,
           customerEmail,
           customerPhone,
