@@ -5,9 +5,15 @@ on:
     branches: [main]
     paths:
       - 'backend/**'
+      - '.github/workflows/deploy-backend.yml'
+  workflow_dispatch:
 
 permissions:
   contents: read
+
+concurrency:
+  group: deploy-backend
+  cancel-in-progress: false
 
 jobs:
   deploy:
@@ -32,12 +38,37 @@ jobs:
           host: ${{ secrets.VPS_HOST }}
           username: ${{ secrets.VPS_USER }}
           key: ${{ secrets.VPS_SSH_KEY }}
+          command_timeout: 15m
           script: |
+            # Stop at the first failing command so a broken deploy never restarts stale code
+            # and the workflow turns red instead of reporting success.
+            set -euo pipefail
             cd /var/www/bethechange
-            git pull origin main
+
+            # The server must run exactly what is on GitHub. A plain `git pull` aborts when a tracked
+            # file was edited on the server (e.g. package-lock.json after an `npm install`), which
+            # previously left old code running. Untracked/ignored files (.env, uploads) are not touched.
+            git fetch --prune origin main
+            git reset --hard origin/main
+            echo "Deploying commit $(git rev-parse --short HEAD)"
+
             cd backend
             npm ci
             npx prisma generate
             npx prisma migrate deploy
             npm run build
-            pm2 restart btc-backend
+            pm2 restart btc-backend --update-env
+
+            # Fail the deploy if the API does not come back healthy (database reachable).
+            PORT=$(sed -n 's/^PORT=//p' .env 2>/dev/null | tail -1 | tr -d '"\r ' || true)
+            PORT=${PORT:-5000}
+            for i in $(seq 1 20); do
+              if curl -fsS "http://127.0.0.1:${PORT}/api/ready" > /dev/null; then
+                echo "Backend is healthy"
+                exit 0
+              fi
+              sleep 3
+            done
+            echo "Backend did not become ready after restart" >&2
+            pm2 logs btc-backend --lines 50 --nostream || true
+            exit 1
