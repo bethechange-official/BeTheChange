@@ -69,7 +69,8 @@ export default function Home() {
           categoryService.getCategories()
         ]);
         if (collectionsRes.success) {
-          setCollections(collectionsRes.data || []);
+          // Never show an empty collection section, even if the API returns one.
+          setCollections((collectionsRes.data || []).filter(c => c.products?.length > 0));
         }
         if (categoriesRes.success) {
           setCategories(sortCategories(categoriesRes.data.filter(c => c.slug !== 'uncategorized')));

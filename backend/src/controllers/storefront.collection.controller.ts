@@ -11,7 +11,8 @@ export const listStorefrontCollections = async (req: Request, res: Response): Pr
     const perCollection = Math.min(12, Math.max(1, getQueryInt(req.query.products, 4)));
     const activeProducts = { isActive: true };
     const collections = await prisma.collection.findMany({
-      where: { isActive: true },
+      // Only collections with at least one active product appear on the homepage.
+      where: { isActive: true, products: { some: activeProducts } },
       orderBy: { createdAt: "asc" },
       select: {
         id: true,
