@@ -11,7 +11,8 @@ const defaultSettings = {
   shippingFee: 50,
   freeShippingThreshold: 999,
   lowStockAlertThreshold: 5,
-  currency: 'INR'
+  currency: 'INR',
+  announcementText: 'Get free shipping on orders above ₹499'
 };
 
 export default function AdminSettings() {
@@ -139,6 +140,18 @@ export default function AdminSettings() {
                 onChange={(e) => setSettings(prev => ({ ...prev, storeAddress: e.target.value }))}
                 disabled={loading}
                 className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg p-3 text-xs text-gray-900 focus:outline-none disabled:opacity-50"
+              />
+            </div>
+            
+            <div>
+              <label className="block text-xs font-semibold uppercase tracking-wider text-gray-700 mb-1">Announcement Text</label>
+              <input
+                type="text"
+                value={settings.announcementText}
+                onChange={(e) => setSettings(prev => ({ ...prev, announcementText: e.target.value }))}
+                disabled={loading}
+                placeholder="E.g., Get free shipping on orders above ₹499"
+                className="w-full bg-gray-50 border border-gray-200 focus:border-gray-900 rounded-lg px-3 py-2 text-sm text-gray-900 focus:outline-none disabled:opacity-50"
               />
             </div>
           </div>

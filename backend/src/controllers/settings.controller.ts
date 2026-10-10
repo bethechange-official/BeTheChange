@@ -13,6 +13,7 @@ const defaultSettings = {
   freeShippingThreshold: 999,
   lowStockAlertThreshold: 5,
   currency: "INR",
+  announcementText: "Get free shipping on orders above ₹499",
 };
 
 const buildSettings = (settings: Array<{ key: string; value: string }>) => {
@@ -39,13 +40,14 @@ export const getSettings = async (req: AuthenticatedRequest, res: Response): Pro
 export const getPublicSettings = async (_req: AuthenticatedRequest, res: Response): Promise<void> => {
   res.set("Cache-Control", "public, max-age=60, stale-while-revalidate=60");
   const settings = await prisma.setting.findMany({
-    where: { key: { in: ["shippingFee", "freeShippingThreshold", "currency"] } },
+    where: { key: { in: ["shippingFee", "freeShippingThreshold", "currency", "announcementText"] } },
   });
   const values = buildSettings(settings);
   successResponse(res, "Store settings retrieved", {
     shippingFee: values.shippingFee,
     freeShippingThreshold: values.freeShippingThreshold,
     currency: values.currency,
+    announcementText: values.announcementText,
   });
 };
 

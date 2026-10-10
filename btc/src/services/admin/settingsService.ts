@@ -18,6 +18,7 @@ export const adminSettingsService = {
     freeShippingThreshold?: number;
     lowStockAlertThreshold?: number;
     currency?: string;
+    announcementText?: string;
   }) {
     try {
       return await adminApi.updateSettings(data);

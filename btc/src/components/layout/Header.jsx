@@ -5,6 +5,7 @@ import { useCart } from '../../context/CartContext';
 import { useAuth } from '../../context/AuthContext';
 import { CartDrawer } from '../cart/CartDrawer';
 import { productService } from '../../services/productService';
+import { settingsService } from '../../services/settingsService';
 
 export function Header() {
   const [scrolled, setScrolled] = useState(false);
@@ -14,6 +15,7 @@ export function Header() {
   const [query, setQuery] = useState('');
   const [userMenuOpen, setUserMenuOpen] = useState(false);
   const [results, setResults] = useState([]);
+  const [announcement, setAnnouncement] = useState('');
   
   const { itemCount } = useCart();
   const { user, logout } = useAuth();
@@ -26,6 +28,20 @@ export function Header() {
     const handler = () => setScrolled(window.scrollY > 20);
     window.addEventListener('scroll', handler);
     return () => window.removeEventListener('scroll', handler);
+  }, []);
+
+  useEffect(() => {
+    const fetchSettings = async () => {
+      try {
+        const res = await settingsService.getPublicSettings();
+        if (res.success && res.data?.announcementText) {
+          setAnnouncement(res.data.announcementText);
+        }
+      } catch (err) {
+        console.error('Failed to fetch announcement:', err);
+      }
+    };
+    fetchSettings();
   }, []);
 
   // Close dropdown on outside click
@@ -256,6 +272,15 @@ export function Header() {
             ))}
           </div>
         </nav>
+        
+        {/* Announcement Bar */}
+        {announcement && (
+          <div className="bg-[#1F1A16] text-[#F8F5F0] overflow-hidden">
+            <div className="max-w-[1480px] mx-auto px-4 py-2 flex justify-center text-[11px] tracking-[0.2em] uppercase whitespace-nowrap">
+              {announcement}
+            </div>
+          </div>
+        )}
       </header>
 
       {/* Mobile Navigation Drawer */}
