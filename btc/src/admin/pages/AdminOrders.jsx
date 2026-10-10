@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDebouncedValue } from '../utils/useDebouncedValue';
 import { Link } from 'react-router-dom';
 import { Eye, CheckCircle2, X } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
@@ -10,6 +11,7 @@ import { StatusSelect, ORDER_STATUS_LABELS } from '../components/OrderStatusSele
 export default function AdminOrders() {
   const [orders, setOrders] = useState([]);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search);
   const [orderStatusFilter, setOrderStatusFilter] = useState('ALL');
   const [paymentStatusFilter, setPaymentStatusFilter] = useState('ALL');
   const [toastMsg, setToastMsg] = useState('');
@@ -24,7 +26,7 @@ export default function AdminOrders() {
       const response = await adminOrderService.getAll({
         page: pagination.page,
         limit: pagination.limit,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         orderStatus: orderStatusFilter !== 'ALL' ? orderStatusFilter : undefined,
         paymentStatus: paymentStatusFilter !== 'ALL' ? paymentStatusFilter : undefined,
       });
@@ -43,7 +45,7 @@ export default function AdminOrders() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, search, orderStatusFilter, paymentStatusFilter]);
+  }, [pagination.page, pagination.limit, debouncedSearch, orderStatusFilter, paymentStatusFilter]);
 
   useEffect(() => {
     fetchOrders();

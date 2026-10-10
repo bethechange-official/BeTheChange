@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDebouncedValue } from '../utils/useDebouncedValue';
 import { Link } from 'react-router-dom';
 import { Plus, Edit2, Trash2, Eye, AlertCircle, Loader2 } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
@@ -12,6 +13,7 @@ export default function AdminProducts() {
   const [products, setProducts] = useState([]);
   const [categories, setCategories] = useState([]);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search);
   const [categoryFilter, setCategoryFilter] = useState('ALL');
   const [stockFilter, setStockFilter] = useState('ALL');
   const [deleteTarget, setDeleteTarget] = useState(null);
@@ -26,7 +28,7 @@ export default function AdminProducts() {
       const response = await adminProductService.getAll({
         page: pagination.page,
         limit: pagination.limit,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         category: categoryFilter !== 'ALL' ? categoryFilter : undefined,
         stockStatus: stockFilter !== 'ALL' ? stockFilter : undefined,
       });
@@ -45,7 +47,7 @@ export default function AdminProducts() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, search, categoryFilter, stockFilter]);
+  }, [pagination.page, pagination.limit, debouncedSearch, categoryFilter, stockFilter]);
 
   const fetchCategories = useCallback(async () => {
     try {

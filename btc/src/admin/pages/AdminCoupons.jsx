@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDebouncedValue } from '../utils/useDebouncedValue';
 import { Plus, Edit2, Trash2, Tag, CheckCircle2, X, Loader2 } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
 import { DataTable } from '../components/DataTable';
@@ -110,6 +111,7 @@ const actionsCell = (row, loading, editingCoupon, deleteTarget, openEditModal, s
 export default function AdminCoupons() {
   const [coupons, setCoupons] = useState([]);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [pagination, setPagination] = useState({ page: 1, limit: 20, total: 0, totalPages: 1 });
 
@@ -130,7 +132,7 @@ export default function AdminCoupons() {
       const response = await adminCouponService.getAll({
         page: pagination.page,
         limit: pagination.limit,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         status: statusFilter !== 'ALL' ? statusFilter : undefined,
       });
       if (response.success) {
@@ -148,7 +150,7 @@ export default function AdminCoupons() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, search, statusFilter]);
+  }, [pagination.page, pagination.limit, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     fetchCoupons();

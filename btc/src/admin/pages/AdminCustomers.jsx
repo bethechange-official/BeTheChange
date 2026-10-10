@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useDebouncedValue } from '../utils/useDebouncedValue';
 import { Mail, Phone, ShoppingBag, DollarSign, Calendar, Eye, Loader2, X } from 'lucide-react';
 import { AdminLayout } from '../components/AdminLayout';
 import { DataTable } from '../components/DataTable';
@@ -8,6 +9,7 @@ import { adminCustomerService } from '../../services/admin/customerService';
 export default function AdminCustomers() {
   const [customers, setCustomers] = useState([]);
   const [search, setSearch] = useState('');
+  const debouncedSearch = useDebouncedValue(search);
   const [statusFilter, setStatusFilter] = useState('ALL');
   const [selectedCustomer, setSelectedCustomer] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -21,7 +23,7 @@ export default function AdminCustomers() {
       const response = await adminCustomerService.getAll({
         page: pagination.page,
         limit: pagination.limit,
-        search: search || undefined,
+        search: debouncedSearch || undefined,
         status: statusFilter !== 'ALL' ? statusFilter : undefined,
       });
       if (response.success) {
@@ -39,7 +41,7 @@ export default function AdminCustomers() {
     } finally {
       setLoading(false);
     }
-  }, [pagination.page, pagination.limit, search, statusFilter]);
+  }, [pagination.page, pagination.limit, debouncedSearch, statusFilter]);
 
   useEffect(() => {
     fetchCustomers();

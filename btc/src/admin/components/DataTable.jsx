@@ -52,9 +52,8 @@ export function DataTable({
                   if (useExternalPagination && onPageChange) onPageChange(1);
                   else setCurrentPage(1);
                 }}
-                disabled={loading}
                 placeholder={searchPlaceholder}
-                className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-colors disabled:opacity-50"
+                className="w-full bg-white border border-gray-200 rounded-lg pl-9 pr-3 py-2 text-xs text-gray-900 placeholder:text-gray-400 focus:outline-none focus:border-gray-900 transition-colors"
               />
             </div>
           )}
