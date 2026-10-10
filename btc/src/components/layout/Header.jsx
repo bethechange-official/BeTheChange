@@ -95,7 +95,7 @@ export function Header() {
   // Called as a function (not a component) so the input keeps focus between renders.
   const renderSearch = (className = '') => (
     <div data-search className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="flex items-center h-11 bg-[#EFE9E0] border border-transparent focus-within:border-[#1F1A16]/25 focus-within:bg-white rounded-full pl-5 pr-1.5 transition-colors">
+      <form onSubmit={handleSubmit} className="flex items-center h-11 bg-white shadow-sm border border-transparent focus-within:border-[#1F1A16]/25 focus-within:shadow-md rounded-full pl-5 pr-1.5 transition-all">
         <Search size={16} strokeWidth={1.5} className="text-[#8C8178] shrink-0" />
         <input
           value={query}
