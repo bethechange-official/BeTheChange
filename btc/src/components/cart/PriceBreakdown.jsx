@@ -1,6 +1,6 @@
 import { useCart } from '../../context/CartContext';
 import { formatINR } from '../../utils/currency';
-import { describeCoupon } from './CouponField';
+import { describeCoupon, couponRate } from './CouponField';
 
 // Subtotal → Coupon Discount → Final Amount. Display only: the backend recalculates every figure when the order is placed.
 export function PriceBreakdown() {
@@ -15,10 +15,13 @@ export function PriceBreakdown() {
       {coupon && (
         <div className="flex justify-between gap-3 text-sm text-green-700">
           <span>
-            Coupon Discount ({coupon.code})
-            <span className="block text-[11px] text-green-600">{describeCoupon(coupon)}</span>
+            Coupon discount{' '}
+            <span className="font-medium">({coupon.code}{couponRate(coupon) ? ` · ${couponRate(coupon)}` : ''})</span>
+            {coupon.discountType === 'PERCENTAGE' && coupon.maximumDiscountAmount && (
+              <span className="block text-[11px] text-green-600">{describeCoupon(coupon)}</span>
+            )}
           </span>
-          <span className="flex-shrink-0">−{formatINR(discount)}</span>
+          <span className="flex-shrink-0 font-medium">−{formatINR(discount)}</span>
         </div>
       )}
       {coupon && (

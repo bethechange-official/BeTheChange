@@ -14,6 +14,12 @@ export const describeCoupon = (coupon) => {
   return base + cap;
 };
 
+// Short form for totals lines, e.g. "−10%" or "−₹100".
+export const couponRate = (coupon) => {
+  if (!coupon?.discountType) return '';
+  return coupon.discountType === 'PERCENTAGE' ? `−${coupon.discountValue}%` : `−${formatINR(coupon.discountValue)}`;
+};
+
 export function CouponField() {
   const { coupon, discount, couponError, applyCoupon, removeCoupon } = useCart();
   const [input, setInput] = useState('');

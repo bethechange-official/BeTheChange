@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Trash2 } from 'lucide-react';
 import { useCart } from '../context/CartContext';
@@ -8,6 +9,16 @@ import { PriceBreakdown } from '../components/cart/PriceBreakdown';
 
 export default function Cart() {
   const { items, updateQuantity, removeFromCart } = useCart();
+  const [busyId, setBusyId] = useState(null);
+  const [itemError, setItemError] = useState(null); // { id, message }
+
+  const change = async (item, action) => {
+    setBusyId(item.id);
+    setItemError(null);
+    const result = await action();
+    if (!result?.success) setItemError({ id: item.id, message: result?.message || 'Could not update your bag. Please try again.' });
+    setBusyId(null);
+  };
   const navigate = useNavigate();
 
   const handleProceedCheckout = (e) => {
@@ -44,7 +55,7 @@ export default function Cart() {
             </div>
 
             {items.map(item => (
-              <div key={item.id} className="grid grid-cols-12 gap-4 items-center py-4 border-b border-[#E4DDD2]">
+              <div key={item.id} className={`grid grid-cols-12 gap-4 items-center py-4 border-b border-[#E4DDD2] transition-opacity ${busyId === item.id ? 'opacity-60 pointer-events-none' : ''}`}>
                 <div className="col-span-12 md:col-span-6 flex gap-4 items-center">
                   <Link to={`/product/${item.slug || item.id}`} className="w-16 h-20 bg-[#EFE9E0] flex-shrink-0 overflow-hidden">
                     {(item.images?.[0] || item.image) && <img src={item.images?.[0] || item.image} alt={item.name} className="w-full h-full object-cover" />}
@@ -63,17 +74,18 @@ export default function Cart() {
                 <div className="col-span-5 md:col-span-2 flex md:justify-center">
                   <QuantitySelector
                     qty={item.qty}
-                    onIncrease={() => updateQuantity(item.id, item.qty + 1)}
-                    onDecrease={() => updateQuantity(item.id, item.qty - 1)}
+                    onIncrease={() => change(item, () => updateQuantity(item.id, item.qty + 1))}
+                    onDecrease={() => change(item, () => updateQuantity(item.id, item.qty - 1))}
                     max={item.stock}
                   />
                 </div>
                 <div className="col-span-3 md:col-span-2 flex items-center justify-end gap-3">
                   <span className="text-sm font-medium text-[#1F1A16]">₹{(Number(item.price) * item.qty).toLocaleString()}</span>
-                  <button onClick={() => removeFromCart(item.id)} className="text-[#8C8178] hover:text-red-500 transition-colors">
+                  <button onClick={() => change(item, () => removeFromCart(item.id))} className="text-[#8C8178] hover:text-red-500 transition-colors" aria-label={`Remove ${item.name} from bag`}>
                     <Trash2 size={14} />
                   </button>
                 </div>
+                {itemError?.id === item.id && <p className="col-span-12 text-xs text-red-600 -mt-2">{itemError.message}</p>}
               </div>
             ))}
           </div>
