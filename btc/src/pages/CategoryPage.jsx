@@ -40,8 +40,8 @@ export default function CategoryPage() {
   const catName = cat?.name || category;
 
   return (
-    <main className="min-h-screen bg-[#F8F5F0]">
-      <header className="border-b border-[#E4DDD2] bg-[#EFE9E0]">
+    <main className="min-h-screen bg-white">
+      <header className="border-b border-[#E4DDD2] bg-white">
         <div className="max-w-[1480px] mx-auto px-5 md:px-10 pt-10 pb-12 md:pt-14 md:pb-16">
           <p className="text-[10px] tracking-[0.24em] uppercase text-[#8C8178] mb-12 md:mb-16">
             <Link to="/" className="hover:text-[#1F1A16] transition-colors">Home</Link>

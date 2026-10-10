@@ -7,7 +7,7 @@ export default function OrderSuccess() {
 
   if (!state) {
     return (
-      <main className="min-h-screen flex items-center justify-center bg-[#F8F5F0]">
+      <main className="min-h-screen flex items-center justify-center bg-white">
         <div className="text-center">
           <p className="font-serif text-3xl text-[#8C8178]">No order found.</p>
           <Link to="/" className="text-sm text-[#1F1A16] underline mt-4 block">Go Home</Link>
@@ -33,7 +33,7 @@ export default function OrderSuccess() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F8F5F0]">
+    <main className="min-h-screen bg-white">
       <div className="max-w-[700px] mx-auto px-6 md:px-10 py-16 md:py-24">
         <div className="text-center mb-12">
           <div className="w-16 h-16 rounded-full bg-[#1F1A16] flex items-center justify-center mx-auto mb-6">

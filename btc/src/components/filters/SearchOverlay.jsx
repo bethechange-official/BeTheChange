@@ -63,7 +63,7 @@ export function SearchOverlay({ isOpen, onClose }) {
                 key={p.id}
                 to={`/product/${p.id}`}
                 onClick={onClose}
-                className="flex items-center gap-4 py-3 border-b border-[#EFE9E0] hover:bg-[#F8F5F0] -mx-2 px-2 transition-colors"
+                className="flex items-center gap-4 py-3 border-b border-[#EFE9E0] hover:bg-white -mx-2 px-2 transition-colors"
               >
                 <div className="w-12 h-12 bg-[#EFE9E0] flex-shrink-0 overflow-hidden">
                   <img src={p.images?.[0] || 'https://via.placeholder.com/48'} alt={p.name} className="w-full h-full object-cover" />

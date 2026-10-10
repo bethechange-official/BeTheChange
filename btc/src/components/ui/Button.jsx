@@ -4,7 +4,7 @@ export function Button({ children, variant = 'primary', size = 'md', className =
     primary: 'bg-[#1F1A16] text-[#F8F5F0] hover:bg-[#3A322B] active:scale-[0.98]',
     outline: 'border border-[#1F1A16] text-[#1F1A16] hover:bg-[#1F1A16] hover:text-[#F8F5F0] active:scale-[0.98]',
     ghost: 'text-[#1F1A16] hover:bg-[#EFE9E0] active:scale-[0.98]',
-    white: 'bg-[#F8F5F0] text-[#1F1A16] hover:bg-white active:scale-[0.98]',
+    white: 'bg-white text-[#1F1A16] hover:bg-white active:scale-[0.98]',
     clay: 'bg-[#A2785A] text-white hover:bg-[#8C6549] active:scale-[0.98]',
   };
   const sizes = {

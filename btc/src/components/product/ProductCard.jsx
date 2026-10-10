@@ -55,14 +55,14 @@ export function ProductCard({ product, onAddToCart }) {
         )}
 
         {badge && (
-          <span className={`absolute top-3 left-3 text-[9px] font-medium tracking-[0.2em] uppercase px-2.5 py-1 ${soldOut ? 'bg-[#F8F5F0] text-[#8C8178]' : 'bg-[#F8F5F0]/90 backdrop-blur-sm text-[#1F1A16]'}`}>
+          <span className={`absolute top-3 left-3 text-[9px] font-medium tracking-[0.2em] uppercase px-2.5 py-1 ${soldOut ? 'bg-white text-[#8C8178]' : 'bg-[#F8F5F0]/90 backdrop-blur-sm text-[#1F1A16]'}`}>
             {badge}
           </span>
         )}
 
         <button
           onClick={(e) => { e.preventDefault(); setWishlisted(w => !w); }}
-          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-[#F8F5F0]/80 backdrop-blur-sm text-[#1F1A16] transition-all duration-300 hover:bg-[#F8F5F0] sm:opacity-0 sm:group-hover:opacity-100"
+          className="absolute top-3 right-3 w-8 h-8 rounded-full flex items-center justify-center bg-[#F8F5F0]/80 backdrop-blur-sm text-[#1F1A16] transition-all duration-300 hover:bg-white sm:opacity-0 sm:group-hover:opacity-100"
           aria-label={wishlisted ? 'Remove from wishlist' : 'Add to wishlist'}
         >
           <Heart size={13} strokeWidth={1.5} fill={wishlisted ? '#1F1A16' : 'none'} />

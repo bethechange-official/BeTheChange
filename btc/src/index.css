@@ -55,7 +55,7 @@ html { scroll-behavior: smooth; }
 
 body {
   font-family: var(--font-sans);
-  background-color: #F8F5F0;
+  background-color: #FFFFFF;
   color: #1F1A16;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -78,7 +78,7 @@ input, textarea, select {
 
 /* Scrollbar */
 ::-webkit-scrollbar { width: 4px; }
-::-webkit-scrollbar-track { background: #F8F5F0; }
+::-webkit-scrollbar-track { background: #FFFFFF; }
 
 ::selection { background: #E4DCCF; color: #1F1A16; }
 ::-webkit-scrollbar-thumb { background: #C8C0B4; border-radius: 2px; }

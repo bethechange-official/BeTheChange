@@ -148,7 +148,7 @@ export default function Checkout() {
   }
 
   return (
-    <main className="pb-24 min-h-screen bg-[#F8F5F0] text-[#1F1A16]">
+    <main className="pb-24 min-h-screen bg-white text-[#1F1A16]">
       <div className="max-w-[1200px] mx-auto px-6 md:px-10">
         <h1 className="font-serif text-4xl md:text-5xl text-[#1F1A16] mb-8">Checkout</h1>
 
@@ -206,7 +206,7 @@ export default function Checkout() {
                           onClick={() => handleAddressSelect(addr)}
                           className={`w-full p-4 border rounded text-left transition-all ${
                             selectedAddressId === addr.id
-                              ? 'border-[#1F1A16] bg-[#F8F5F0]'
+                              ? 'border-[#1F1A16] bg-white'
                               : 'border-[#E4DDD2] hover:border-[#8C8178]'
                           }`}
                         >

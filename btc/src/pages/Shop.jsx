@@ -72,8 +72,8 @@ export default function Shop() {
   };
 
   return (
-    <main className="min-h-screen bg-[#F8F5F0]">
-      <header className="border-b border-[#E4DDD2] bg-[#EFE9E0]">
+    <main className="min-h-screen bg-white">
+      <header className="border-b border-[#E4DDD2] bg-white">
         <div className="max-w-[1480px] mx-auto px-5 md:px-10 pt-14 pb-12 md:pt-20 md:pb-16 flex flex-col md:flex-row md:items-end justify-between gap-6">
           <div>
             <p className="flex items-center gap-3 text-[10px] tracking-[0.32em] uppercase text-[#A2785A] font-medium mb-5">

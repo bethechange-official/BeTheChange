@@ -15,7 +15,7 @@ export function CheckoutAuthModal({ isOpen, onClose }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <div className="text-center pt-2">
-        <div className="w-14 h-14 rounded-full bg-[#F8F5F0] border border-[#E4DDD2] flex items-center justify-center mx-auto mb-5 text-[#1F1A16] shadow-2xs">
+        <div className="w-14 h-14 rounded-full bg-white border border-[#E4DDD2] flex items-center justify-center mx-auto mb-5 text-[#1F1A16] shadow-2xs">
           <Lock size={22} strokeWidth={1.5} />
         </div>
 
@@ -42,7 +42,7 @@ export function CheckoutAuthModal({ isOpen, onClose }) {
           <Link
             to="/register?redirect=/checkout"
             onClick={onClose}
-            className="w-full flex items-center justify-center gap-2 border border-[#1F1A16] text-[#1F1A16] hover:bg-[#F8F5F0] py-3.5 text-[11px] tracking-[0.25em] font-semibold uppercase transition-all"
+            className="w-full flex items-center justify-center gap-2 border border-[#1F1A16] text-[#1F1A16] hover:bg-white py-3.5 text-[11px] tracking-[0.25em] font-semibold uppercase transition-all"
           >
             <UserPlus size={14} />
             <span>CREATE NEW ACCOUNT</span>

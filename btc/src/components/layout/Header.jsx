@@ -95,7 +95,7 @@ export function Header() {
   // Called as a function (not a component) so the input keeps focus between renders.
   const renderSearch = (className = '') => (
     <div data-search className={`relative ${className}`}>
-      <form onSubmit={handleSubmit} className="flex items-center h-11 bg-[#EFE9E0] border border-transparent focus-within:border-[#1F1A16]/25 focus-within:bg-[#F8F5F0] rounded-full pl-5 pr-1.5 transition-colors">
+      <form onSubmit={handleSubmit} className="flex items-center h-11 bg-[#EFE9E0] border border-transparent focus-within:border-[#1F1A16]/25 focus-within:bg-white rounded-full pl-5 pr-1.5 transition-colors">
         <Search size={16} strokeWidth={1.5} className="text-[#8C8178] shrink-0" />
         <input
           value={query}
@@ -116,7 +116,7 @@ export function Header() {
       </form>
 
       {searchOpen && (
-        <div className="absolute top-full left-0 right-0 mt-2 bg-[#F8F5F0] border border-[#E4DDD2] shadow-[0_30px_60px_-20px_rgba(31,26,22,0.25)] z-[90] max-h-96 overflow-y-auto">
+        <div className="absolute top-full left-0 right-0 mt-2 bg-white border border-[#E4DDD2] shadow-[0_30px_60px_-20px_rgba(31,26,22,0.25)] z-[90] max-h-96 overflow-y-auto">
           {query.trim().length <= 1 ? (
             <div className="p-5">
               <p className="text-[10px] tracking-[0.24em] uppercase text-[#8C8178] mb-3">Popular searches</p>
@@ -161,7 +161,7 @@ export function Header() {
 
   return (
     <>
-      <header className={`sticky top-0 z-[80] transition-colors duration-500 ${scrolled ? 'bg-[#F8F5F0]/92 backdrop-blur-xl' : 'bg-[#F8F5F0]'} shadow-[0_1px_0_#E4DDD2]`}>
+      <header className={`sticky top-0 z-[80] transition-colors duration-500 ${scrolled ? 'bg-[#F8F5F0]/92 backdrop-blur-xl' : 'bg-white'} shadow-[0_1px_0_#E4DDD2]`}>
         {/* Row 1 — logo · search · actions */}
         <div className="max-w-[1480px] mx-auto px-4 sm:px-6 md:px-10">
           <div className="flex items-center gap-4 lg:gap-10 h-16 md:h-[76px]">
@@ -198,7 +198,7 @@ export function Header() {
                 )}
 
                 {user && userMenuOpen && (
-                  <div className="absolute right-0 top-full mt-4 w-60 bg-[#F8F5F0] border border-[#E4DDD2] shadow-[0_24px_48px_-12px_rgba(31,26,22,0.18)] py-2 z-[90]">
+                  <div className="absolute right-0 top-full mt-4 w-60 bg-white border border-[#E4DDD2] shadow-[0_24px_48px_-12px_rgba(31,26,22,0.18)] py-2 z-[90]">
                     <div className="px-5 py-4 border-b border-[#E4DDD2]">
                       <p className="text-[9px] tracking-[0.28em] uppercase text-[#A2785A]">Signed in as</p>
                       <p className="font-serif text-lg text-[#1F1A16] truncate mt-1">{user.name}</p>
@@ -263,7 +263,7 @@ export function Header() {
         className={`fixed inset-0 z-[105] bg-[#1F1A16]/40 backdrop-blur-sm transition-opacity duration-500 lg:hidden ${mobileOpen ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
         onClick={() => setMobileOpen(false)}
       />
-      <div className={`fixed inset-y-0 left-0 w-full max-w-sm z-[110] bg-[#F8F5F0] flex flex-col transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
+      <div className={`fixed inset-y-0 left-0 w-full max-w-sm z-[110] bg-white flex flex-col transition-transform duration-500 ease-[cubic-bezier(.22,1,.36,1)] ${mobileOpen ? 'translate-x-0' : '-translate-x-full'}`}>
         <div className="flex items-center justify-between px-6 h-16 border-b border-[#E4DDD2]">
           <Link to="/" onClick={() => setMobileOpen(false)}>
             <img src="/logo.png" alt="Be The Change" className="h-11 w-auto object-contain" />

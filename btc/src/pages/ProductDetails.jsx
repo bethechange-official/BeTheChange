@@ -85,7 +85,7 @@ export default function ProductDetails() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#F8F5F0] flex flex-col items-center justify-center">
+      <main className="min-h-screen bg-white flex flex-col items-center justify-center">
         <div className="w-10 h-10 border-2 border-[#1F1A16] border-t-transparent rounded-full animate-spin mb-4" />
         <p className="font-serif text-sm tracking-widest uppercase text-[#8C8178] animate-pulse">
           Crafting Product Experience…
@@ -96,7 +96,7 @@ export default function ProductDetails() {
 
   if (!product) {
     return (
-      <main className="pt-10 pb-20 min-h-screen bg-[#F8F5F0] flex items-center justify-center px-6">
+      <main className="pt-10 pb-20 min-h-screen bg-white flex items-center justify-center px-6">
         <div className="text-center max-w-md bg-white border border-[#E4DDD2] p-10 shadow-xs">
           <div className="w-12 h-12 rounded-full bg-[#EFE9E0] text-[#1F1A16] flex items-center justify-center mx-auto mb-4">
             <Sparkles size={20} />
@@ -122,7 +122,7 @@ export default function ProductDetails() {
   const benefitsList = parseList(product.benefits);
 
   return (
-    <main className="pt-6 md:pt-8 pb-20 bg-[#F8F5F0] min-h-screen text-[#1F1A16]">
+    <main className="pt-6 md:pt-8 pb-20 bg-white min-h-screen text-[#1F1A16]">
       <div className="max-w-[1360px] mx-auto px-5 sm:px-8 md:px-12">
         {/* Editorial Breadcrumbs */}
         <nav className="text-[10px] tracking-[0.25em] uppercase text-[#8C8178] mb-8 font-medium flex items-center gap-2 flex-wrap">

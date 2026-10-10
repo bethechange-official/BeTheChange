@@ -30,7 +30,7 @@ export default function Account() {
   }, [activeTab, user]);
 
   if (authLoading) {
-    return <main className="min-h-screen flex items-center justify-center bg-[#F8F5F0]">Loading…</main>;
+    return <main className="min-h-screen flex items-center justify-center bg-white">Loading…</main>;
   }
 
   // Redirect if not logged in
@@ -76,7 +76,7 @@ export default function Account() {
     : 'U';
 
   return (
-    <main className="pb-24 min-h-screen bg-[#F8F5F0] text-[#1F1A16]">
+    <main className="pb-24 min-h-screen bg-white text-[#1F1A16]">
       <div className="max-w-[1300px] mx-auto px-6 md:px-10">
         
         {/* TOP HERO MEMBER CARD */}
@@ -131,7 +131,7 @@ export default function Account() {
 
               <button
                 onClick={() => setActiveTab('orders')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'orders' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-[#F8F5F0]'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'orders' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-white'}`}
               >
                 <Package size={15} />
                 <span>My Orders</span>
@@ -140,7 +140,7 @@ export default function Account() {
 
               <button
                 onClick={() => setActiveTab('profile')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'profile' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-[#F8F5F0]'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'profile' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-white'}`}
               >
                 <User size={15} />
                 <span>Profile Details</span>
@@ -148,7 +148,7 @@ export default function Account() {
 
               <button
                 onClick={() => setActiveTab('addresses')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'addresses' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-[#F8F5F0]'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'addresses' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-white'}`}
               >
                 <MapPin size={15} />
                 <span>Addresses</span>
@@ -156,7 +156,7 @@ export default function Account() {
 
               <button
                 onClick={() => setActiveTab('security')}
-                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'security' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-[#F8F5F0]'}`}
+                className={`w-full flex items-center gap-3 px-4 py-3.5 text-[11px] tracking-[0.2em] uppercase font-semibold transition-all text-left ${activeTab === 'security' ? 'bg-[#1F1A16] text-white shadow-sm' : 'text-[#1F1A16] hover:bg-white'}`}
               >
                 <Shield size={15} />
                 <span>Security</span>
@@ -221,7 +221,7 @@ export default function Account() {
                             <span className="text-[9px] tracking-[0.2em] uppercase text-[#8C8178]">Total Amount</span>
                             <p className="text-base font-semibold text-[#1F1A16]">₹{order.total?.toLocaleString()}</p>
                           </div>
-                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F8F5F0] border border-[#E4DDD2] text-[10px] tracking-widest uppercase font-semibold text-[#1F1A16]">
+                          <span className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white border border-[#E4DDD2] text-[10px] tracking-widest uppercase font-semibold text-[#1F1A16]">
                             <Truck size={12} className="text-emerald-700" />
                             {order.status || 'Confirmed'}
                           </span>
@@ -232,7 +232,7 @@ export default function Account() {
                       <div className="space-y-3 pt-1">
                         {order.items?.map(item => (
                           <div key={item.id} className="flex items-center gap-4 py-2 border-b border-[#F8F5F0] last:border-0">
-                            <div className="w-14 h-14 bg-[#F8F5F0] border border-[#E4DDD2] overflow-hidden flex-shrink-0">
+                            <div className="w-14 h-14 bg-white border border-[#E4DDD2] overflow-hidden flex-shrink-0">
                               {(item.images?.[0]) && <img src={item.images?.[0]} alt={item.name} className="w-full h-full object-cover" />}
                             </div>
                             <div className="flex-1 min-w-0">

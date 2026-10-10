@@ -122,7 +122,7 @@ export function HeroSlider({ slides }) {
                             <p className="hidden sm:block text-xs xl:text-sm font-light text-[#F8F5F0]/80 mt-2 leading-relaxed">{slide.subtitle}</p>
                           )}
                           {slide.ctaLabel && (
-                            <span className="inline-flex items-center gap-2 self-start mt-3 sm:mt-5 bg-[#F8F5F0] text-[#1F1A16] px-4 py-2 sm:px-5 sm:py-2.5 text-[9px] sm:text-[10px] tracking-[0.22em] uppercase font-medium rounded-full">
+                            <span className="inline-flex items-center gap-2 self-start mt-3 sm:mt-5 bg-white text-[#1F1A16] px-4 py-2 sm:px-5 sm:py-2.5 text-[9px] sm:text-[10px] tracking-[0.22em] uppercase font-medium rounded-full">
                               {slide.ctaLabel} <ArrowRight size={12} strokeWidth={1.5} />
                             </span>
                           )}

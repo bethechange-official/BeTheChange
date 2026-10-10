@@ -66,9 +66,9 @@ export default function Contact() {
   ];
 
   return (
-    <main className="bg-[#F8F5F0] text-[#1F1A16] min-h-screen">
+    <main className="bg-white text-[#1F1A16] min-h-screen">
       {/* 1. HERO SECTION */}
-      <section className="py-16 md:py-24 bg-[#F8F5F0] border-b border-[#E4DDD2]">
+      <section className="py-16 md:py-24 bg-white border-b border-[#E4DDD2]">
         <div className="max-w-[1400px] mx-auto px-6 md:px-10 text-center max-w-3xl">
           <p className="text-[10px] tracking-[0.35em] uppercase text-[#8C8178] font-medium mb-3">GET IN TOUCH</p>
           <h1 className="font-serif text-4xl md:text-6xl text-[#1F1A16] mb-6">Contact Us</h1>
@@ -93,7 +93,7 @@ export default function Contact() {
                   const IconComp = detail.icon;
                   return (
                     <div key={detail.title} className="flex items-start gap-4 pb-5 border-b border-[#EFE9E0] last:border-0 last:pb-0">
-                      <div className="w-10 h-10 rounded-full bg-[#F8F5F0] border border-[#E4DDD2] flex items-center justify-center text-[#1F1A16] flex-shrink-0 mt-0.5">
+                      <div className="w-10 h-10 rounded-full bg-white border border-[#E4DDD2] flex items-center justify-center text-[#1F1A16] flex-shrink-0 mt-0.5">
                         <IconComp size={16} strokeWidth={1.5} />
                       </div>
                       <div>

@@ -28,9 +28,9 @@ export default function About() {
   ];
 
   return (
-    <main className="bg-[#F8F5F0] text-[#1F1A16] overflow-hidden">
+    <main className="bg-white text-[#1F1A16] overflow-hidden">
       {/* 1. HERO SECTION */}
-      <section className="relative py-20 md:py-32 bg-[#F8F5F0] border-b border-[#E4DDD2]">
+      <section className="relative py-20 md:py-32 bg-white border-b border-[#E4DDD2]">
         <div className="max-w-[1400px] mx-auto px-6 md:px-10">
           <div className="grid lg:grid-cols-12 gap-12 lg:gap-16 items-center">
             
@@ -93,7 +93,7 @@ export default function About() {
             {values.map((item, i) => {
               const IconComp = item.icon;
               return (
-                <div key={item.title} className="bg-[#F8F5F0] border border-[#E4DDD2] p-8 flex flex-col items-start transition-all hover:shadow-sm">
+                <div key={item.title} className="bg-white border border-[#E4DDD2] p-8 flex flex-col items-start transition-all hover:shadow-sm">
                   <div className="w-12 h-12 rounded-full bg-white border border-[#E4DDD2] flex items-center justify-center text-[#1F1A16] mb-6 shadow-2xs">
                     <IconComp size={20} strokeWidth={1.5} />
                   </div>

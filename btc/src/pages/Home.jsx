@@ -95,7 +95,7 @@ export default function Home() {
   const heroLabel = collections.find(c => c.products.includes(hero))?.name || 'Most loved';
 
   return (
-    <main className="bg-[#F8F5F0] text-[#1F1A16] overflow-hidden">
+    <main className="bg-white text-[#1F1A16] overflow-hidden">
 
       {/* 1. HERO */}
       <section className="relative">
@@ -202,7 +202,7 @@ export default function Home() {
         </section>
       ) : (
         collections.map((collection, i) => (
-          <section key={collection.id} className={`py-20 sm:py-24 lg:py-28 ${i % 2 === 1 ? 'bg-[#EFE9E0]' : ''}`}>
+          <section key={collection.id} className={`py-20 sm:py-24 lg:py-28 bg-white ${i > 0 ? 'border-t border-[#E4DDD2]' : ''}`}>
             <div className="max-w-[1480px] mx-auto px-5 md:px-10">
               <motion.div {...inView} variants={fadeUp} className="flex flex-col sm:flex-row sm:items-end justify-between mb-12 sm:mb-16 gap-6">
                 <SectionHeading
@@ -270,7 +270,7 @@ export default function Home() {
       </section>
 
       {/* 7. PROMISE */}
-      <section className="border-t border-[#E4DDD2] bg-[#F8F5F0]">
+      <section className="border-t border-[#E4DDD2] bg-white">
         <div className="max-w-[1480px] mx-auto px-5 md:px-10 py-20 sm:py-24">
           <motion.div {...inView} variants={fadeUp} className="text-center mb-14 sm:mb-20">
             <SectionHeading center label="Our promise" title={<>Skincare you can <em>trust</em></>} />
